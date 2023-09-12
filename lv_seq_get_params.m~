@@ -1,0 +1,3 @@
+function out_params = lv_seq_get_params(in_base_name,in_nums,in_param)
+
+out_params = zeros(size(in_n

@@ -1,0 +1,14 @@
+function out_struct = lv_seq_get_channel_no(in_seq, in_channel_no)
+
+% primary analog group
+if in_channel_no < 16
+	out_struct.ival = in_seq.primary_analog.ival(in_channel_no);
+	out_struct.name = in_seq.primary_analog.name{in_channel_no};
+	out_struct.is_analog = in_seq.primary_analog.is_analog(in_channel_no);
+elseif in_channel_no < 46
+	out_struct.ival = in_seq.digital.ival(in_channel_no-16);
+	out_struct.name = in_seq.digital.name{in_channel_no-16};
+	out_struct.is_analog = in_seq.digital.is_analog(in_channel_no-16);
+else
+	out_struct.ival = in_seq.secondary_analog
+end

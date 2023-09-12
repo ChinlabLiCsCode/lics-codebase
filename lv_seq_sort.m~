@@ -1,0 +1,12 @@
+function in_seq = lv_seq_sort(in_seq)
+
+for a = 1:(in_seq.proc_details.dims(1))
+	[sorted_enablings init_sort_order] = sort(in_seq.proc_details.enabled(a,:));
+	
+	[sorted_times sort_order] = sort(in_seq.proc_details.time(a,:));
+	in_seq.proc_details.time(a,:) = sorted_times;
+	in_seq.proc_details.voltage(a,:) = in_seq.proc_details.voltage(a,sort_order);
+	in_seq.proc_details.channel_no(a,:) = in_seq.proc_details.channel_no(a,sort_order);
+	in_seq.proc_details.enabled(a,:) = in_seq.proc_details.enabled(a,sort_order);
+	in_seq.proc_details.ramp_res(a,:) = in_seq.proc_details.ramp_res(a,sort_order);
+end
