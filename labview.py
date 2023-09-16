@@ -2,9 +2,27 @@ import numpy as np
 import time
 import os
 import struct
+from dataclasses import dataclass, asdict
+import pandas as pd
+
+@dataclass
+class LabviewSeq:
+    version: int 
+    timing: int = 0
+    primary_analog: dict = None
+    digital: dict = None
+    proc_details: dict = None
+    procedures: dict = None
+    ramp_params: dict = None
+    secondary_analog: dict = None
+    never_ramp: bool = False
+    always_ramp: bool = False
+
+
 
 def seq_read(in_file_name):
-    """Reads a LabVIEW sequence file and returns a dictionary with the sequence information.
+    """Reads a LabVIEW sequence file and returns an LabviewSeq data class with the sequence information.
+    This code is nearly identical to the MATLAB version.
     
     Parameters
     ----------
@@ -18,112 +36,22 @@ def seq_read(in_file_name):
         
     Returns
     -------
-    out_struct : dict
-        A dictionary with the sequence information. The dictionary has the following keys:
+    seq : LabviewSeq
+        An LabviewSeq data class with the sequence information.
+
+    LabviewSeq has the following attributes:
+
+    seq.version : int
+    seq.timing : int
+    seq.primary_analog : dict
+    seq.digital : dict
+    seq.proc_details : dict
+    seq.procedures : dict
+    seq.ramp_params : dict
+    seq.secondary_analog : dict
+    seq.never_ramp : bool
+    seq.always_ramp : bool
     
-    out_struct['version'] : int
-        The version of the LabVIEW sequence file. I don't know what this does.
-
-    out_struct['timing'] : int
-        I don't know what this does.
-        
-    out_struct['primary_analog'] : dict
-        The primary analog channels of the sequence file. The dictionary has the following keys:
-
-        out_struct['primary_analog']['ival'] : np.ndarray
-            The initial values of the primary analog channels.
-
-        out_struct['primary_analog']['name'] : np.ndarray
-            The names of the primary analog channels.
-
-        out_struct['primary_analog']['is_analog'] : np.ndarray
-            The analog status of the primary analog channels. 0 is for digital, 1 is for analog.
-
-    out_struct['digital'] : dict
-        The digital channels of the sequence file. The dictionary has the following keys:
-
-        out_struct['digital']['ival'] : np.ndarray
-            The initial values of the digital channels.
-
-        out_struct['digital']['name'] : np.ndarray      
-            The names of the digital channels.
-
-        out_struct['digital']['is_analog'] : np.ndarray
-            The analog status of the digital channels. 0 is for digital, 1 is for analog.
-        
-    out_struct['proc_details'] : dict
-        The procedure details of the sequence file. The dictionary has the following keys:
-
-        out_struct['proc_details']['time'] : np.ndarray
-            The times of the procedure details.
-
-        out_struct['proc_details']['voltage'] : np.ndarray
-            The voltages of the procedure details.
-
-        out_struct['proc_details']['channel_no'] : np.ndarray
-            The channel numbers of the procedure details.
-
-        out_struct['proc_details']['enabled'] : np.ndarray
-            The enabled status of the procedure details. 0 is for disabled, 1 is for enabled.
-
-        out_struct['proc_details']['ramp_res'] : np.ndarray
-            The ramp resolution of the procedure details.
-
-    
-    out_struct['procedures'] : dict
-        The procedures of the sequence file. The dictionary has the following keys:
-
-        out_struct['procedures']['enabled'] : np.ndarray
-            The enabled status of the procedures. 0 is for disabled, 1 is for enabled.
-
-        out_struct['procedures']['name'] : np.ndarray
-            The names of the procedures.
-
-        out_struct['procedures']['time'] : np.ndarray
-            The times of the procedures.
-
-    out_struct['ramp_params'] : dict
-        The ramp parameters of the sequence file. The dictionary has the following keys:
-
-        out_struct['ramp_params']['num'] : int
-            The number associated with the ramp parameter.
-
-        out_struct['ramp_params']['cur_val'] : np.ndarray
-            The current values of the ramp parameter.
-
-        out_struct['ramp_params']['start_val'] : np.ndarray
-            The start values of the ramp parameter.
-
-        out_struct['ramp_params']['end_val'] : np.ndarray
-            The end values of the ramp parameter.
-
-        out_struct['ramp_params']['incr_val'] : np.ndarray
-            The increment values of the ramp parameter.
-
-        out_struct['ramp_params']['ramp_every'] : np.ndarray
-            The ramp every values of the ramp parameter.
-
-        out_struct['ramp_params']['next_ramp'] : np.ndarray
-            The next ramp values of the ramp parameter.
-
-    out_struct['secondary_analog'] : dict
-        The secondary analog channels of the sequence file. The dictionary has the following keys:
-
-        out_struct['secondary_analog']['ival'] : np.ndarray
-            The initial values of the secondary analog channels.
-
-        out_struct['secondary_analog']['name'] : np.ndarray
-            The names of the secondary analog channels.
-
-        out_struct['secondary_analog']['is_analog'] : np.ndarray
-            The analog status of the secondary analog channels. 0 is for digital, 1 is for analog.
-
-    out_struct['never_ramp'] : bool
-        The never ramp status of the sequence file. True is for never ramp, False is for not never ramp.
-
-    out_struct['always_ramp'] : bool
-        The always ramp status of the sequence file. True is for always ramp, False is for not always ramp.
-
     Raises
     ------  
     Exception
@@ -132,13 +60,11 @@ def seq_read(in_file_name):
     Notes
     -----
     The LabVIEW sequence file is a binary file. The file is read in as a binary file and the data is parsed into a
-    dictionary. The dictionary is returned.
+    data class. The data class is returned.
 
     """
-
     my_clock = np.array(time.localtime())
     
-
     # If no file name is passed, attempt to read the most recent file in the current day's directory
     if not isinstance(in_file_name, str):
         if not isinstance(in_file_name, dict):
@@ -153,207 +79,353 @@ def seq_read(in_file_name):
         my_file_name = in_file_name
 
     # Read the file
-    with open(my_file_name, 'rb') as my_fid:
+    with open(my_file_name, 'rb') as fid:
 
         # Read the version number
-        my_version = np.fromfile(my_fid, dtype=np.dtype('>i4'), count=1, sep="")[0]
+        # version = np.fromfile(fid, dtype=np.dtype('>i4'), count=1, sep="")[0]
+        version = read_single(fid, 'int32')
 
         # If the version number is negative, read the timing information.
-        if my_version < 0:
-            out_struct = {'version': -my_version}
-            out_struct['timing'] = np.fromfile(my_fid, dtype=np.dtype('>u4'), count=1, sep="")[0]
+        if version < 0:
+            seq = LabviewSeq(version=-version)
+            seq.timing = read_single(fid, 'uint32')
         else:
-            out_struct = {'timing': my_version, 'version': 3}
+            seq = LabviewSeq(timing=version, version=3)
         
+        seq.primary_analog = read_array(fid, 2, [
+            ['ival', 'float64'],
+            ['name', 'str'],
+            ['is_analog', 'uint8']])
+        seq.digital = read_array(fid, 2, [
+            ['ival', 'float64'],
+            ['name', 'str'],
+            ['is_analog', 'uint8']])
+        seq.proc_details = read_array(fid, 2, [
+            ['time', 'float64'],
+            ['voltage', 'float64'],
+            ['channel_no', 'uint16'],
+            ['enabled', 'uint8'],
+            ['ramp_res', 'int16']])
+        seq.procedures = read_array(fid, 1, [
+            ['enabled', 'uint8'],
+            ['name', 'str'],
+            ['time', 'float64']])
         
-        out_struct['primary_analog'] = read_array(my_fid, 2, [('ival', 'float64'), ('name', 'pstr'), ('is_analog', 'uint8')])
-        out_struct['digital'] = read_array(my_fid, 2, [('ival', 'float64'), ('name', 'pstr'), ('is_analog', 'uint8')])
-        out_struct['proc_details'] = read_array(my_fid, 2, [('time', 'float64'), ('voltage', 'float64'), ('channel_no', 'uint16'), ('enabled', 'uint8'), ('ramp_res', 'int16')])
-        out_struct['procedures'] = read_array(my_fid, 1, [('enabled', 'uint8'), ('name', 'pstr'), ('time', 'float64')])
 
-        out_struct['ramp_params'] = {}
-        out_struct['ramp_params']['num'] = np.fromfile(my_fid, dtype=np.dtype('>u4'), count=1)[0]
+        # read the ramping params
+        seq.ramp_params = {}
+        seq.ramp_params['num'] = read_single(fid, 'uint32')
 
-        raw_ramps = np.fromfile(my_fid, dtype=np.dtype('>f8'), count=4 * out_struct['ramp_params']['num'])
-        raw_ramps = np.reshape(raw_ramps, (4, out_struct['ramp_params']['num']))
-        out_struct['ramp_params']['cur_val'] = raw_ramps[0, :]
-        out_struct['ramp_params']['start_val'] = raw_ramps[1, :]
-        out_struct['ramp_params']['end_val'] = raw_ramps[2, :]
-        out_struct['ramp_params']['incr_val'] = raw_ramps[3, :]
-        out_struct['ramp_params']['ramp_every'] = np.ones(out_struct['ramp_params']['end_val'].shape)
-        out_struct['ramp_params']['next_ramp'] = np.zeros(out_struct['ramp_params']['end_val'].shape)
-
-        out_struct['secondary_analog'] = read_array(my_fid, 2, [('ival', 'float64'), ('name', 'pstr'), ('is_analog', 'uint8')])
-
-        check_num = np.fromfile(my_fid, dtype=np.dtype('>u4'), count=1)[0]
-        if not my_fid.tell() == os.fstat(my_fid.fileno()).st_size:
-            raw_ramps = np.fromfile(my_fid, dtype=np.dtype('>i4'), count=2 * check_num)
-            raw_ramps = np.reshape(raw_ramps, (2, check_num))
-            out_struct['ramp_params']['ramp_every'][:check_num] = raw_ramps[0, :]
-            out_struct['ramp_params']['next_ramp'][:check_num] = raw_ramps[1, :]
-
-        out_struct['never_ramp'] = np.fromfile(my_fid, dtype=np.dtype('>u1'), count=1)
-        if len(out_struct['never_ramp']) == 0:
-            out_struct['never_ramp'] = False
-
-        out_struct['always_ramp'] = np.fromfile(my_fid, dtype=np.dtype('>u1'), count=1)
-        if len(out_struct['always_ramp']) == 0:
-            out_struct['always_ramp'] = False
-
-    return out_struct
+        raw_ramps = [read_single(fid, 'float64') for i in range(4 * seq.ramp_params['num'])]
+        raw_ramps = np.reshape(raw_ramps, (4, seq.ramp_params['num']))
+        seq.ramp_params['cur_val'] = raw_ramps[0, :]
+        seq.ramp_params['start_val'] = raw_ramps[1, :]
+        seq.ramp_params['end_val'] = raw_ramps[2, :]
+        seq.ramp_params['incr_val'] = raw_ramps[3, :]
+        seq.ramp_params['ramp_every'] = np.ones(seq.ramp_params['end_val'].shape)
+        seq.ramp_params['next_ramp'] = np.zeros(seq.ramp_params['end_val'].shape)
 
 
+        # read secondary analog
+        seq.secondary_analog = read_array(fid, 2, [
+            ['ival', 'float64'],
+            ['name', 'str'],
+            ['is_analog', 'uint8']])
 
-def lv_seq_write(in_seq, in_target, options=None):
-    if options is None:
-        options = {}
+        # read the ramping control group
+        check_num = read_single(fid, 'uint32')
+        
+        raw_ramps = [read_single(fid, 'int32') for i in range(2 * check_num)]
+        raw_ramps = np.reshape(raw_ramps, (2, check_num))
+        seq.ramp_params['ramp_every'][:check_num] = raw_ramps[0, :]
+        seq.ramp_params['next_ramp'][:check_num] = raw_ramps[1, :]
 
-    if 'sort' not in options:
-        options['sort'] = False
-    if 'clear_disabled' not in options:
-        options['clear_disabled'] = False
+        # read "never ramp"
+        seq.never_ramp = bool(read_single(fid, 'uint8'))
 
-    if options['clear_disabled']:
-        in_seq = lv_seq_clear_disabled(in_seq)
+        # read "always ramp"
+        seq.always_ramp = bool(read_single(fid, 'uint8'))
 
-    if options['sort']:
-        in_seq = lv_seq_sort(in_seq)
+    return seq
 
-    my_fid = open(in_target, 'wb')
+def seq_write(seq: LabviewSeq, in_target):
+    """Writes a LabVIEW sequence file from an LabviewSeq data class with the sequence information. This code 
+    is nearly identical to the MATLAB version.
 
-    try:
+    Parameters
+    ----------
+    in_target : str
+        The file name of the LabVIEW sequence file to be written. The file name is assumed to be the full path to the
+        file.
+
+    seq : LabviewSeq
+        An LabviewSeq data class with the sequence information.
+
+    LabviewSeq has the following attributes:
+
+    seq.version : int
+    seq.timing : int
+    seq.primary_analog : dict
+    seq.digital : dict
+    seq.proc_details : dict
+    seq.procedures : dict
+    seq.ramp_params : dict
+    seq.secondary_analog : dict
+    seq.never_ramp : bool
+    seq.always_ramp : bool
+
+    Raises
+    ------
+    Exception
+        If the file cannot be written, an exception is raised.
+
+    Notes
+    -----
+    The LabVIEW sequence file is a binary file. The file is written as a binary file and the data is parsed from an
+    LabviewSeq data class. The data class is passed as an argument.
+    
+    """
+
+    with open(in_target, 'wb') as fid:
+
         # Write the version header
-        if in_seq.version >= 4:
-            my_fid.write(struct.pack('>i', -in_seq.version))
+        if seq.version >= 4:
+            fid.write(struct.pack('>i', -seq.version))
 
         # Write the timing header
-        my_fid.write(struct.pack('>I', in_seq.timing))
+        fid.write(struct.pack('>I', seq.timing))
 
-        # Write the primary analog group
-        write_array(my_fid, in_seq.primary_analog, 2, ['ival', 'name', 'is_analog'], ['>d', 'str', 'B'])
-
-        # Write the digital group
-        write_array(my_fid, in_seq.digital, 2, ['ival', 'name', 'is_analog'], ['>d', 'str', 'B'])
-
-        # Write the procedure details
-        write_array(my_fid, in_seq.proc_details, 2, ['time', 'voltage', 'channel_no', 'enabled', 'ramp_res'],
-                    ['>d', '>d', '>H', 'B', '>h'])
-
-        # Write the procedures
-        write_array(my_fid, in_seq.procedures, 1, ['enabled', 'name', 'time'], ['B', 'str', '>d'])
+        write_array(fid, seq.primary_analog, 2, [
+            ['ival', 'float64'],
+            ['name', 'str'],
+            ['is_analog', 'uint8']])
+        write_array(fid, seq.digital, 2, [
+            ['ival', 'float64'],
+            ['name', 'str'],
+            ['is_analog', 'uint8']])
+        write_array(fid, seq.proc_details, 2, [
+            ['time', 'float64'],
+            ['voltage', 'float64'],
+            ['channel_no', 'uint16'],
+            ['enabled', 'uint8'],
+            ['ramp_res', 'int16']])
+        write_array(fid, seq.procedures, 1, [
+            ['enabled', 'uint8'],
+            ['name', 'str'],
+            ['time', 'float64']])
 
         # Write the ramping parameters
-        my_fid.write(struct.pack('>I', in_seq.ramp_params['num']))
+        write_single(fid, 'uint32', seq.ramp_params['num'])
 
-        raw_ramps = np.zeros((4, in_seq.ramp_params['num']), dtype=np.float64)
-        raw_ramps[0, :] = in_seq.ramp_params['cur_val']
-        raw_ramps[1, :] = in_seq.ramp_params['start_val']
-        raw_ramps[2, :] = in_seq.ramp_params['end_val']
-        raw_ramps[3, :] = in_seq.ramp_params['incr_val']
+        raw_ramps = np.zeros((4, seq.ramp_params['num']), dtype=np.float64)
+        raw_ramps[0, :] = seq.ramp_params['cur_val']
+        raw_ramps[1, :] = seq.ramp_params['start_val']
+        raw_ramps[2, :] = seq.ramp_params['end_val']
+        raw_ramps[3, :] = seq.ramp_params['incr_val']
 
-        my_fid.write(raw_ramps.tobytes())
+        raw_ramps = np.reshape(raw_ramps, (4 * seq.ramp_params['num']))
+        for r in raw_ramps:
+            write_single(fid, 'float64', r)
 
         # Write the secondary analog group
-        write_array(my_fid, in_seq.secondary_analog, 2, ['ival', 'name', 'is_analog'], ['>d', 'str', 'B'])
+        write_array(fid, seq.secondary_analog, 2, [
+            ['ival', 'float64'],
+            ['name', 'str'],
+            ['is_analog', 'uint8']])
 
         # Write the ramping control group
-        my_fid.write(struct.pack('>I', in_seq.ramp_params['num']))
-        raw_ramps = np.zeros((2, in_seq.ramp_params['num']), dtype=np.int32)
-        raw_ramps[0, :] = in_seq.ramp_params['ramp_every']
-        raw_ramps[1, :] = in_seq.ramp_params['next_ramp']
+        write_single(fid, 'uint32', seq.ramp_params['num'])
 
-        my_fid.write(raw_ramps.tobytes())
+        raw_ramps = np.zeros((2, seq.ramp_params['num']), dtype=int)
+        raw_ramps[0, :] = seq.ramp_params['ramp_every']
+        raw_ramps[1, :] = seq.ramp_params['next_ramp']
+        raw_ramps = np.reshape(raw_ramps, (2 * seq.ramp_params['num']))
+
+        for r in raw_ramps:
+            write_single(fid, 'int32', r)
 
         # Write the "always ramp"
-        my_fid.write(struct.pack('B', in_seq.always_ramp))
+        write_single(fid, 'uint8', seq.always_ramp)
 
         # Write the "never ramp"
-        my_fid.write(struct.pack('B', in_seq.never_ramp))
-
-        my_fid.close()
-    except Exception as my_err:
-        my_fid.close()
-        raise my_err
-
-def write_array(my_fid, in_struct, num_dimensions, field_names, data_format):
-    num_fields = len(field_names)
-    true_dims = in_struct['dims'][::-1]
-    total_size = np.prod(true_dims)
-
-    for a in range(num_dimensions):
-        my_fid.write(struct.pack('>I', true_dims[a]))
-
-    for a in range(total_size):
-        for b in range(num_fields):
-            field_data = in_struct[field_names[b]][a]
-            if data_format[b] == '>d':
-                my_fid.write(struct.pack(data_format[b], field_data))
-            elif data_format[b] == 'str':
-                out_strlen = len(field_data)
-                my_fid.write(struct.pack('>I', out_strlen))
-                my_fid.write(field_data.encode('UTF-8'))
-            elif data_format[b] == 'B':
-                my_fid.write(struct.pack('B', field_data))
-
-# You'll need to define lv_seq_clear_disabled and lv_seq_sort functions if they are not already defined elsewhere.
+        write_single(fid, 'uint8', seq.never_ramp)
 
 
+def read_array(fid, num_dimensions, in_format):
+        """
+        Reads a single array from the LabVIEW sequence file format. This code is nearly identical to the MATLAB version.
 
-def read_array(my_fid, num_dimensions, in_format):
+        Parameters
+        ----------
+        fid : file
+            The file object to read from.
+
+        num_dimensions : int
+            The number of dimensions of the array. 
+
+        in_format : list
+            A list of tuples with the field names and data types of the array. The tuples should have the following
+            format: (field_name, data_type). The data types should be one of the following: 'str', 'float64', 'int8',
+            'uint8', 'int16', 'uint16', 'int32', 'uint32'.
+
+        Returns
+        -------
+        arr : dict
+            A dictionary with the array information. The dictionary has the following keys:
+
+        arr['dims'] : np.ndarray
+            The dimensions of the array.
+
+        arr[field_name] : np.ndarray
+            The data of the array.
+
+        Notes
+        -----   
+        The LabVIEW sequence file is a binary file. The file is read in as a binary file and the data is parsed into a
+        dictionary. The dictionary is returned.
+        
+        """
+        
         num_fields = len(in_format)
 
-        temp_dims = np.zeros(num_dimensions, dtype=np.dtype('>u4'))
+        # Read the dimensions of the array
+        dims = [1, 1]
         for a in range(num_dimensions):
-            temp_dims[a] = np.fromfile(my_fid, dtype=np.dtype('>u4'), count=1, sep="")[0]
+            dims[a] = read_single(fid, 'uint32')
 
-        total_size = np.prod(temp_dims)
-        arg_dims = temp_dims
-        if len(arg_dims) == 1:
-            arg_dims = [int(arg_dims), 1]
+        # Initialize the output dictionary
+        arr = {}
+        arr['dims'] = dims
 
-        out_struct = {}
+        # rectify dims not to be dumb
+        if dims[1] == 1:
+            dims = [dims[0]]
+
+        # initialize arrays
         for b in range(num_fields):
             field_name = in_format[b][0]
             field_type = in_format[b][1]
-            if field_type == 'pstr':
-                out_struct[field_name] = np.empty(arg_dims, dtype=object)
-            else:
-                out_struct[field_name] = np.zeros(arg_dims, dtype=np.dtype('>f8') if field_type == 'float64' else np.dtype('>u4'))
+            match field_type:
+                case 'str':
+                    arr[field_name] = np.empty(dims, dtype=object)
+                case 'float64':
+                    arr[field_name] = np.zeros(dims)
+                case _:
+                    arr[field_name] = np.zeros(dims, dtype=int)
+        
+        # Read the data
+        for ind in np.ndindex(tuple(dims)):
+            for c in range(num_fields):
+                field_name = in_format[c][0]
+                field_type = in_format[c][1]
+                arr[field_name][ind] = read_single(fid, field_type)
 
-        for a in range(arg_dims[0]):
-            for b in range(arg_dims[1]):
-                for c in range(num_fields):
-                    field_name = in_format[c][0]
-                    field_type = in_format[c][1]
-                    if field_type == 'pstr':
-                        in_strlen = np.fromfile(my_fid, dtype=np.dtype('>u4'), count=1, sep="")[0]
-                        my_str = np.fromfile(my_fid, dtype=np.dtype('>u1'), count=in_strlen, sep="").tobytes().decode('utf-8')
-                        out_struct[field_name][a, b] = my_str
-                    else:
-                        out_struct[field_name][a, b] = np.fromfile(my_fid, dtype=field_type, count=1, sep="")[0]
+        return arr
 
-        out_struct['dims'] = np.flip(arg_dims)
+
+def write_array(fid, in_struct, num_dimensions, out_format):
+    """
+    Writes a single array to the LabVIEW sequence file format. This code is nearly identical to the MATLAB version.
+
+    Parameters
+    ----------
+    fid : file   
+        The file object to write to.
+
+    in_struct : dict
+
+    num_dimensions : int
+        The number of dimensions of the array.
+
+    out_format : list
+        A list of 2-part tuples, containing the field name and the data format. The data formats should be one of the
+        following: 'str', 'float64', 'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'.
+    
+
+    Notes
+    -----
+    The LabVIEW sequence file is a binary file. The file is written as a binary file and the data is parsed from a
+    dictionary. The dictionary is passed as an argument.
+
+    """
+    
+    num_fields = len(out_format)
+    dims = in_struct['dims']
+
+    for a in range(num_dimensions):
+        write_single(fid, 'uint32', dims[a])
+
+    dims = in_struct[out_format[0][0]].shape
+
+    for ind in np.ndindex(tuple(dims)):
         for b in range(num_fields):
-            field_name = in_format[b][0]
-            out_struct[field_name] = np.reshape(out_struct[field_name], out_struct['dims'])
-
-        return out_struct
-
+            data = in_struct[out_format[b][0]][ind]
+            fmt = out_format[b][1]
+            write_single(fid, fmt, data)
 
 
 
+def read_single(fid, type):
+    """
+    Reads a single value from the file 'fid' in the format 'type'.
+    """
+    match type:
+        case 'int8':
+            return struct.unpack('>b', fid.read(1))[0]
+        case 'uint8':
+            return struct.unpack('>B', fid.read(1))[0]
+        case 'int16':
+            return struct.unpack('>h', fid.read(2))[0]
+        case 'uint16':
+            return struct.unpack('>H', fid.read(2))[0]
+        case 'int32':
+            return struct.unpack('>i', fid.read(4))[0]
+        case 'uint32':
+            return struct.unpack('>I', fid.read(4))[0]
+        case 'float64':
+            return struct.unpack('>d', fid.read(8))[0]
+        case 'str':
+            strlen = int(struct.unpack('>I', fid.read(4))[0])
+            return np.fromfile(fid, dtype=np.dtype('>u1'), count=strlen, sep="").tobytes().decode('utf-8')
+        
+def write_single(fid, type, data):
+    """
+    Writes 'data' to the file 'fid' in the format 'type'.
+    """
+    match type:
+        case 'int8':
+            fid.write(struct.pack('>b', data))
+        case 'uint8':
+            fid.write(struct.pack('>B', data))
+        case 'int16':
+            fid.write(struct.pack('>h', data))
+        case 'uint16':
+            fid.write(struct.pack('>H', data))
+        case 'int32':
+            fid.write(struct.pack('>i', data))
+        case 'uint32':
+            fid.write(struct.pack('>I', data))
+        case 'float64':
+            fid.write(struct.pack('>d', data))
+        case 'str':
+            fid.write(struct.pack('>I', len(data)))
+            darr = data.encode('UTF-8')
+            for d in darr:
+                fid.write(struct.pack('>b', d))
+            
 
-
-
-
-
-
-# Test code for lv_seq_read
+# Test code for the module
 if __name__ == "__main__":
-    # Test 1
-    my_file_name = "/Users/henry/Library/CloudStorage/GoogleDrive-henry.ando@gmail.com/My Drive/Chinlab/Code/labview/testdata/202305190000"
-    my_struct = seq_read(my_file_name)
-    print(my_struct)
+    # Test 1: Read a test file
+    script_dir = os.path.dirname(__file__) 
+    rel_path = "testdata/202305190000"
+    test_file = os.path.join(script_dir, rel_path)
+    test_seq = seq_read(test_file)
 
 
-
+    # Test 2: Write that data to a new file
+    rel_path = "testdata/test_write"
+    test_file = os.path.join(script_dir, rel_path)
+    seq_write(test_seq, test_file)
+    test_seq2 = seq_read(test_file)
+    print(test_seq2)
