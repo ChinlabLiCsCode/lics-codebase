@@ -17,7 +17,7 @@ class LabviewSeq:
     secondary_analog: dict = None
     never_ramp: bool = False
     always_ramp: bool = False
-
+    channels: list = []
 
 
 def seq_read(in_file_name):
@@ -139,11 +139,11 @@ def seq_read(in_file_name):
         seq.ramp_params['ramp_every'][:check_num] = raw_ramps[0::2]
         seq.ramp_params['next_ramp'][:check_num] = raw_ramps[1::2]
 
-        # read "never ramp"
-        seq.never_ramp = bool(read_single(fid, 'uint8'))
-
         # read "always ramp"
         seq.always_ramp = bool(read_single(fid, 'uint8'))
+
+        # read "never ramp"
+        seq.never_ramp = bool(read_single(fid, 'uint8'))
 
     return seq
 
@@ -291,18 +291,15 @@ def read_array(fid, num_dimensions, format):
     for a in range(num_dimensions):
         dims[a] = read_single(fid, 'uint32')
 
-    # initialize the output array
+    # Initialize the output array
     arr = {}
     arr['save_dims'] = dims
 
-    # rectify dims not to be dumb
-
+    # Remove singleton dimensions
     if min(dims) == 1:
         dims = [max(dims)]
 
-    
-
-    # initialize arrays
+    # Initialize arrays
     for b in range(num_fields):
         field_name = format[b][0]
         field_type = format[b][1]
@@ -322,7 +319,7 @@ def read_array(fid, num_dimensions, format):
             arr[field_name][ind] = read_single(fid, field_type)
 
 
-    # reshape 2d arrays
+    # Reshape 2d arrays
     if len(dims) == 2:
         dims = np.flip(dims)
         for b in range(num_fields):
@@ -364,16 +361,18 @@ def write_array(fid, savearr, num_dimensions, format):
     dims = arr['dims']
     save_dims = arr['save_dims']
 
-    # reshape 2d arrays
+    # Reshape 2d arrays
     if len(dims) == 2:
         dims = np.flip(dims)
         for b in range(num_fields):
             field_name = format[b][0]
             arr[field_name] = np.transpose(arr[field_name])
 
+    # Write the dimensions of the array
     for a in range(num_dimensions):
         write_single(fid, 'uint32', save_dims[a])
 
+    # Write the data
     for ind in np.ndindex(tuple(dims)):
         for b in range(num_fields):
             data = arr[format[b][0]][ind]
@@ -431,7 +430,7 @@ def write_single(fid, type, data):
                 fid.write(struct.pack('>b', d))
             
 
-def lv_seq_channel_report(seq: LabviewSeq, which_channel):
+def get_channel_info(seq: LabviewSeq, which_channel):
     """
     Returns a string with a report about the given channel.
 
@@ -447,6 +446,7 @@ def lv_seq_channel_report(seq: LabviewSeq, which_channel):
     -------
     outstr : str
         A string with the report about the channel.
+
     """
 
     # Get the channel numbers to be reported
@@ -461,14 +461,10 @@ def lv_seq_channel_report(seq: LabviewSeq, which_channel):
         channels = which_channel
     
     # Initialize the channel info dictionary
-    channel_info = [{} for _ in range(len(channels))]
+    channel_info = {'channel_no': channels, 'events': channels} 
     for c in range(len(channels)):
-        channel_info[c]['proc_enabled'] = []
-        channel_info[c]['enabled'] = []
-        channel_info[c]['global_time'] = []
-        channel_info[c]['ramp_res'] = []
-        channel_info[c]['voltage'] = []
-        channel_info[c]['proc_name'] = []
+        channel_info['events'][c] = pd.DataFrame(
+            columns=['proc_enabled', 'enabled', 'global_time', 'ramp_res', 'voltage', 'proc_name'])
 
     # Populate the channel info dictionary
     for a in range(len(seq.proc_details['channel_no'])):
@@ -488,12 +484,56 @@ def lv_seq_channel_report(seq: LabviewSeq, which_channel):
                         var_lookup(seq.ramp_params, seq.proc_details['voltage'][a, b]))
                     channel_info[c]['proc_name'].append(proc_name)
 
+    # Sort the times
+    ordered_times = sorted(range(len(channel_info[c]['global_time'])), key=lambda d: channel_info[c]['global_time'][d])
+    
 
+    return channel_info
+
+
+
+def channel_report(seq: LabviewSeq, channel_info: list):
+    """
+    Returns a string with a report about the given channel. Channel info can be obtained using the get_channel_info
+    function.
+
+    Parameters
+    ----------
+    seq : LabviewSeq
+
+    channel_info : list of dicts 
+
+    The dicts have the following keys:
+
+    channel_info[c]['chan_no'] : int
+
+    channel_info[c]['proc_enabled'] : list of bool
+
+    channel_info[c]['enabled'] : list of bool
+
+    channel_info[c]['global_time'] : list of float
+
+    channel_info[c]['ramp_res'] : list of int
+
+    channel_info[c]['voltage'] : list of float
+
+    channel_info[c]['proc_name'] : list of str
+
+
+    Returns
+    -------
+    outstr : str
+        A string with the report about the channel.
+
+    """
+
+    # Create the output string
     outstr  = 'ch no  name                         init val  analog  used  enabled  proc enabled\n'
     outstr += '-----  ---------------------------  --------  ------  ----  -------  ------------\n'
     
-    for c in range(len(channels)):
-        this_chan = get_channel_by_no(seq, channels[c])
+    # Populate the channel info dictionary
+    for c in range(len(channel_info)):
+        this_chan = get_channel_by_no(seq, channel_info[c]['chan_no'])
         outstr += f'{this_chan["chan_no"]:03d}    '
         outstr += f'{this_chan["name"][:24]:<27s}  '
         outstr += f'{this_chan["ival"]:<8.4f}  '
@@ -502,9 +542,9 @@ def lv_seq_channel_report(seq: LabviewSeq, which_channel):
         outstr += f'{any(channel_info[c]["enabled"]):<7d}  '
         outstr += f'{any([a*b for a, b in zip(channel_info[c]["enabled"], channel_info[c]["proc_enabled"])])}\n\n'
     
-
-    for c in range(len(channels)):
-        this_chan = get_channel_by_no(seq, channels[c])
+    # Create the output string
+    for c in range(len(channel_info)):
+        this_chan = get_channel_by_no(seq, channel_info[c]['chan_no'])
         outstr += 'global time  pr enbl  enabled  voltage  ramp    proc name\n'
         outstr += '-----------  -------  -------  -------  ------  ---------\n'
         
@@ -522,6 +562,8 @@ def lv_seq_channel_report(seq: LabviewSeq, which_channel):
                     2: 'COARSE  ',
                 }.get(channel_info[c]['ramp_res'][d], '??????  ')
                 outstr += f'{channel_info[c]["proc_name"][d]}\n'
+
+    outstr += '\n'
 
     return outstr
 
@@ -655,4 +697,4 @@ if __name__ == "__main__":
     # Test 3: Channel report
     # print(test_seq.proc_details['dims'])
     # print(test_seq.proc_details['channel_no'])
-    print(lv_seq_channel_report(test_seq2, '3.0'))
+    print(channel_report(test_seq2, '3.0'))
