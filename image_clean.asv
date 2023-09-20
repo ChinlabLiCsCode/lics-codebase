@@ -1,0 +1,33 @@
+function images = imageset_clean(shots, dfshots, bgshots, params)
+
+% load the image set (can be an N-D array or a struct with array plus
+% date)
+images = image_load(shots, params);
+
+% load the background set (can be a 1D array of shots, a struct with array plus
+% date, or a 2D array of exactly what you want subtracted off.)
+if isstruct(bgshots)
+    bgimgs = image_load(bgshots, params);
+elseif min(size(bgshots)) == 1
+    bgbgims = image_load(bgshots, params);
+else
+    bg = 
+
+% load the df set (can be 1D array, a struct with array plus
+% date, or false, in which case the image set will be used as the df set.)
+
+
+
+
+% average the background set and subtract from the df set and the image set
+
+
+% use the df set to create a dfobject
+
+
+% apply the dfobject to the image set to get defringed absorption images
+
+
+% calculate atom density from absorption profile
+
+

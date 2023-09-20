@@ -1,0 +1,54 @@
+function imagestack = image_load(shots,in_params)
+
+% Loads an image or set of images
+% 'shots' can be an integer or 
+
+n = numel(shots);
+fshots = reshape(shots, [n, 1]);
+
+% relevant parts of params
+date = in_params.date;
+view = in_params.view;
+cam = in_params.cam;
+atom = in_params.atom;
+
+if cam == 'H'
+    file_template = '//LiCs_NAS/Data_Backup/Data/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
+elseif cam == 'V'
+    file_template = '//LiCs_NAS/Data_Backup/V_Images/Data/%1$04d/%2$02/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
+else
+    error('Invalid params.cam value')
+end
+
+if not(or(atom == 'C', atom == 'L')) 
+    error('Invalid params.atom value')
+end
+
+% load the first shot to get image size
+fname = sprintf(file_template,date(1),date(2),date(3),fshots(1));
+vars = load(fname,'imagestack');
+sz = size(vars.imagestack);
+% initialize full imagestack
+imagestack = zeros(n, sz(1), sz(2), sz(3));
+
+% load the full image stack
+for a=1:n
+    fname = sprintf(file_template,date(1),date(2),date(3),fshots(a));
+    vars = load(fname,'imagestack');
+    %cut out desired area
+    imagestack(a,:,:,:) = vars.imagestack;
+end
+
+% we need only return the relevant parts of the image stack
+imagestack = imagestack(:, view(3):view(4),view(1):view(2), :);
+if cam == 'V'
+    if atom == 'L'
+        imagestack = imagestack(:, :, :, [1, 3]);
+    else
+        imagestack = imagestack(:, :, :, [2, 4]);
+    end
+end
+
+
+
+end
