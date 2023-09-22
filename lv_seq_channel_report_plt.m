@@ -1,11 +1,7 @@
 function lv_seq_channel_report_plt(in_seq,which_channel,out_file,options)
 
 %Initialize plot variables
-tvals=[]; vvals=[]; rampo='';
-
-
- 
-
+tvals=[]; vvals=[];
 
 default_details = true;
 if ischar(which_channel)
@@ -41,7 +37,6 @@ for c = 1:numel(channels)
 	channel_info{c}.ramp_res = zeros(1,0);
 	channel_info{c}.voltage = zeros(1,0);
 	channel_info{c}.proc_name = cell(1,0);
-    
 end
 
 for a = 1:(in_seq.proc_details.dims(1))
@@ -70,7 +65,7 @@ end
 try
 	fprintf(my_fid,'ch no\tname\t\t\t\t\t\t  init val\tanalog?\t\tused  enabled\tproc enabled\n');
 	fprintf(my_fid,'-----\t----\t\t\t\t\t\t  --------\t-------\t\t----  -------\t------------\n');
-	for c = 1:(numel(channels))
+	for c = 1:(numel(channels));
 		this_chan = lv_seq_get_channel_by_no(in_seq,channels(c));
 		fprintf(my_fid,'%03d\t\t',this_chan.chan_no);
 		fprintf(my_fid,'%-24.24s\t',this_chan.name);
@@ -99,32 +94,21 @@ try
 					fprintf(my_fid,'%10.4f\t',channel_info{c}.voltage(d));
                     vvals(d) = channel_info{c}.voltage(d);
                     tvals(d) = channel_info{c}.global_time(d);
-                 
-               
-				    switch channel_info{c}.ramp_res(d)
-					    	case 0
+					switch channel_info{c}.ramp_res(d)
+						case 0
 							fprintf(my_fid,'JUMP\t');
-                            rampo='JUMP';
 						case 1
 							fprintf(my_fid,'FINE\t');
-                            rampo='FINE'
 						case 2
 							fprintf(my_fid,'COARSE\t');
-                            rampo='COARSE';
 						otherwise
 							fprintf(my_fid,'????\t');
-                            rampo='????'
-
-                    end
-                    
+					end
 					fprintf(my_fid,'%s\n',channel_info{c}.proc_name{d});
-
-                 
-    
- 
+				end
 			end
 		end
-   
+    end
 	
     if isstr(out_file)
         fclose(my_fid);
@@ -133,68 +117,18 @@ try
     %plot output :)
     [sX,sI] = sort(tvals);
     sY = vvals(sI);
-  
     figure;
-                    box on;
-                    plot(sX, sY)
-                    
-                    dcm_obj = datacursormode(gcf);
-                    set(dcm_obj, 'UpdateFcn', {@customDatatip, tvals,vvals channel_info{c}.proc_name(sI), channel_info{c}.ramp_res(sI)});
-
-             
-                    xlabel('Time (ms)'); 
-                    ylabel('Channel Voltage');
-                    trw= channelname,'Interpreter','none';
-                    title("Channel "+channelname(1:4));
-                    
-
-				end
+    box on;
+    plot(sX,sY,'b','LineWidth',2);
+    xlabel('Time (ms)'); ylabel('Channel Voltage');
+    title(channelname,'Interpreter','none');
     
-    
-    
-    
-    
-  
 
-
-%catch my_err
- %   if isstr(out_file)
-%        fclose(my_fid);
-%    end
-%	rethrow(my_err);
-
-
-end
-
-end 
-end 
-function output_txt = customDatatip(~, event,tvals,vvals, proc_names, ramp_res)
-    pos = get(event, 'Position');
-    idx = get(event, 'DataIndex');
-
-    x = tvals(idx);
-    y = vvals(idx);
-
-    proc_name = proc_names{idx};
-    proc_name = strrep(proc_name, '_', ' ');
-
-    switch ramp_res(idx)
-        case 0
-            rampo = 'JUMP';
-        case 1
-            rampo = 'FINE';
-        case 2
-            rampo = 'COARSE';
-        otherwise
-            rampo = '????';
+catch my_err
+    if isstr(out_file)
+        fclose(my_fid);
     end
+	rethrow(my_err);
 
-    output_txt = {...
-        ['Time: ', num2str(pos(1))], ...
-        ['Voltage: ', num2str(pos(2))], ...
-        ['Ramp Type: ', rampo],...
-        ['Procedure Name: ', proc_name]};
+
 end
-    
-       
-

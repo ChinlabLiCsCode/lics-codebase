@@ -1,13 +1,7 @@
 function out_struct = lv_seq_read(in_file_name)
 
-% LV_SEQ_READ reads a LabView sequence file and returns a structure
-% containing the sequence information.
-%	OUT_STRUCT = LV_SEQ_READ(IN_FILE_NAME) reads the sequence file
-%	IN_FILE_NAME and returns a structure containing the sequence
-%	information.
-%	
 
-if ~isstr(in_file_name) 
+if ~isstr(in_file_name) %#ok<REMFF1>
     if ~isstruct(in_file_name)
         my_clock = clock();
         my_num = in_file_name;
@@ -24,14 +18,16 @@ else
     my_file_name = in_file_name;
 end
 
-try
-    my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
-    fclose(my_fid);
-    my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
-catch my_err %#ok<NASGU>
-    my_file_name = sprintf('//DESKTOP-L5NCGH6/Experimentalcontroll/ExpControl%4d/timingsettings/%02d/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(2),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
-    my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
-end
+% Henry removed this try/catch block May 2023
+my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
+% try
+%     my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
+%     fclose(my_fid);
+%     my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
+% catch my_err %#ok<NASGU>
+%     my_file_name = sprintf('//DESKTOP-L5NCGH6/Experimentalcontroll/ExpControl%4d/timingsettings/%02d/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(2),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
+%     my_fid = fopen(my_file_name,'r','ieee-be','UTF-8');
+% end
 
 try
     %read the file version header
@@ -81,20 +77,25 @@ try
 		out_struct.ramp_params.ramp_every(1:check_num) = raw_ramps(1,:);
 		out_struct.ramp_params.next_ramp(1:check_num) = raw_ramps(2,:);
 	end
-	
-	%read in "never ramp"
-	out_struct.never_ramp = fread(my_fid,1,'uint8');
-	if numel(out_struct.never_ramp) == 0
-		out_struct.never_ramp = false;
-	end
-	
+%--------------------------------------------------------------------------	
+% Frank Test: before test: never ramp, then always ramp block
+% I switched the order of these two blocked
+%--------------------------------------------------------------------------	
 	%read in "always ramp"
 	out_struct.always_ramp = fread(my_fid,1,'uint8');
-	if numel(out_struct.always_ramp) == 0
+	 if numel(out_struct.always_ramp) == 0
 		out_struct.always_ramp = false;
-	end
+     end
+%--------------------------------------------------------------------------	
+    	%read in "never ramp"
+	out_struct.never_ramp = fread(my_fid,1,'uint8');
+
+     if numel(out_struct.never_ramp) == 0
+		out_struct.never_ramp = false;
+     end   
+%--------------------------------------------------------------------------	
 	
-	fclose(my_fid);
+    fclose(my_fid);
 	
 catch my_err
 	fclose(my_fid);

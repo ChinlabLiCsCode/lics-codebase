@@ -19,6 +19,23 @@ if options.sort
 	in_seq = lv_seq_sort(in_seq);
 end
 
+
+% Henry added this May 2023
+% testA = ~isstruct(in_target)
+% in_target
+if ~isstr(in_target) 
+    if isstruct(in_target)
+        my_clock = in_target.date;
+        my_num = in_target.num;
+    else 
+        my_clock = clock();
+        my_num = in_target;
+    end
+
+    in_target = sprintf('//DESKTOP-L5NCGH6/Experimentalcontroll/ExpControl%4d/timingsettings/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
+end
+% End Henry addition
+ 
 my_fid = fopen(in_target,'w','ieee-be','UTF-8');
 
 try
