@@ -2,6 +2,7 @@ function imagestack = image_load(shots, params)
 % 
 % Loads and returns an image or set of images
 % 'shots' can be an integer or an n-d array of integers.
+% 'shots' can also be a struct that includes a date as well as shots.
 % 'in_params' must have a date (3 element array), view (4 element array),
 % cam (either 'H' or 'V), and atom (either 'C' or 'L').
 % Returned imagestack has dimensions [numel(shots), view(3)-view(4),
@@ -13,7 +14,6 @@ function imagestack = image_load(shots, params)
 % 
 
 % relevant parts of params
-date = params.date;
 view = params.view;
 cam = params.cam;
 atom = params.atom;
@@ -22,6 +22,8 @@ atom = params.atom;
 if isstruct(shots)
     date = shots.date;
     shots = shots.shots;
+else
+    date = params.date;
 end
 
 % flatten shots array
@@ -49,13 +51,15 @@ sz = size(vars.imagestack);
 
 % initialize full imagestack
 imagestack = zeros(n, sz(1), sz(2), sz(3));
+imagestack(1, :, :) = vars.imagestack;
 
 % load the full image stack
-for a=1:n
-    fname = sprintf(file_template,date(1),date(2),date(3),fshots(a));
-    vars = load(fname,'imagestack');
-    %cut out desired area
-    imagestack(a,:,:,:) = vars.imagestack;
+if n > 1
+    for a=2:n
+        fname = sprintf(file_template,date(1),date(2),date(3),fshots(a));
+        vars = load(fname,'imagestack');
+        imagestack(a,:,:,:) = vars.imagestack;
+    end
 end
 
 % only return the relevant parts of the image stack
