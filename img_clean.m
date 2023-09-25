@@ -1,4 +1,4 @@
-function images = image_clean(shots, dfshots, bgshots, params)
+function images = imag_clean(shots, dfshots, bgshots, params)
 
 % load the image set (can be an N-D array or a struct with array plus
 % date)

@@ -1,4 +1,4 @@
-function out_info = macro_scan(params, shots, in_x, dfshots)
+function out_info = proc_scan(params, shots, in_x, dfshots)
 
 
 %Keep track of images to plot later
@@ -148,8 +148,8 @@ num_complete = 0;
 % else
 dfshots = unique(dfshots);
 num_df = numel(dfshots);
-bgstack = zeros([numel(shots)+num_df imagestack_sz(1:2)]);
-old_set_bad = true;
+% bgstack = zeros([numel(shots)+num_df imagestack_sz(1:2)]);
+% old_set_bad = true;
 % if evalin('base','~isempty(who(''ZZZ_DF_SHOTS''))') && evalin('base','~isempty(who(''ZZZ_DATE''))') && isequal(evalin('base','ZZZ_DATE(1:3)'),exp_date(1:3))
 %     if isequal(evalin('base','ZZZ_DF_SHOTS'),dfshots) && isequal(evalin('base','ZZZ_OLD_PARAMS.view'),params.view) && isequal(evalin('base','ZZZ_OLD_PARAMS.maskg'),params.maskg)
 %         old_set_bad = false;
@@ -181,18 +181,18 @@ old_set_bad = true;
 %         old_params_bad = false;
 %     end
 % end
-is_filled = zeros(1,numel(shots));
-fgstack = zeros([numel(shots) imagestack_sz(1:2)]);
-if ~old_params_bad
-    temp_filled = evalin('base','ZZZ_DONE_SHOTS');
-    is_filled(1:numel(temp_filled)) = temp_filled;
-    is_filled = is_filled(1:numel(shots));
-    old_fg_size = evalin('base','size(ZZZ_FG_STACK)');
-    old_bg_size = evalin('base','size(ZZZ_BG_STACK)');
-    bgstack((num_df+1):(num_df+old_bg_size(1)),:,:) = evalin('base','ZZZ_BG_STACK');
-    fgstack(1:old_fg_size(1),:,:) = evalin('base','ZZZ_FG_STACK');
-    fprintf('Note: loaded %d old shots\n',old_fg_size(1));
-end
+% is_filled = zeros(1,numel(shots));
+% fgstack = zeros([numel(shots) imagestack_sz(1:2)]);
+% if ~old_params_bad
+%     temp_filled = evalin('base','ZZZ_DONE_SHOTS');
+%     is_filled(1:numel(temp_filled)) = temp_filled;
+%     is_filled = is_filled(1:numel(shots));
+%     old_fg_size = evalin('base','size(ZZZ_FG_STACK)');
+%     old_bg_size = evalin('base','size(ZZZ_BG_STACK)');
+%     bgstack((num_df+1):(num_df+old_bg_size(1)),:,:) = evalin('base','ZZZ_BG_STACK');
+%     fgstack(1:old_fg_size(1),:,:) = evalin('base','ZZZ_FG_STACK');
+%     fprintf('Note: loaded %d old shots\n',old_fg_size(1));
+% end
 
 while ~done
     worst = size(shots,1);

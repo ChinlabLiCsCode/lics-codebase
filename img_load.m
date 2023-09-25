@@ -1,4 +1,4 @@
-function imagestack = image_load(shots, params)
+function imagestack = img_load(shots, params)
 % 
 % Loads and returns an image or set of images
 % 'shots' can be an integer or an n-d array of integers.
@@ -12,6 +12,9 @@ function imagestack = image_load(shots, params)
 % (for Li) or 2 and 4 (for Cs), so x=2. If you want to reshape the
 % imagestack to match the shots shape, then do it yourself.
 % 
+
+%%%%%% add something to copy over the data if we request it in params %%%%%
+
 
 % relevant parts of params
 view = params.view;
@@ -45,31 +48,39 @@ if not(or(atom == 'C', atom == 'L'))
 end
 
 % load the first shot to get image size
-fname = sprintf(file_template,date(1),date(2),date(3),fshots(1));
-vars = load(fname,'imagestack');
+fname = sprintf(file_template, date(1), date(2), date(3), fshots(1));
+vars = load(fname, 'imagestack');
 sz = size(vars.imagestack);
 
 % initialize full imagestack
 imagestack = zeros(n, sz(1), sz(2), sz(3));
-imagestack(1, :, :) = vars.imagestack;
+imagestack(1, :, :, :) = vars.imagestack;
 
 % load the full image stack
 if n > 1
     for a=2:n
-        fname = sprintf(file_template,date(1),date(2),date(3),fshots(a));
-        vars = load(fname,'imagestack');
-        imagestack(a,:,:,:) = vars.imagestack;
+        fname = sprintf(file_template, date(1), date(2), date(3), fshots(a));
+        vars = load(fname, 'imagestack');
+        imagestack(a, :, :, :) = vars.imagestack;
     end
 end
 
 % only return the relevant parts of the image stack
-imagestack = imagestack(:, view(3):view(4),view(1):view(2), :);
+imagestack = imagestack(:, view(3):view(4), view(1):view(2), :);
 if cam == 'V'
     if atom == 'L'
         imagestack = imagestack(:, :, :, [1, 3]);
-    else
+    elseif atom == 'C'
         imagestack = imagestack(:, :, :, [2, 4]);
+    else
+        error('Invalid params.atom input');
     end
+elseif cam == 'H'
+    % reverse the order of the imagestack to be consistent with the
+    % convention from fk imaging, that is, 1. atoms 2. light 3. background
+    imagestack = imagestack(:, :, :, [2, 3, 1]);
+else
+    error('Invalid params.cam input');
 end
 
 end
