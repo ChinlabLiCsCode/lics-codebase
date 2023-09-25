@@ -16,7 +16,7 @@ function imgs = proc_imgs(shots, params, dfinfo, bginfo)
 %               - pix: pixel size (m)
 %               - I_sat: saturation intensity in counts per pixel
 %               - alpha: correction factor for OD calculation, should 
-%               take the form [a b c] for the 0th, 0th, 1st, and 2nd order terms
+%               take the form [c b a] for the 0th, 0th, 1st, and 2nd order terms
 %               - 'fit_fun': a function 
 %               - 'fit_params_names'
 %               - 'plot_params'
@@ -41,6 +41,7 @@ function imgs = proc_imgs(shots, params, dfinfo, bginfo)
 %                       bg if bg mode is 'self'.)
            
 
+
 %% enable user to pass bginfo and dfinfo in params
 if nargin < 4
     bginfo = params.bginfo;
@@ -49,9 +50,16 @@ if nargin < 3
     dfinfo = params.dfinfo;
 end
 
+%% perform validation on various params
 
+% atom
+% cam
 
 %% figure out how the user supplied bginfo.
+
+% bgcase tells us about the method
+% bg is the actual background we will subtract
+
 if ischar(bginfo)
     switch bginfo
         case 'none'
@@ -66,29 +74,33 @@ if ischar(bginfo)
 elseif isnumeric(bginfo) && size(bginfo, 1) == 1
     % Case 3: 1D array of shots - Use a 1D array of shots data.
     bgcase = 3;
-    B = squeeze(mean(img_load(bginfo, params), 1));
+    bg = squeeze(mean(img_load(bginfo, params), 1));
 elseif isstruct(bginfo) && isfield(bginfo, 'shots') && isfield(bginfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     bgcase = 3;
-    B = squeeze(mean(img_load(bginfo, params), 1));
+    bg = squeeze(mean(img_load(bginfo, params), 1));
 elseif isnumeric(bginfo) && ndims(bginfo) == 3
     % Case 3: 3D array - Preaveraged image.
     bgcase = 3;
-    B = bginfo;
+    bg = bginfo;
 else
     error('Invalid bginfo input');
 end
 
 
+
 %% figure out how the user supplied dfinfo.
+
+% dfcase tells us about the method
+% L is the actual light frames we will use
+
 if ischar(dfinfo)
     switch dfinfo
         case 'none'
             % Case 1: "none" - Do no defringeing.
             dfcase = 1;
         case 'self'
-            % Case 2: "self" - Use the light images from the shots to
-            % defringe.
+            % Case 2: "self" - Use just the light images from the 
             dfcase = 2;
         otherwise
             error('Invalid dfinfo input');
@@ -96,12 +108,17 @@ if ischar(dfinfo)
 elseif isnumeric(dfinfo) && size(dfinfo, 1) == 1
     % Case 3: 1D array of shots - Use a 1D array of shots data.
     dfcase = 3;
+    L = img_load(dfinfo, params);
+    L = L(:, :, :, 2);
 elseif isstruct(dfinfo) && isfield(dfinfo, 'shots') && isfield(dfinfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     dfcase = 3;
+    L = img_load(dfinfo, params);
+    L = L(:, :, :, 2);
 else
     error('Invalid dfinfo input');
 end
+
 
 
 %% load images 
@@ -110,52 +127,76 @@ end
 raw = img_load(shots, params);
 
 A = raw(:, :, :, 1); % atom frames
-L = raw(:, :, :, 2); % light frames
 
-if bgcase == 2 % use background frames from the images 
-    B = squeeze(mean(raw(:, :, :, 3), 1)); % background frames
-end
-
+% add shots to light stack
 switch dfcase
-    case 2 % use light frames as df set
-        df = L; 
-    case 3 % use light frames + external loaded df set 
-        df = img_load(dfinfo, params);
-        if bgcase == 2 % additionally, use individual backround shots
-            dfbg = squeeze(mean((1, df(:, :, :, 3), raw(:, :, :, 3)); % get background from images and df set 
-        end
-        df = cat(1, df(:, :, :, 2), raw(:, :, :, 2)); 
+    case 2 % self
+        L = raw(:, :, :, 2); % light frames
+    case 3 % self + extra 
+        L = cat(1, raw(:, :, :, 2), L);
 end
 
-n = size(A, 1); % image set length
-m = size(df, 1); % df set length
+% add shots to background stack
+if bgcase == 2 % use background frames from the images 
+    bg = squeeze(mean(raw(:, :, :, 3), 1)); % background frames
+end
+
+% get lengths 
+n = size(A, 1); % atom set length
+m = size(L, 1); % light set length
+
+
+%% pick out correct bg frames from bg stack
+
+if params.cam == 'H'
+    Abg = bg(:, :, 3);
+    Lbg = Abg;
+else
+    Abg = bg(:, :, 1);
+    Lbg = bg(:, :, 2);
+end
+
 
 %% subtract electronic background
 
-% image set 
+% atom set 
 for i = 1:n
-    switch bgcase
-        case 2 % subtract off the background from each image
-            A(i) = A(i) - B(i);
-            L(i) = L(i) - B(i);
-        case 3 % subtract off the appropriate preaveraged image
-            A(i) = A(i) - B(:, :, 1);
-            L(i) = L(i) - B(:, :, 2);
-    end
+    A(i) = A(i) - Abg;
 end
 
-% df set 
+% light set 
 for i = 1:m
-    switch bgcase
-        case 2 % subtract off the background from each image
-            df(i) = df(i) - dfbg(i);
-        case 3 % subtract off the appropriate preaveraged image
-            df(i) = df(i) - B(:, :, 2);
-    end
+    L(i) = L(i) - Lbg;
 end
 
+%% calculate mean light image and subtract from light and atom images
 
-%% perform defringing 
+Lavg = squeeze(mean(L, 1));
+dA = zeros(size(A));
+dL = zeros(size(L));
 
-meanlight = squeeze(mean(df, ))
+% atom set 
+for i = 1:n
+    dA(i) = A(i) - Lavg;
+end
+
+% light set 
+for i = 1:m
+    dL(i) = L(i) - Lavg;
+end
+
+%% perform defringing
+
+dfobj = dfobj_create(dL, params.mask, params.pcanum);
+dAprime = dfobj_apply(dA, dfobj);
+Aprime = zeros(size(A));
+for i = 1:n
+    Aprime(i) = dAprime(i) + Lavg;
+end
+
+%% calculate OD 
+
+imgs = od_calc(A, Aprime, params);
+
+
 
