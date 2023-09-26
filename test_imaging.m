@@ -1,7 +1,20 @@
-params = struct();
-params.date = [2022 12 16];
-params.view = [1, 100, 1, 1000];
-params.cam = 'V';
-params.atom = 'C';
-shots = 71:80;
-im = image_load(shots, params);
+paramsVC = struct();
+paramsVC.date = [2023 09 19];
+paramsVC.view = [1, 100, 1, 1000];
+paramsVC.cam = 'V';
+paramsVC.atom = 'C';
+shotsV = 347:376;
+im = img_load(shotsV, paramsVC);
+
+figure();
+imagesc(squeeze(im(1, :, :, 1)));
+axis image;
+
+paramsVL = paramsVC;
+paramsVL.atom = 'L';
+im = img_load(shotsV, paramsVL);
+
+figure();
+imagesc(squeeze(im(1, :, :, 1)));
+axis image;
+
