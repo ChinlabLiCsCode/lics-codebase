@@ -1,5 +1,4 @@
-function imgs = proc_imgs(shots, params, dfinfo, bginfo)
-
+dimsfunction imgs = proc_imgs(shots, params, dfinfo, bginfo)
 % 
 % Returns defringed images from a set of shots.
 %   
@@ -28,17 +27,11 @@ function imgs = proc_imgs(shots, params, dfinfo, bginfo)
 %   bginfo:     can be one of the following options:
 %               1) 'none'
 %               2) 'self'
-%               3) 1D array of shots (uses params.date)
-%                   or shots struct (shots + date)
-%               4) 3D array (basically a preaveraged image) 
+%               3) 1D array of shots (uses params.date),
+%                   shots struct (shots + date),
+%                   or 3D array (basically a preaveraged image).
 % 
-%   cancelled params: 
-%               - 'dfmethod': 
-%                   - 'od' (previous method, defringes the OD image)
-%                   - 'raw' (defringes both the light and shadow images)
-%                   - 'avg' (defringes the shadow image and uses an average 
-%                       light image from the df set. Also uses an average 
-%                       bg if bg mode is 'self'.)
+
            
 
 
@@ -52,8 +45,15 @@ end
 
 %% perform validation on various params
 
-% atom
-% cam
+% if atom isn't 'C' or 'L', throw an error
+if ~strcmp(params.atom, 'C') && ~strcmp(params.atom, 'L')
+    error('Invalid params.atom input');
+end
+% if cam isn't 'H' or 'V', throw an error
+if ~strcmp(params.cam, 'H') && ~strcmp(params.cam, 'V')
+    error('Invalid params.cam input');
+end
+
 
 %% figure out how the user supplied bginfo.
 
@@ -74,11 +74,11 @@ if ischar(bginfo)
 elseif isnumeric(bginfo) && size(bginfo, 1) == 1
     % Case 3: 1D array of shots - Use a 1D array of shots data.
     bgcase = 3;
-    bg = squeeze(mean(img_load(bginfo, params), 1));
+    bg = squeeze(mean(load_img(bginfo, params), 1));
 elseif isstruct(bginfo) && isfield(bginfo, 'shots') && isfield(bginfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     bgcase = 3;
-    bg = squeeze(mean(img_load(bginfo, params), 1));
+    bg = squeeze(mean(load_img(bginfo, params), 1));
 elseif isnumeric(bginfo) && ndims(bginfo) == 3
     % Case 3: 3D array - Preaveraged image.
     bgcase = 3;
@@ -108,12 +108,12 @@ if ischar(dfinfo)
 elseif isnumeric(dfinfo) && size(dfinfo, 1) == 1
     % Case 3: 1D array of shots - Use a 1D array of shots data.
     dfcase = 3;
-    L = img_load(dfinfo, params);
+    L = load_img(dfinfo, params);
     L = L(:, :, :, 2);
 elseif isstruct(dfinfo) && isfield(dfinfo, 'shots') && isfield(dfinfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     dfcase = 3;
-    L = img_load(dfinfo, params);
+    L = load_img(dfinfo, params);
     L = L(:, :, :, 2);
 else
     error('Invalid dfinfo input');
@@ -124,7 +124,7 @@ end
 %% load images 
 
 % load shots
-raw = img_load(shots, params);
+raw = load_img(shots, params);
 
 A = raw(:, :, :, 1); % atom frames
 

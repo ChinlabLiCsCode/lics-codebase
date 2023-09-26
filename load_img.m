@@ -1,4 +1,4 @@
-function imagestack = img_load(shots, params)
+function imagestack = load_img(shots, params)
 % 
 % Loads and returns an image or set of images
 % 'shots' can be an integer or an n-d array of integers.
