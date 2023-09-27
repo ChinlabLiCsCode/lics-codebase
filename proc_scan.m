@@ -1,4 +1,4 @@
-function [imgs, fitvals] = proc_scan(shots, params, xvals, dfinfo, bginfo)
+function [OD, fitvals] = proc_scan(shots, params, xvals, dfinfo, bginfo)
 
 % 
 % scannnnnnnn
@@ -39,22 +39,14 @@ function [imgs, fitvals] = proc_scan(shots, params, xvals, dfinfo, bginfo)
 %                       light image from the df set. Also uses an average 
 %                       bg if bg mode is 'self'.)
             
+%% handle varargsin
 
 
-%% enable user to pass bginfo and dfinfo in params, and 
-if nargin < 5
-    bginfo = params.bginfo;
-end
-if nargin < 4
-    dfinfo = params.dfinfo;
-end
-if nargin < 3
-    xvals = shots;
-end
 
+%% perform some checks on the inputs
 
-%% perform validation on various params
-% TODO: add validation for params struct
+view = params.view;
+mask = params.mask;
 
 
 %% figure out how the user supplied bginfo.
@@ -89,7 +81,15 @@ else
     error('Invalid bginfo input');
 end
 
-
+% distinguish between H and V images 
+if bgcase == 3
+    if cam == 'H'
+        Abg = bg(:, :, 3);
+        Lbg = bg(:, :, 1);
+    else
+        Abg = bg(:, :, 1);
+        Lbg = bg(:, :, 2);
+end
 
 %% figure out how the user supplied dfinfo.
 
@@ -101,62 +101,145 @@ if ischar(dfinfo)
         case 'none'
             % Case 1: "none" - Do no defringeing.
             dfcase = 1;
+            ndf = 0;
         case 'self'
             % Case 2: "self" - Use just the light images from the 
             dfcase = 2;
+            ndf = 0;
         otherwise
             error('Invalid dfinfo input');
     end
 elseif isnumeric(dfinfo) && size(dfinfo, 1) == 1
     % Case 3: 1D array of shots - Use a 1D array of shots data.
     dfcase = 3;
-    L = load_img(dfinfo, params);
-    L = L(:, :, :, 2);
+    loadL = load_img(dfinfo, params);
+    loadL = loadL(:, :, :, 2);
+    ndf = size(loadL, 1);
 elseif isstruct(dfinfo) && isfield(dfinfo, 'shots') && isfield(dfinfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     dfcase = 3;
-    L = load_img(dfinfo, params);
-    L = L(:, :, :, 2);
+    loadL = load_img(dfinfo, params);
+    loadL = loadL(:, :, :, 2);
+    ndf = size(loadL, 1);
 else
     error('Invalid dfinfo input');
 end
 
 
-%% initialize arrays 
+%% initialize all the image variables and arrays 
 
-% initialize shots arrays 
-sz = [params.view(4) - params.view(3) + 1, params.view(2) - params.view(1) + 1];
-if cam == 'H'
-    raw = zeros(numel(shots), sz(1), sz(2), 3);
+% get the number of shots
+if isstruct(shots)
+    nA = numel(shots.shots);
 else
-    raw = zeros(numel(shots), sz(1), sz(2), 2);
-end
-A = raw(:, :, :, 1); % atom frames
-dA = A; % background subtracted atom frames
-Aprime = A; % defringed atom frames
-
-% initialize light arrays
-switch dfcase
-    case 1 % none
-        L = 0;
-    case 2 % self
-        L = raw(:, :, :, 2); % light frames
-    case 3 % self + extra
-        L = cat(1, L, raw(:, :, :, 2));
-end
-dL = L; % background subtracted light frames
-Lavg = squeeze(mean(L, 1)); % average light image
-
-% initialize background array
-if bgcase == 2 % use background frames from the images 
-    bg = raw(:, :, :, 3); % background frames
+    nA = numel(shots);
 end
 
-% get lengths 
-n = size(A, 1); % atom set length
-m = size(L, 1); % light set length
-l = m - n; % number of extra light frames
+% number of light images
+nL = nA + ndf;
+
+% size of the images
+sz = [view(4) - view(3) + 1, view(2) - view(1) + 1]; % size of the images
+
+% number of frames in each raw image
+if cam == 'H'
+    nF = 3; % number of frames
+else
+    nF = 2;
+end
+
+raw = NaN(nA, sz(1), sz(2), nF); % raw images
+A = NaN(nA, sz(1), sz(2)); % atom frames
+dA = NaN(nA, sz(1), sz(2)); % mean subtracted atom frames
+Aprime = NaN(nA, sz(1), sz(2)); % defringed ideal light pattern for atom frames
+dAprime = NaN(nA, sz(1), sz(2)); % mean subtracted defringed ideal light pattern for atom frames
+OD = NaN(nA, sz(1), sz(2)); % optical density images
+L = NaN(nL, sz(1), sz(2)); % light frames
+dL = NaN(nL, sz(1), sz(2)); % mean subtracted light frames
+if dfcase == 3
+    L(1:ndf, :, :) = loadL; % insert preloaded light frames
+end
+if bgcase == 2
+    bg = NaN(nA, sz(1), sz(2)); % background frames
+end
 
 
-% initialize figure
+% % initialize figure and outputs 
+% switch fittype 
+%     case 'gauss'
+%         fig = figure("Position", [100 100 1000 800]);
+%         axim = subplot(2, 4, [1 2]);
+%         title(axim, 'OD');
+%         axxtrc = subplot(2, 4, 3);
+%         xlabel(axxtrc, 'x (px)');
+%         ylabel(axxtrc, 'OD');
+%         title(axxtrc, 'x trace');
+%         axytrc = subplot(2, 4, 4);
+%         xlabel(axytrc, 'y (px)');
+%         ylabel(axytrc, 'OD');
+%         title(axytrc, 'y trace');
+%         axnx = subplot(2, 4, 5);
+%         xlabel(axnx, xvallbl);
+%         ylabel(axnx, 'number (x)');
+%         title(axnx, 'number (x)');
+%         axny = subplot(2, 4, 6);
+%         title(axny, 'number (y)');
+%         xlabel(axny, xvallbl);
+%         ylabel(axny, 'number (y)');
+%         axwx = subplot(2, 4, 7);
+%         xlabel(axwx, xvallbl);
+%         ylabel(axwx, 'width (x)');
+%         title(axwx, 'width (x)');
+%         axwy = subplot(2, 4, 8);
+%         xlabel(axwy, xvallbl);
+%         ylabel(axwy, 'width (y)');
+%         title(axwy, 'width (y)');
+% end
+
+
+for ind = 1:nA
+
+fprintf('Awaiting shot %d of %d\r', ind, nA);
+% wait till file exists
+fexists = 0;
+while ~fexists 
+    try 
+        im = load_img(shots, params, ind);
+        fexists = 1;
+    catch 
+        pause(0.5);
+    end
+end
+fprintf('Shot %d of %d loaded\r', ind, nA);
+
+A(ind, :, :) = im(:, :, 1);
+L(ind + ndf, :, :) = im(:, :, 2);
+if bgcase == 2
+    bg(ind, :, :) = im(:, :, 3);
+    Abg = squeeze(mean(bg(1:ind, :, :), 1));
+    Lbg = Abg;
+end
+Lavg = squeeze(mean(L(1:ind, :, :), 1));
+for i = 1:ind
+    dA(i) = A(i) - Lavg;
+end
+for i = 1:(ind + ndf)
+    dL(i) = L(i) - Lavg;
+end
+dfobj = dfobj_create(dL(1:ind, :, :), params.mask, params.pcanum);
+dAprime(1:ind, :, :) = dfobj_apply(dA(1:ind, :, :), dfobj);
+for i = 1:ind
+    Aprime(i) = dAprime(i) + Lavg;
+end
+
+OD(1:ind, :, :) = od_calc(A(1:ind, :, :), Aprime(1:ind, :, :), params);
+
+imagesc(OD(ind, :, :));
+axis image;
+
+
+end % end of loop
+
+
+end % end of function
 

@@ -1,4 +1,4 @@
-function imagestack = load_img(shots, params)
+function imagestack = load_img(shots, params, ind)
 % 
 % Loads and returns an image or set of images
 % 'shots' can be an integer or an n-d array of integers.
@@ -16,6 +16,7 @@ function imagestack = load_img(shots, params)
 %%%%%% add something to copy over the data if we request it in params %%%%%
 
 
+
 % relevant parts of params
 view = params.view;
 cam = params.cam;
@@ -27,6 +28,11 @@ if isstruct(shots)
     shots = shots.shots;
 else
     date = params.date;
+end
+
+if nargin == 3
+    % if we are given an index, then we only want to load one shot
+    shots = shots(ind);
 end
 
 % flatten shots array
