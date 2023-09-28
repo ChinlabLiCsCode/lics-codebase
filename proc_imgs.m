@@ -1,4 +1,4 @@
-dimsfunction imgs = proc_imgs(shots, params, dfinfo, bginfo)
+function imgs = proc_imgs(shots, params, dfinfo, bginfo)
 % 
 % Returns defringed images from a set of shots.
 %   
@@ -74,12 +74,12 @@ if ischar(bginfo)
 elseif isnumeric(bginfo) && size(bginfo, 1) == 1
     % Case 3: 1D array of shots - Use a 1D array of shots data.
     bgcase = 3;
-    bg = squeeze(mean(load_img(bginfo, params), 1));
+    bg = mean(load_img(bginfo, params), 1);
 elseif isstruct(bginfo) && isfield(bginfo, 'shots') && isfield(bginfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     bgcase = 3;
-    bg = squeeze(mean(load_img(bginfo, params), 1));
-elseif isnumeric(bginfo) && ndims(bginfo) == 3
+    bg = mean(load_img(bginfo, params), 1);
+elseif isnumeric(bginfo) && ndims(bginfo) > 2
     % Case 3: 3D array - Preaveraged image.
     bgcase = 3;
     bg = bginfo;
@@ -138,7 +138,7 @@ end
 
 % add shots to background stack
 if bgcase == 2 % use background frames from the images 
-    bg = squeeze(mean(raw(:, :, :, 3), 1)); % background frames
+    bg = mean(raw(:, :, :, :), 1); % background frames
 end
 
 % get lengths 
@@ -149,50 +149,43 @@ m = size(L, 1); % light set length
 %% pick out correct bg frames from bg stack
 
 if params.cam == 'H'
-    Abg = bg(:, :, 3);
+    Abg = bg(:, :, :, 3);
     Lbg = Abg;
 else
-    Abg = bg(:, :, 1);
-    Lbg = bg(:, :, 2);
+    Abg = bg(:, :, :, 1);
+    Lbg = bg(:, :, :, 2);
 end
 
 
 %% subtract electronic background
 
 % atom set 
-for i = 1:n
-    A(i) = A(i) - Abg;
-end
+A = A - Abg;
 
 % light set 
-for i = 1:m
-    L(i) = L(i) - Lbg;
-end
+L = L - Lbg;
+
 
 %% calculate mean light image and subtract from light and atom images
 
-Lavg = squeeze(mean(L, 1));
+Lavg = mean(L, 1);
 dA = zeros(size(A));
 dL = zeros(size(L));
 
 % atom set 
-for i = 1:n
-    dA(i) = A(i) - Lavg;
-end
+dA = A - Lavg;
 
 % light set 
-for i = 1:m
-    dL(i) = L(i) - Lavg;
-end
+dL= L - Lavg;
+
 
 %% perform defringing
 
 dfobj = dfobj_create(dL, params.mask, params.pcanum);
 dAprime = dfobj_apply(dA, dfobj);
 Aprime = zeros(size(A));
-for i = 1:n
-    Aprime(i) = dAprime(i) + Lavg;
-end
+Aprime = dAprime + Lavg;
+
 
 %% calculate OD 
 

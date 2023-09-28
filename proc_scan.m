@@ -1,4 +1,4 @@
-function [OD, fitvals] = proc_scan(shots, params, xvals, dfinfo, bginfo)
+function OD = proc_scan(shots, params, xvals, dfinfo, bginfo)
 
 % 
 % scannnnnnnn
