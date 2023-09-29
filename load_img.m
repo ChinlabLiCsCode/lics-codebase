@@ -13,10 +13,6 @@ function imagestack = load_img(shots, params, ind)
 % imagestack to match the shots shape, then do it yourself.
 % 
 
-%%%%%% add something to copy over the data if we request it in params %%%%%
-
-
-
 % relevant parts of params
 view = params.view;
 cam = params.cam;
@@ -40,13 +36,17 @@ n = numel(shots);
 fshots = reshape(shots, [n, 1]);
 
 % set file template
-if cam == 'H'
-    file_template = '//LiCs_NAS/Data_Backup/Data/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
-elseif cam == 'V'
-    file_template = '//LiCs_NAS/Data_Backup/V_Images/Data/%1$04d/%2$02d/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
-else
-    error('Invalid params.cam value')
-end
+file_template = localpath(cam);
+% localpath.m should be a function in your path that basically looks like the following, but with your own paths:
+% function ftemplate = localpath(cam)
+% if cam == 'H'
+%     ftemplate = '//LiCs_NAS/Data_Backup/Data/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
+% elseif cam == 'V'
+%     ftemplate = '//LiCs_NAS/Data_Backup/V_Images/Data/%1$04d/%2$02d/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
+% else
+%     error('Invalid camera type');
+% end
+% end
 
 % ensure valid atom setting
 if not(or(atom == 'C', atom == 'L')) 
