@@ -176,7 +176,7 @@ dL = zeros(size(L));
 dA = A - Lavg;
 
 % light set 
-dL= L - Lavg;
+dL = L - Lavg;
 
 
 %% perform defringing

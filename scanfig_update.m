@@ -1,51 +1,59 @@
-function h = scanfig_update(h, params, xvals, OD, fd, ind)
+function h = scanfig_update(h, params, xvals, OD, fd, ind, xvalname)
 
 % update the OD image axis 
 axes(h.OD);
-imagesc(OD);
+imagesc(squeeze(OD(ind, :, :))');
 axis image;
 hold on;
-rectangle('Position', params.mask, 'EdgeColor', 'r', 'LineWidth', 1);
+boxx = params.mask([3, 4, 4, 3, 3]);
+boxy = params.mask([1, 1, 2, 2, 1]);
+plot(boxx, boxy, 'r-', 'LineWidth', 1);
+colorbar();
 hold off;
 
 % update the n_count axis
-h.n_count = update_ax(h.n_count, fd.n_count, xvals, ind);
-
-% update the trace axes
-h.x.trace = update_trace(h.x.trace, fd.x.trace, ind, params.mask(3, 4));
-h.y.trace = update_trace(h.y.trace, fd.y.trace, ind, params.mask(1, 2));
+h.n_count = update_ax(h.n_count, fd.n_count, xvals, ind, xvalname, 'n count');
 
 % update the fit axes
-fld = fields(h.x);
-for i = 2:length(fld)
-    h.x.(fld{i}) = update_ax(h.x.(fld{i}), fd.x.(fld{i}), xvals, ind);
+for a = ['x', 'y']
+    fld = fields(h.(a));
+    for i = 1:length(fld)
+        if strcmp(fld{i}, 'trace')
+            if a == 'x'
+                m = params.mask(1:2);
+            else
+                m = params.mask(3:4);
+            end
+            h.(a).(fld{i}) = update_trace(h.(a).(fld{i}), fd.(a), ind, m, a);
+        else
+            h.(a).(fld{i}) = update_ax(h.(a).(fld{i}), fd.(a).(fld{i}), ...
+                xvals, ind, xvalname, fld{i}); 
+        end
+    end
 end
-fld = fields(h.y);
-for i = 2:length(fld)
-    h.y.(fld{i}) = update_ax(h.y.(fld{i}), fd.y.(fld{i}), xvals, ind);
-end
 
 end
 
 
-
-function ax = update_trace(ax, fdr, ind, mask)
+function ax = update_trace(ax, fdr, ind, mask, axname)
     axes(ax);
     
     trace = fdr.trace(ind, :);
-    trace_fit = fdr.trace_fit(ind, :);
+    fit_trace = fdr.fit_trace(ind, :);
 
     plot(trace, '-', 'Color', 'b', 'LineWidth', 1);
     hold on;
-    plot(trace_fit, '-', 'Color', 'g', 'LineWidth', 1);
+    plot(fit_trace, '-', 'Color', 'g', 'LineWidth', 1);
     ylimits = ylim();
-    rectangle('Position', [mask(1) ylimits(1) mask(2) ylimits(2)], 'EdgeColor', 'r', 'LineWidth', 1);
-    ylim(ylimigs);
+    rectangle('Position', [mask(1) ylimits(1) mask(2) ylimits(2)-ylimits(1)], 'EdgeColor', 'r', 'LineWidth', 1);
+    ylim(ylimits);
+    xlabel([axname, ' position']);
+    ylabel('integrated od');
     hold off;
     
 end
 
-function ax = update_ax(ax, dat, xvals, ind)
+function ax = update_ax(ax, dat, xvals, ind, xvalname, fldname)
     axes(ax);
     nx = length(xvals);
     i = mod(ind, nx);
@@ -58,7 +66,6 @@ function ax = update_ax(ax, dat, xvals, ind)
         ylimits = ylim();
         plot(xvals(i+1:end), ylimits(1) + zeros(1, nx - i), 'x', optsA{:});
         ylim(ylimits);
-        hold off;
     else
         x = NaN(nx, ceil(ind/nx));
         d = NaN(nx, ceil(ind/nx));
@@ -71,7 +78,8 @@ function ax = update_ax(ax, dat, xvals, ind)
         ylimits = ylim();
         errorbar(xvals(i+1:end), avg(i+1:end), err(i+1:end), 'x', optsA{:});
         ylim(ylimits);
-        hold off;
     end
-
+    xlabel(xvalname)
+    ylabel(fldname)
+    hold off;
 end

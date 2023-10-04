@@ -87,6 +87,6 @@ elseif cam == 'H'
     imagestack = imagestack(:, :, :, [2, 3, 1]);
 else
     error('Invalid params.cam input');
-end
+end 
 
 end

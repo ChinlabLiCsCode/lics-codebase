@@ -1,26 +1,6 @@
 function fd = fit1Dflex(OD, params, fd)
 
-% fit1Dflex(OD, params, fd)
-%
-% Fits a 1D function to the given OD profile and returns the fit data in
-% the struct fd.  If fd is not given, it is created. If fd is given, the 
-% new data is appended to the end.
-% 
-% Parameters:
-%   OD - the OD profile to fit
-%   params - the parameters for the fit
-%       .mask - the mask to use for the fit
-%       .fittype - the type of fit to use
-%   fd - the fit data struct to append to
-%
-% Output:
-%   fd - the fit data struct
-%       .xtrace - the x trace
-%       .ytrace - the y trace
-%       .xfit - the x fit trace
-%       .yfit - the y fit trace
-%       .xpars - the x fit parameters
-%       .ypars - the y fit parameters
+
 
 % extract fittype args
 ft = params.fittype;
@@ -36,6 +16,7 @@ end
 mask = params.mask;
 xtrace = sum(OD(mask(3):mask(4), :), 1);
 ytrace = sum(OD(:, mask(1):mask(2)), 2);
+ytrace = ytrace';
 
 % perform fits 
 x = fit1D(xtrace, xft, mask(1:2), params);
@@ -56,13 +37,13 @@ else
     % append to fd
     fd.OD = cat(1, fd.OD, OD);
     fd.n_count = cat(1, fd.n_count, n_count);
-    fld = fields(x);
+    fld = fields(fd.x);
     for i = 1:length(fld)
-        fd.x.(fld) = cat(1, fd.x.(fld), x.(fld));
+        fd.x.(fld{i}) = cat(1, fd.x.(fld{i}), x.(fld{i}));
     end
-    fld = fields(y);
+    fld = fields(fd.y);
     for i = 1:length(fld)
-        fd.y.(fld) = cat(1, fd.y.(fld), y.(fld));
+        fd.y.(fld{i}) = cat(1, fd.y.(fld{i}), y.(fld{i}));
     end
 end
 
@@ -70,8 +51,8 @@ end
 
 % function to perform fitting 
 function dout = fit1D(trace, ftype, mask, params)
-
-    x = 1:length(trace);
+    x = zeros(size(trace));
+    x(:) = 1:length(trace);
     low = mask(1);
     high = mask(2);
 
@@ -125,7 +106,7 @@ function [p, pub, plb] = gauss1Dp0(trace, low, high)
     p(4) = mean(trace([1:(low-1) (high+1):numel(trace)]));
 
     plb = [0 0 0 1.25*min(trace)-0.25*max(trace)];
-    pub = [1.25*(max(trace)-min(trace)) max(x) Inf mean(trace)];
+    pub = [1.25*(max(trace)-min(trace)) numel(trace) Inf mean(trace)];
 end
 
 function f = gauss1Dcalcs(p, params)
@@ -152,7 +133,7 @@ function [p, pub, plb] = dbl1Dp0(trace, low, high)
     p(5) = mean(trace([1:(low-1) (high+1):numel(trace)]));
 
     plb = [0 0 0 0 1.25*min(trace)-0.25*max(trace)];
-    pub = [2.5*(max(trace)-min(trace)) max(x) Inf max(x) mean(trace)];
+    pub = [2.5*(max(trace)-min(trace)) numel(trace) Inf numel(trace) mean(trace)];
 end
 
 function f = dbl1Dcalcs(p, params)

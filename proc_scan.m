@@ -1,43 +1,5 @@
 function scan = proc_scan(shots, params, xvals, dfinfo, bginfo, figname, xvalname)
 
-% 
-% scannnnnnnn
-%   
-% INPUTS
-%   shots:      1D or 2D array of shot numbers (uses params.date), 
-%               or a shots struct (shots + date)
-%   params:     params struct, should have the following fields:
-%               - date: [yyyy mm dd]
-%               - cam: 'H' or 'V'
-%               - atom: 'C' or 'L'
-%               - view: [xmin xmax ymin ymax]
-%               - mask: [xmin xmax ymin ymax]
-%               - wavelength: wavelength of imaging light (m)
-%               - pix: pixel size (m)
-%               - I_sat: saturation intensity in counts per pixel
-%               - alpha: correction factor for OD calculation, should 
-%               take the form [c b a] for the 0th, 0th, 1st, and 2nd order terms
-%               - 'plot_init': function to 
-
-%   dfinfo:     can be one of the following options:
-%               1) 'none'
-%               2) 'self'
-%               3) 1D array of shots (uses params.date)
-%                   or shots struct (shots + date)
-%   bginfo:     can be one of the following options:
-%               1) 'none'
-%               2) 'self'
-%               3) 1D array of shots (uses params.date)
-%                   or shots struct (shots + date)
-%               4) 3D array (basically a preaveraged image) 
-% 
-%   cancelled params: 
-%               - 'dfmethod': 
-%                   - 'od' (previous method, defringes the OD image)
-%                   - 'raw' (defringes both the light and shadow images)
-%                   - 'avg' (defringes the shadow image and uses an average 
-%                       light image from the df set. Also uses an average 
-%                       bg if bg mode is 'self'.)
 
 %% handle varargsin
 
@@ -96,18 +58,10 @@ if ischar(bginfo)
         otherwise
             error('Invalid bginfo input');
     end
-elseif isnumeric(bginfo) && size(bginfo, 1) == 1
-    % Case 3: 1D array of shots - Use a 1D array of shots data.
-    bgcase = 3;
-    bg = squeeze(mean(load_img(bginfo, params), 1));
 elseif isstruct(bginfo) && isfield(bginfo, 'shots') && isfield(bginfo, 'date')
     % Case 3: Shots struct - Use a struct containing shots and date information.
     bgcase = 3;
-    bg = squeeze(mean(load_img(bginfo, params), 1));
-elseif isnumeric(bginfo) && ndims(bginfo) == 3
-    % Case 3: 3D array - Preaveraged image.
-    bgcase = 3;
-    bg = bginfo;
+    bg = mean(load_img(bginfo, params), 1);
 else
     error('Invalid bginfo input');
 end
@@ -115,11 +69,12 @@ end
 % distinguish between H and V images 
 if bgcase == 3
     if params.cam == 'H'
-        Abg = bg(:, :, 3);
-        Lbg = bg(:, :, 1);
+        Abg = bg(:, :, :, 2);
+        Lbg = bg(:, :, :, 3);
     else
-        Abg = bg(:, :, 1);
-        Lbg = bg(:, :, 2);
+        Abg = bg(:, :, :, 1);
+        Lbg = bg(:, :, :, 2);
+    end
 end
 
 %% figure out how the user supplied dfinfo.
@@ -233,7 +188,8 @@ dL = cL - Lavg;
 dfobj = dfobj_create(dL(1:ind, :, :), params.mask, params.pcanum);
 dAprime(1:ind, :, :) = dfobj_apply(dA(1:ind, :, :), dfobj);
 Aprime = dAprime + Lavg;
-OD = od_calc(cA, Aprime, params);
+% OD = od_calc(cA, Aprime, params);
+OD = od_calc(cA + Lavg, Lavg, params);
 
 % perform fits
 if ind == 1
@@ -244,9 +200,9 @@ end
 
 % update plots
 if ind == 1
-    h = scanfig_init(params, name, fd);
+    h = scanfig_init(params, figname);
 end
-h = scanfig_update(h, params, xvals, OD, fd, ind);
+h = scanfig_update(h, params, xvals, OD, fd, ind, xvalname);
 
 
 end % end of main loop
