@@ -1,39 +1,8 @@
-function imgs = proc_imgs(shots, params, dfinfo, bginfo)
-% 
-% Returns defringed images from a set of shots.
-%   
-% INPUTS
-%   shots:      1D or 2D array of shot numbers (uses params.date), 
-%               or a shots struct (shots + date)
-%   params:     params struct, should have the following fields:
-%               - date: [yyyy mm dd]
-%               - cam: 'H' or 'V'
-%               - atom: 'C' or 'L'
-%               - view: [xmin xmax ymin ymax]
-%               - mask: [xmin xmax ymin ymax]
-%               - wavelength: wavelength of imaging light (m)
-%               - pix: pixel size (m)
-%               - I_sat: saturation intensity in counts per pixel
-%               - alpha: correction factor for OD calculation, should 
-%               take the form [c b a] for the 0th, 0th, 1st, and 2nd order terms
-%               - 'fit_fun': a function 
-%               - 'fit_params_names'
-%               - 'plot_params'
-%   dfinfo:     can be one of the following options:
-%               1) 'none'
-%               2) 'self'
-%               3) 1D array of shots (uses params.date)
-%                   or shots struct (shots + date)
-%   bginfo:     can be one of the following options:
-%               1) 'none'
-%               2) 'self'
-%               3) 1D array of shots (uses params.date),
-%                   shots struct (shots + date),
-%                   or 3D array (basically a preaveraged image).
-% 
+function od = proc_imgs(shots, params, dfinfo, bginfo)
 
            
 
+debug = params.debug;
 
 %% enable user to pass bginfo and dfinfo in params
 if nargin < 4
@@ -43,23 +12,9 @@ if nargin < 3
     dfinfo = params.dfinfo;
 end
 
-%% perform validation on various params
-
-% if atom isn't 'C' or 'L', throw an error
-if ~strcmp(params.atom, 'C') && ~strcmp(params.atom, 'L')
-    error('Invalid params.atom input');
-end
-% if cam isn't 'H' or 'V', throw an error
-if ~strcmp(params.cam, 'H') && ~strcmp(params.cam, 'V')
-    error('Invalid params.cam input');
-end
-
-
 %% figure out how the user supplied bginfo.
-
 % bgcase tells us about the method
 % bg is the actual background we will subtract
-
 if ischar(bginfo)
     switch bginfo
         case 'none'
@@ -71,125 +26,171 @@ if ischar(bginfo)
         otherwise
             error('Invalid bginfo input');
     end
-elseif isnumeric(bginfo) && size(bginfo, 1) == 1
-    % Case 3: 1D array of shots - Use a 1D array of shots data.
+elseif isnumeric(bginfo) || iscell(bginfo)
+    % Case 3: array of shots, assuming today, or cell with date and shots
     bgcase = 3;
-    bg = mean(load_img(bginfo, params), 1);
-elseif isstruct(bginfo) && isfield(bginfo, 'shots') && isfield(bginfo, 'date')
-    % Case 3: Shots struct - Use a struct containing shots and date information.
-    bgcase = 3;
-    bg = mean(load_img(bginfo, params), 1);
-elseif isnumeric(bginfo) && ndims(bginfo) > 2
-    % Case 3: 3D array - Preaveraged image.
-    bgcase = 3;
-    bg = bginfo;
+    bg = mean(load_img(bginfo, params), 3);
 else
     error('Invalid bginfo input');
 end
 
-
-
 %% figure out how the user supplied dfinfo.
-
 % dfcase tells us about the method
-% L is the actual light frames we will use
-
+% L is the light frames 
 if ischar(dfinfo)
     switch dfinfo
         case 'none'
-            % Case 1: "none" - Do no defringeing.
+            % Case 1: "none" - Do no defringing.
             dfcase = 1;
         case 'self'
-            % Case 2: "self" - Use just the light images from the 
+            % Case 2: "self" - Defringe using only images from dataset.
             dfcase = 2;
         otherwise
             error('Invalid dfinfo input');
     end
-elseif isnumeric(dfinfo) && size(dfinfo, 1) == 1
-    % Case 3: 1D array of shots - Use a 1D array of shots data.
+elseif isnumeric(dfinfo) || iscell(dfinfo)
+    % Case 3: array of shots, assuming today, or cell with date and shots
     dfcase = 3;
-    L = load_img(dfinfo, params);
-    L = L(:, :, :, 2);
-elseif isstruct(dfinfo) && isfield(dfinfo, 'shots') && isfield(dfinfo, 'date')
-    % Case 3: Shots struct - Use a struct containing shots and date information.
-    dfcase = 3;
-    L = load_img(dfinfo, params);
-    L = L(:, :, :, 2);
+    dfload = load_img(dfinfo, params);
+    if bgcase == 2
+        Lload = dfload(:, :, :, 2) - dfload(:, :, :, 3);
+        Aload = dfload(:, :, :, 1) - dfload(:, :, :, 3);
+    elseif bgcase == 3
+        Lload = dfload(:, :, :, 2) - bg(:, :, :, 2);
+        Aload = dfload(:, :, :, 1) - bg(:, :, :, 1);
+    end
 else
     error('Invalid dfinfo input');
 end
 
 
-
 %% load images 
 
-% load shots
 raw = load_img(shots, params);
 
-A = raw(:, :, :, 1); % atom frames
+A = raw(:, :, :, 1); 
+L = raw(:, :, :, 2);
 
-% add shots to light stack
-switch dfcase
-    case 2 % self
-        L = raw(:, :, :, 2); % light frames
-    case 3 % self + extra 
-        L = cat(1, raw(:, :, :, 2), L);
+if bgcase == 2
+    A = A - raw(:, :, :, 3);
+    L = L - raw(:, :, :, 3);
+elseif bgcase == 3
+    A = A - bg(:, :, :, 1);
+    L = L - bg(:, :, :, 2);
 end
 
-% add shots to background stack
-if bgcase == 2 % use background frames from the images 
-    bg = mean(raw(:, :, :, :), 1); % background frames
-end
-
-% get lengths 
-n = size(A, 1); % atom set length
-m = size(L, 1); % light set length
-
-
-%% pick out correct bg frames from bg stack
-
-if params.cam == 'H'
-    Abg = bg(:, :, :, 3);
-    Lbg = Abg;
-else
-    Abg = bg(:, :, :, 1);
-    Lbg = bg(:, :, :, 2);
+if debug
+    imgstack_viewer(A, 'A (ebg subtracted)');
+    imgstack_viewer(L, 'L (ebg subtracted)');
 end
 
 
-%% subtract electronic background
-
-% atom set 
-A = A - Abg;
-
-% light set 
-L = L - Lbg;
+%% perform defringing and od calculation
 
 
-%% calculate mean light image and subtract from light and atom images
+if strcmp(params.dfmethod, 'avg')
 
-Lavg = mean(L, 1);
-dA = zeros(size(A));
-dL = zeros(size(L));
+    if dfcase == 3
+        L = cat(3, Lload, L);
+    end
 
-% atom set 
-dA = A - Lavg;
+    Lavg = mean(L, 3);
+    dA = A - Lavg;
+    dL = L - Lavg;
+    dfobj = dfobj_create(dL, params.mask, params.pcanum);
+    dAprime = dfobj_apply(dA, dfobj);
+    Aprime = Lavg + dAprime;
 
-% light set 
-dL = L - Lavg;
+    od = od_calc(A, Aprime, params);
+    
+    if debug
+        imgstack_viewer(Lavg, 'Lavg');
+        imgstack_viewer(dA, 'dA');
+        imgstack_viewer(dL, 'dL');
+        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+        imgstack_viewer(dA, 'dA')
+        imgstack_viewer(dAprime, 'dAprime')
+        imgstack_viewer(Aprime, 'Aprime')
+        imgstack_viewer(od, 'OD');
+    end
 
+elseif strcmp(params.dfmethod, 'norm')
 
-%% perform defringing
+    if dfcase == 3
+        L = cat(3, Lload, L);
+    end
+    
+    dfobj = dfobj_create(L, params.mask, params.pcanum);
+    Aprime = dfobj_apply(A, dfobj);
+    od = od_calc(A, Aprime, params);
+    
+    if debug
+        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+        imgstack_viewer(Aprime, 'Aprime');
+        imgstack_viewer(od, 'OD');
+    end
 
-dfobj = dfobj_create(dL, params.mask, params.pcanum);
-dAprime = dfobj_apply(dA, dfobj);
-Aprime = zeros(size(A));
-Aprime = dAprime + Lavg;
+elseif strcmp(params.dfmethod, 'odnorm')
+    
+    dfod = od_calc(Aload, Lload, params);
+    dfobj = dfobj_create(dfod, params.mask, params.pcanum);
+    odraw = od_calc(A, L, params);
+    od = odraw - dfobj_apply(odraw, dfobj);
 
+    if debug
+        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+        imgstack_viewer(dfod, 'dfod');
+        imgstack_viewer(odraw, 'odraw');
+        imgstack_viewer(od, 'OD');
+    end
 
-%% calculate OD 
+elseif strcmp(params.dfmethod, 'odavg')
+    
+    dfod = od_calc(Aload, Lload, params);
+    dfodavg = mean(dfod, 3);
+    ddfod = dfod - dfodavg;
+    dfobj = dfobj_create(ddfod, params.mask, params.pcanum);
+    odraw = od_calc(A, L, params);
+    dodraw = odraw - dfodavg;
+    dodrawprime = dfobj_apply(dodraw, dfobj);
+    od = odraw - dodrawprime;
 
-imgs = od_calc(A, Aprime, params);
+    if debug
+        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+        imgstack_viewer(dfod, 'dfod');
+        imgstack_viewer(dfodavg, 'dfodavg');
+        imgstack_viewer(ddfod, 'ddfod');
+        imgstack_viewer(odraw, 'odraw');
+        imgstack_viewer(dodraw, 'dodraw');
+        imgstack_viewer(dodrawprime, 'dodrawprime');
+        imgstack_viewer(od, 'OD');
+    end
+
+elseif strcmp(params.dfmethod, 'cvp')
+    
+    dfodavg = mean(dfod, 3);
+    ddfod = dfod - dfodavg;
+    dfobj = dfobj_create(ddfod, params.mask, params.pcanum);
+    odraw = od_calc(A, L, params);
+    dodraw = odraw - dfodavg;
+    dodrawprime = dfobj_apply(dodraw, dfobj);
+    od = odraw - dodrawprime;
+
+    if debug
+        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+        imgstack_viewer(dfod, 'dfod');
+        imgstack_viewer(dfodavg, 'dfodavg');
+        imgstack_viewer(ddfod, 'ddfod');
+        imgstack_viewer(odraw, 'odraw');
+        imgstack_viewer(dodraw, 'dodraw');
+        imgstack_viewer(dodrawprime, 'dodrawprime');
+        imgstack_viewer(od, 'OD');
+    end
+
+else 
+    error('invalid params.dfmethod');
+end
+
 
 
 

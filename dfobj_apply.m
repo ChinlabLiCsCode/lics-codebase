@@ -1,9 +1,12 @@
 function outimgs = dfobj_apply(imgs, dfobj)
 
 sz = size(imgs);
-outimgs = NaN(sz);
-for i = 1:sz(1)
-    t = imgs(i, :);
-    t = (dfobj.fulleigvecs')*(dfobj.fulleigvecs*(dfobj.maskmat*t'));
-    outimgs(i, :, :) = real(reshape(t, sz([2 3])));
+npix = sz(1) * sz(2);
+if length(sz) < 3
+    sz(3) = 1;
 end
+
+flt = reshape(imgs, [npix, sz(3)]);
+outflt = dfobj.dfmat * flt;
+outimgs = reshape(outflt, sz);
+

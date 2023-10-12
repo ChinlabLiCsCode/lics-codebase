@@ -1,17 +1,5 @@
 function imagestack = load_img(shots, params, ind)
-% 
-% Loads and returns an image or set of images
-% 'shots' can be an integer or an n-d array of integers.
-% 'shots' can also be a struct that includes a date as well as shots.
-% 'in_params' must have a date (3 element array), view (4 element array),
-% cam (either 'H' or 'V), and atom (either 'C' or 'L').
-% Returned imagestack has dimensions [numel(shots), view(3)-view(4),
-% view(1)-view(2), x]. If the cam is 'H', we return the atoms, no atoms, 
-% and background frames (so x=3). If the cam is 'V',
-% then depending on the value of atom we either return the frames 1 and 3
-% (for Li) or 2 and 4 (for Cs), so x=2. If you want to reshape the
-% imagestack to match the shots shape, then do it yourself.
-% 
+
 
 % relevant parts of params
 view = params.view;
@@ -19,9 +7,9 @@ cam = params.cam;
 atom = params.atom;
 
 % allow shots to include a date
-if isstruct(shots)
-    date = shots.date;
-    shots = shots.shots;
+if iscell(shots)
+    date = shots{1};
+    shots = shots{2};
 else
     date = params.date;
 end
@@ -37,21 +25,6 @@ fshots = reshape(shots, [n, 1]);
 
 % set file template
 file_template = localpath(cam);
-% localpath.m should be a function in your path that basically looks like the following, but with your own paths:
-% function ftemplate = localpath(cam)
-% if cam == 'H'
-%     ftemplate = '//LiCs_NAS/Data_Backup/Data/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
-% elseif cam == 'V'
-%     ftemplate = '//LiCs_NAS/Data_Backup/V_Images/Data/%1$04d/%2$02d/%1$04d%2$02d%3$02d/%1$04d%2$02d%3$02d_%4$d.mat';
-% else
-%     error('Invalid camera type');
-% end
-% end
-
-% ensure valid atom setting
-if not(or(atom == 'C', atom == 'L')) 
-    error('Invalid params.atom value')
-end
 
 % load the first shot to get image size
 fname = sprintf(file_template, date(1), date(2), date(3), fshots(1));
@@ -59,20 +32,20 @@ vars = load(fname, 'imagestack');
 sz = size(vars.imagestack);
 
 % initialize full imagestack
-imagestack = zeros(n, sz(1), sz(2), sz(3));
-imagestack(1, :, :, :) = vars.imagestack;
+imagestack = zeros(sz(1), sz(2), n, sz(3));
+imagestack(:, :, 1, :) = vars.imagestack;
 
 % load the full image stack
 if n > 1
     for a=2:n
         fname = sprintf(file_template, date(1), date(2), date(3), fshots(a));
         vars = load(fname, 'imagestack');
-        imagestack(a, :, :, :) = vars.imagestack;
+        imagestack(:, :, a, :) = vars.imagestack;
     end
 end
 
 % only return the relevant parts of the image stack
-imagestack = imagestack(:, view(3):view(4), view(1):view(2), :);
+imagestack = imagestack(view(3):view(4), view(1):view(2), :, :);
 if cam == 'V'
     if atom == 'L'
         imagestack = imagestack(:, :, :, [1, 3]);

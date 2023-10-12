@@ -23,4 +23,3 @@ else
 end
 
 od(~isfinite(od)) = 0;
-od = abs(od);

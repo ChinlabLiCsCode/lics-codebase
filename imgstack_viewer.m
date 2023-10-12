@@ -1,17 +1,24 @@
-function fig = imgstack_viewer(imgstack)
+function fig = imgstack_viewer(ims, figname)
 
-sz = size(imgstack);
-d = numel(sz);
-
-figure();
-if d == 2
-    imagesc(imgstack);
-elseif d == 3
-    figure();
-    imagesc(reshape(imgstack, [sz(1)*sz(2), sz(3)]));
-else 
-    error('too many dims!')
+figure;
+hold on;
+if nargin > 1
+    sgtitle(figname);
 end
 
-axis image;
-colorbar();
+if ndims(ims) == 2
+    imagesc(ims);
+    axis image;
+    colorbar();
+elseif ndims(ims) == 3
+    imagesc(imtile(ims, 'BorderSize', 5));
+    axis image;
+    colorbar();
+elseif ndims(ims) == 4
+    for i = 1:size(ims, 4)
+        subplot(1, size(ims, 4), i);
+        imagesc(imtile(ims(:, :, :, i), 'BorderSize', 5));
+        axis image;
+        colorbar();
+    end
+end
