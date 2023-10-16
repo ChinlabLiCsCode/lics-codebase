@@ -52,12 +52,16 @@ elseif isnumeric(dfinfo) || iscell(dfinfo)
     % Case 3: array of shots, assuming today, or cell with date and shots
     dfcase = 3;
     dfload = load_img(dfinfo, params);
-    if bgcase == 2
-        Lload = dfload(:, :, :, 2) - dfload(:, :, :, 3);
-        Aload = dfload(:, :, :, 1) - dfload(:, :, :, 3);
-    elseif bgcase == 3
-        Lload = dfload(:, :, :, 2) - bg(:, :, :, 2);
-        Aload = dfload(:, :, :, 1) - bg(:, :, :, 1);
+    switch bgcase
+        case 1 
+            Lload = dfload(:, :, :, 2);
+            Aload = dfload(:, :, :, 1);
+        case 2
+            Lload = dfload(:, :, :, 2) - dfload(:, :, :, 3);
+            Aload = dfload(:, :, :, 1) - dfload(:, :, :, 3);
+        case 3
+            Lload = dfload(:, :, :, 2) - bg(:, :, :, 2);
+            Aload = dfload(:, :, :, 1) - bg(:, :, :, 1);
     end
 else
     error('Invalid dfinfo input');
@@ -88,33 +92,7 @@ end
 %% perform defringing and od calculation
 
 
-if strcmp(params.dfmethod, 'avg')
-
-    if dfcase == 3
-        L = cat(3, Lload, L);
-    end
-
-    Lavg = mean(L, 3);
-    dA = A - Lavg;
-    dL = L - Lavg;
-    dfobj = dfobj_create(dL, params.mask, params.pcanum);
-    dAprime = dfobj_apply(dA, dfobj);
-    Aprime = Lavg + dAprime;
-
-    od = od_calc(A, Aprime, params);
-    
-    if debug
-        imgstack_viewer(Lavg, 'Lavg');
-        imgstack_viewer(dA, 'dA');
-        imgstack_viewer(dL, 'dL');
-        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-        imgstack_viewer(dA, 'dA')
-        imgstack_viewer(dAprime, 'dAprime')
-        imgstack_viewer(Aprime, 'Aprime')
-        imgstack_viewer(od, 'OD');
-    end
-
-elseif strcmp(params.dfmethod, 'norm')
+if strcmp(params.dfmethod, 'norm')
 
     if dfcase == 3
         L = cat(3, Lload, L);
@@ -130,62 +108,41 @@ elseif strcmp(params.dfmethod, 'norm')
         imgstack_viewer(od, 'OD');
     end
 
-elseif strcmp(params.dfmethod, 'odnorm')
-    
-    dfod = od_calc(Aload, Lload, params);
-    dfobj = dfobj_create(dfod, params.mask, params.pcanum);
-    odraw = od_calc(A, L, params);
-    od = odraw - dfobj_apply(odraw, dfobj);
-
-    if debug
-        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-        imgstack_viewer(dfod, 'dfod');
-        imgstack_viewer(odraw, 'odraw');
-        imgstack_viewer(od, 'OD');
-    end
-
-elseif strcmp(params.dfmethod, 'odavg')
-    
-    dfod = od_calc(Aload, Lload, params);
-    dfodavg = mean(dfod, 3);
-    ddfod = dfod - dfodavg;
-    dfobj = dfobj_create(ddfod, params.mask, params.pcanum);
-    odraw = od_calc(A, L, params);
-    dodraw = odraw - dfodavg;
-    dodrawprime = dfobj_apply(dodraw, dfobj);
-    od = odraw - dodrawprime;
-
-    if debug
-        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-        imgstack_viewer(dfod, 'dfod');
-        imgstack_viewer(dfodavg, 'dfodavg');
-        imgstack_viewer(ddfod, 'ddfod');
-        imgstack_viewer(odraw, 'odraw');
-        imgstack_viewer(dodraw, 'dodraw');
-        imgstack_viewer(dodrawprime, 'dodrawprime');
-        imgstack_viewer(od, 'OD');
-    end
-
-elseif strcmp(params.dfmethod, 'cvp')
-    
-    dfodavg = mean(dfod, 3);
-    ddfod = dfod - dfodavg;
-    dfobj = dfobj_create(ddfod, params.mask, params.pcanum);
-    odraw = od_calc(A, L, params);
-    dodraw = odraw - dfodavg;
-    dodrawprime = dfobj_apply(dodraw, dfobj);
-    od = odraw - dodrawprime;
-
-    if debug
-        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-        imgstack_viewer(dfod, 'dfod');
-        imgstack_viewer(dfodavg, 'dfodavg');
-        imgstack_viewer(ddfod, 'ddfod');
-        imgstack_viewer(odraw, 'odraw');
-        imgstack_viewer(dodraw, 'dodraw');
-        imgstack_viewer(dodrawprime, 'dodrawprime');
-        imgstack_viewer(od, 'OD');
-    end
+% elseif strcmp(params.dfmethod, 'odnorm')
+% 
+%     dfod = od_calc(Aload, Lload, params);
+%     dfobj = dfobj_create(dfod, params.mask, params.pcanum);
+%     odraw = od_calc(A, L, params);
+%     od = odraw - dfobj_apply(odraw, dfobj);
+% 
+%     if debug
+%         imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+%         imgstack_viewer(dfod, 'dfod');
+%         imgstack_viewer(odraw, 'odraw');
+%         imgstack_viewer(od, 'OD');
+%     end
+% 
+% elseif strcmp(params.dfmethod, 'cvp')
+% 
+%     dfod = od_calc(Aload, Lload, params);
+%     dfodavg = mean(dfod, 3);
+%     ddfod = dfod - dfodavg;
+%     dfobj = dfobj_create(ddfod, params.mask, params.pcanum);
+%     odraw = od_calc(A, L, params);
+%     dodraw = odraw - dfodavg;
+%     dodrawprime = dfobj_apply(dodraw, dfobj);
+%     od = odraw - dodrawprime;
+% 
+%     if debug
+%         imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+%         imgstack_viewer(dfod, 'dfod');
+%         imgstack_viewer(dfodavg, 'dfodavg');
+%         imgstack_viewer(ddfod, 'ddfod');
+%         imgstack_viewer(odraw, 'odraw');
+%         imgstack_viewer(dodraw, 'dodraw');
+%         imgstack_viewer(dodrawprime, 'dodrawprime');
+%         imgstack_viewer(od, 'OD');
+%     end
 
 else 
     error('invalid params.dfmethod');

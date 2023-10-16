@@ -1,4 +1,4 @@
-function dfobj = dfobj_create(dfimgs, mask, pcanum, debug)
+function dfobj = dfobj_create(dfimgs, mask, pcanum)
 
 if ndims(dfimgs) > 3
     error('Too many dims');
