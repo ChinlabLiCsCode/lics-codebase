@@ -1,5 +1,7 @@
 function h = scanfig_update(h, params, xvals, OD, fd, ind, xvalname)
 
+
+
 % update the OD image axis 
 axes(h.OD);
 imagesc(squeeze(OD(ind, :, :))');

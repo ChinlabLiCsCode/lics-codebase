@@ -98,12 +98,12 @@ end
 
 dfobj = dfobj_create(L, params.mask, params.pcanum);
 Aprime = dfobj_apply(A, dfobj);
-od = od_calc(A, Aprime, params);
+nd = nd_calc(A, Aprime, params);
 
 if debug
     imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
     imgstack_viewer(Aprime, 'Aprime');
-    imgstack_viewer(od, 'OD');
+    imgstack_viewer(nd, 'ND');
 end
 
 

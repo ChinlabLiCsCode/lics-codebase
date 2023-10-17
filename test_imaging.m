@@ -2,7 +2,6 @@
 clear;
 close all;
 clc;
-day = [2023 10 02];
 build_params;
 
 params = paramsCV_IS;
@@ -16,6 +15,17 @@ dfinfo = {[2023 10 13], 5:105};
 shots = {[2023 10 13], 110:130};
     
 od = proc_imgs(shots, params, dfinfo, bginfo);
+
+
+%% test for figure production
+
+clear;
+close all;
+clc;
+day = [2023 10 17];
+build_params;
+
+scanfig_init(paramsCV_IS, 'test');
 
 
 %% defringing test

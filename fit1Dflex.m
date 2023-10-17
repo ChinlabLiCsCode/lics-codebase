@@ -1,5 +1,4 @@
-function fd = fit1Dflex(OD, params, fd)
-
+function fd = fit1Dflex(ND, params, fd)
 
 
 % extract fittype args
@@ -14,8 +13,8 @@ end
 
 % integrate traces over mask
 mask = params.mask;
-xtrace = sum(OD(mask(3):mask(4), :), 1);
-ytrace = sum(OD(:, mask(1):mask(2)), 2);
+xtrace = sum(ND(mask(3):mask(4), :), 1);
+ytrace = sum(ND(:, mask(1):mask(2)), 2);
 ytrace = ytrace';
 
 % perform fits 
@@ -23,27 +22,30 @@ x = fit1D(xtrace, xft, mask(1:2), params);
 y = fit1D(ytrace, yft, mask(3:4), params);
 
 % calculate total flourescence for image
-n_count = sum(sum(OD(mask(3):mask(4), mask(1):mask(2))));
+n_count = sum(sum(ND(mask(3):mask(4), mask(1):mask(2))));
 
 % output
 if nargin < 3
     % create fd struct
     fd = struct();
-    fd.OD = OD;
+    fd.ND = ND;
     fd.n_count = n_count;
     fd.x = x;
     fd.y = y;
 else
-    % append to fd
-    fd.OD = cat(1, fd.OD, OD);
-    fd.n_count = cat(1, fd.n_count, n_count);
-    fld = fields(fd.x);
-    for i = 1:length(fld)
-        fd.x.(fld{i}) = cat(1, fd.x.(fld{i}), x.(fld{i}));
+    % append to fd if you've already 
+    fd(end+1).ND = ND;
+    fd(end).n_count = n_count;
+
+    % extract the x and y fields 
+    flds = fieldnames(fd);
+    xflds = fields(startsWith(flds, 'x_'));
+    yflds = fields(startsWith(flds, 'y_'));
+    for i = 1:length(xflds)
+        fd(end).(xflds{i}) = x.(xflds{i}(3:end));
     end
-    fld = fields(fd.y);
-    for i = 1:length(fld)
-        fd.y.(fld{i}) = cat(1, fd.y.(fld{i}), y.(fld{i}));
+    for i = 1:length(yflds)
+        fd(end).(yflds{i}) = y.(yflds{i}(3:end));
     end
 end
 
@@ -78,7 +80,7 @@ function dout = fit1D(trace, ftype, mask, params)
     p(p < plb) = plb(p < plb);
     p(p > pub) = pub(p > pub);
 
-    options = optimset('TolX',1e-8,'Display','off');
+    options = optimset('TolX', 1e-8, 'Display', 'off');
     pars = lsqcurvefit(fun, p, x, trace, plb, pub, options);
     fit_trace = fun(pars, x);
 
@@ -114,10 +116,10 @@ function f = gauss1Dcalcs(p, params)
                 'f_sigma', p(2),...
                 'f_pos', p(3),...
                 'f_bg', p(4));
-    f.fwhm_um = 2*sqrt(2*log(2)) * f.f_sigma * params.pixel;
-    f.sigma_um = f.f_sigma * params.pixel;
-    f.nfit = params.pixel^2/(3*params.wavelength^2/(2*pi)) * sqrt(2*pi)*f.f_amp*abs(f.f_sigma);
-    f.center_um = f.f_pos * params.pixel;
+    f.fwhm = 2*sqrt(2*log(2)) * f.f_sigma * params.pixel;
+    f.sigma = f.f_sigma * params.pixel;
+    f.nfit = sqrt(2*pi)*f.f_amp*abs(f.f_sigma);
+    f.center = f.f_pos * params.pixel;
 end
 
 % double gaussian
@@ -144,7 +146,7 @@ function f = dbl1Dcalcs(p, params)
                 'f_bg', p(5));
     f.fwhm_um = 2*sqrt(2*log(2)) * f.f_sigma * params.pixel;
     f.sigma_um = f.f_sigma * params.pixel;
-    f.nfit = 2 * params.pixel^2/(3*params.wavelength^2/(2*pi)) * sqrt(2*pi)*f.f_amp*abs(f.f_sigma);
+    f.nfit = 2 * sqrt(2*pi)*f.f_amp*abs(f.f_sigma);
     f.center_um = f.f_pos * params.pixel;
     f.sep_um = f.f_sep * params.pixel;
 end
@@ -166,6 +168,6 @@ function f = tf1Dcalcs(p, params)
                 'f_pos', p(3),...
                 'f_bg', p(4));
     f.rtf_um = f.f_rtf * params.pixel;
-    f.nfit = params.pixel^2/(3*params.wavelength^2/(2*pi)) * f.f_amp*f.f_rtf*16/15;
+    f.nfit = f.f_amp*f.f_rtf*16/15;
     f.center_um = f.f_pos * params.pixel;
 end
