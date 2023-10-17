@@ -92,62 +92,20 @@ end
 %% perform defringing and od calculation
 
 
-if strcmp(params.dfmethod, 'norm')
+if dfcase == 3
+    L = cat(3, Lload, L);
+end
 
-    if dfcase == 3
-        L = cat(3, Lload, L);
-    end
-    
-    dfobj = dfobj_create(L, params.mask, params.pcanum);
-    Aprime = dfobj_apply(A, dfobj);
-    od = od_calc(A, Aprime, params);
-    
-    if debug
-        imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-        imgstack_viewer(Aprime, 'Aprime');
-        imgstack_viewer(od, 'OD');
-    end
+dfobj = dfobj_create(L, params.mask, params.pcanum);
+Aprime = dfobj_apply(A, dfobj);
+od = od_calc(A, Aprime, params);
 
-% elseif strcmp(params.dfmethod, 'odnorm')
-% 
-%     dfod = od_calc(Aload, Lload, params);
-%     dfobj = dfobj_create(dfod, params.mask, params.pcanum);
-%     odraw = od_calc(A, L, params);
-%     od = odraw - dfobj_apply(odraw, dfobj);
-% 
-%     if debug
-%         imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-%         imgstack_viewer(dfod, 'dfod');
-%         imgstack_viewer(odraw, 'odraw');
-%         imgstack_viewer(od, 'OD');
-%     end
-% 
-% elseif strcmp(params.dfmethod, 'cvp')
-% 
-%     dfod = od_calc(Aload, Lload, params);
-%     dfodavg = mean(dfod, 3);
-%     ddfod = dfod - dfodavg;
-%     dfobj = dfobj_create(ddfod, params.mask, params.pcanum);
-%     odraw = od_calc(A, L, params);
-%     dodraw = odraw - dfodavg;
-%     dodrawprime = dfobj_apply(dodraw, dfobj);
-%     od = odraw - dodrawprime;
-% 
-%     if debug
-%         imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
-%         imgstack_viewer(dfod, 'dfod');
-%         imgstack_viewer(dfodavg, 'dfodavg');
-%         imgstack_viewer(ddfod, 'ddfod');
-%         imgstack_viewer(odraw, 'odraw');
-%         imgstack_viewer(dodraw, 'dodraw');
-%         imgstack_viewer(dodrawprime, 'dodrawprime');
-%         imgstack_viewer(od, 'OD');
-%     end
-
-else 
-    error('invalid params.dfmethod');
+if debug
+    imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
+    imgstack_viewer(Aprime, 'Aprime');
+    imgstack_viewer(od, 'OD');
 end
 
 
-
+end
 
