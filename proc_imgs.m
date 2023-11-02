@@ -1,4 +1,4 @@
-function od = proc_imgs(shots, params, dfinfo, bginfo)
+function nd = proc_imgs(shots, params, dfinfo, bginfo)
 
            
 
@@ -104,6 +104,16 @@ if debug
     imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
     imgstack_viewer(Aprime, 'Aprime');
     imgstack_viewer(nd, 'ND');
+end
+
+if ndims(shots) > 1
+    szA = size(nd);
+    if iscell(shots)
+        szB = size(shots{2});
+    else
+        szB = size(shots);
+    end
+    nd = reshape(nd, [szA(1), szA(2), szB(1), szB(2)]);
 end
 
 

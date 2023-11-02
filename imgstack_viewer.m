@@ -1,10 +1,13 @@
-function fig = imgstack_viewer(ims, figname)
+function fig = imgstack_viewer(ims, figname, inax)
 
-figure;
-hold on;
-if nargin > 1
-    sgtitle(figname);
+if nargin < 3
+    figure;
+else
+    axes(inax);
 end
+
+hold on;
+title(figname);
 
 if ndims(ims) == 2
     imagesc(ims);
@@ -15,10 +18,9 @@ elseif ndims(ims) == 3
     axis image;
     colorbar();
 elseif ndims(ims) == 4
-    for i = 1:size(ims, 4)
-        subplot(1, size(ims, 4), i);
-        imagesc(imtile(ims(:, :, :, i), 'BorderSize', 5));
-        axis image;
-        colorbar();
-    end
+    sz = size(ims);
+    rims = reshape(ims, [sz(1), sz(2), sz(3) * sz(4)]);
+    imagesc(imtile(rims, 'BorderSize', 5));
+    axis image;
+    colorbar();
 end
