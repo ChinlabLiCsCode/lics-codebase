@@ -17,12 +17,16 @@ mask_y(:,mask(1):mask(2)) = 1;
 mask = mask_x.*mask_y;
 mask = ~mask;
 
+% full_size = orig_size(2)*orig_size(3);
+% imagestack = reshape(imagestack,[orig_size(1) full_size]);
+% big_sparse = spdiags(mask(:), 0, full_size, full_size);
+% cov_matrix = (imagestack)*big_sparse*(imagestack');
+
 npix = sz(1)*sz(2); % number of pixels per image
 mask = reshape(mask, [npix, 1]); % reshape mask to be column vec
 maskmat = spdiags(mask, 0, npix, npix);
 fullvecs = reshape(dfimgs, [npix sz(3)]); % reshape image to be column vecs (R_i in the paper)
-edgevecs = fullvecs(mask, :); % reshape edge pixels to be column vecs (u_i in the paper)
-covmat = edgevecs' * edgevecs; % make covariance matrix (S in the paper)
+covmat = fullvecs' * maskmat * fullvecs;
 [V,D] = eig(covmat); % find eigensystem
 [eigvals, order] = sort(diag(D), 'descend'); % sort eigenvals
 eigvecs = V(:, order(1:pcanum)); % get first pcanum of eigvecs (v_i in the paper)
