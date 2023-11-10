@@ -32,20 +32,20 @@ vars = load(fname, 'imagestack');
 sz = size(vars.imagestack);
 
 % initialize full imagestack
-imagestack = zeros(sz(1), sz(2), n, sz(3));
-imagestack(:, :, 1, :) = vars.imagestack;
+imagestack = zeros(n, sz(1), sz(2), sz(3));
+imagestack(1, :, :, :) = vars.imagestack;
 
 % load the full image stack
 if n > 1
     for a=2:n
         fname = sprintf(file_template, date(1), date(2), date(3), fshots(a));
         vars = load(fname, 'imagestack');
-        imagestack(:, :, a, :) = vars.imagestack;
+        imagestack(a, :, :, :) = vars.imagestack;
     end
 end
 
 % only return the relevant parts of the image stack
-imagestack = imagestack(view(3):view(4), view(1):view(2), :, :);
+imagestack = imagestack(:, view(3):view(4), view(1):view(2), :);
 if cam == 'V'
     if atom == 'L'
         imagestack = imagestack(:, :, :, [1, 3]);

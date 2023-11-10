@@ -3,3 +3,4 @@
 localpath.m
 .vscode*
 build_params.m
+*.mat

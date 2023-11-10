@@ -14,6 +14,7 @@ bginfo = 'none';
 dfinfo = {[2023 10 13], 5:105};
 shots = {[2023 10 13], 110:130};
     
+
 od = proc_imgs(shots, params, dfinfo, bginfo);
 
 
@@ -50,8 +51,8 @@ im4 = im1 + 3.*cos((X + Y)/lambda);
 im5 = 1.5*im1 + 4.*sin((X + Y)/lambda);
 
 
-L = cat(3, im1, im2, im3, im4, im5);
-L = cat(3, L, L, L, L);
+L = cat(1, im1, im2, im3, im4, im5);
+L = cat(1, L, L, L, L);
 L = L + randn(size(L));
 imgstack_viewer(L, 'L');
 dfobj = dfobj_create(L, mask, Inf);

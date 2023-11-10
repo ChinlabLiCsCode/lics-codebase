@@ -13,6 +13,9 @@ if nargin < 3
 end
 
 %% figure out how the user supplied bginfo.
+if debug
+    disp('loading bg');
+end
 % bgcase tells us about the method
 % bg is the actual background we will subtract
 if ischar(bginfo)
@@ -29,12 +32,15 @@ if ischar(bginfo)
 elseif isnumeric(bginfo) || iscell(bginfo)
     % Case 3: array of shots, assuming today, or cell with date and shots
     bgcase = 3;
-    bg = mean(load_img(bginfo, params), 3);
+    bg = mean(load_img(bginfo, params), 1);
 else
     error('Invalid bginfo input');
 end
 
 %% figure out how the user supplied dfinfo.
+if debug
+    disp('loading df');
+end
 % dfcase tells us about the method
 % L is the light frames 
 if ischar(dfinfo)
@@ -69,6 +75,9 @@ end
 
 
 %% load images 
+if debug
+    disp('loading imgs');
+end
 
 raw = load_img(shots, params);
 
@@ -91,21 +100,36 @@ end
 
 %% perform defringing and od calculation
 
-
 if dfcase == 3
-    L = cat(3, Lload, L);
+    L = cat(1, Lload, L);
 end
 
-dfobj = dfobj_create(L, params.mask, params.pcanum);
-Aprime = dfobj_apply(A, dfobj);
+if debug
+    disp('dfobj_create');
+end
+% dfobj = dfobj_create(L, params.mask, params.pcanum);
+dfobj = cvpcreatedefringeset(L, params.mask, params.pcanum);
+if debug
+    disp('dfobj_apply');
+end
+% Aprime = dfobj_apply(A, dfobj);
+Aprime = A;
+for a = 1:size(A, 1)
+    Aprime(a, :, :) = cvpdefringe(A(a, :, :), dfobj);
+end
+if debug
+    disp('nd calc');
+end
 nd = nd_calc(A, Aprime, params);
 
 if debug
-    imgstack_viewer(dfobj.eigvecims, 'dfobj.eigvecims');
     imgstack_viewer(Aprime, 'Aprime');
     imgstack_viewer(nd, 'ND');
 end
 
+if debug
+    disp('reshaping');
+end
 if ndims(shots) > 1
     szA = size(nd);
     if iscell(shots)
@@ -113,7 +137,7 @@ if ndims(shots) > 1
     else
         szB = size(shots);
     end
-    nd = reshape(nd, [szA(1), szA(2), szB(1), szB(2)]);
+    nd = reshape(nd, [szB(1), szB(2), szA(2), szA(3)]);
 end
 
 
