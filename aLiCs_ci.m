@@ -1,4 +1,4 @@
-function [sl, su] = aLiCs_ci(abf, fielderr, invflag)
+function sabf = aLiCs_ci(abf, fielderr, invflag)
 
 if nargin < 3
     invflag = false;
@@ -17,11 +17,8 @@ for i = 1:length(abf)
     end
 end
 
-disp(bs)
 lb = aLiCs(bs - fielderr, 'a');
 ub = aLiCs(bs + fielderr, 'a');
-disp(lb)
-disp(ub)
 
 if invflag
     sl = abs(1./lb - 1./abf);
@@ -30,7 +27,8 @@ else
     sl = abs(lb - abf);
     su = abs(ub - abf);
 end
-disp(sl)
-disp(su)
+
+sabf = [sl; su];
+
     
 end
