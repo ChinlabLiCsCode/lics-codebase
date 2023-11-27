@@ -1,13 +1,34 @@
-function nd = proc_imgs(shots, params, dfinfo, bginfo)
+function ND = proc_imgs(params, shots, dfinfo, varargin)
 
            
+%% build a shots cell if not supplied 
+if ~iscell(shots)
+    shots = {params.date, shots};
+end
+shotnums = shots{2};
+shotdate = shots{1};
 
+
+
+%% handle varargin
+
+% initialize default values 
+bginfo = params.bginfo;
 debug = params.debug;
 
-%% enable user to pass bginfo and dfinfo in params
-if nargin < 4
-    bginfo = params.bginfo;
+% process varargin
+for setting = 1:2:length(varargin)
+    switch varargin{setting}
+        case 'bginfo' 
+            bginfo = varargin{setting + 1};
+        case 'debug'
+            debug = varargin{setting + 1};
+        otherwise
+            error('Invalid input: %s', varargin{setting});
+    end
 end
+
+%% enable user to pass dfinfo in params
 if nargin < 3
     dfinfo = params.dfinfo;
 end
@@ -61,13 +82,10 @@ elseif isnumeric(dfinfo) || iscell(dfinfo)
     switch bgcase
         case 1 
             Lload = dfload(:, :, :, 2);
-            Aload = dfload(:, :, :, 1);
         case 2
             Lload = dfload(:, :, :, 2) - dfload(:, :, :, 3);
-            Aload = dfload(:, :, :, 1) - dfload(:, :, :, 3);
         case 3
             Lload = dfload(:, :, :, 2) - bg(:, :, :, 2);
-            Aload = dfload(:, :, :, 1) - bg(:, :, :, 1);
     end
 else
     error('Invalid dfinfo input');
@@ -120,24 +138,24 @@ end
 if debug
     disp('nd calc');
 end
-nd = nd_calc(A, Aprime, params);
+ND = nd_calc(A, Aprime, params);
 
 if debug
     imgstack_viewer(Aprime, 'Aprime');
-    imgstack_viewer(nd, 'ND');
+    imgstack_viewer(ND, 'ND');
 end
 
 if debug
     disp('reshaping');
 end
 if ndims(shots) > 1
-    szA = size(nd);
+    szA = size(ND);
     if iscell(shots)
         szB = size(shots{2});
     else
         szB = size(shots);
     end
-    nd = reshape(nd, [szB(1), szB(2), szA(2), szA(3)]);
+    ND = reshape(ND, [szB(1), szB(2), szA(2), szA(3)]);
 end
 
 

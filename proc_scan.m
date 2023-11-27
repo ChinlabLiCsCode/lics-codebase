@@ -1,50 +1,68 @@
-function scan = proc_scan(shots, params, xvals, dfinfo, bginfo, figname, xvalname)
+function scan = proc_scan(params, shots, dfinfo, varargin)
 
 
-%% handle varargsin
-
-% don't plot x axis name if none supplied
-if nargin < 7
-    xvalname = '';
+%% build a shots cell if not supplied 
+if ~iscell(shots)
+    shots = {params.date, shots};
 end
+shotnums = shots{2};
+shotdate = shots{1};
 
-% make up a name if none supplied
-if nargin < 6
-    if isstruct(shots)
-        s = sprintf('%d-%d', shots.shots(1), shots.shots(end));
-        d = sprintf('%d%d%d', shots.date(1), shots.date(2), shots.date(3));
-    else
-        s = sprintf('%d-%d', shots(1), shots(end));
-        d = sprintf('%d%d%d', params.date(1), params.date(2), params.date(3));
-    end
-    figname = strcat(d, '_', params.cam, params.atom, '_', s);
-end
+%% handle varargin
 
-% use params bginfo if none supplied
-if nargin < 5
-    bginfo = params.bginfo;
-end
+% initialize default values 
+xvalname = '';
+figname = sprintf('scan %d-%d-%d %c%c shots %d-%d', shotdate(1), shotdate(2), ...
+    shotdate(3), params.cam, params.atom, shotnums(1), shotnums(end));
+bginfo = params.bginfo;
+macrocalc = {};
+debug = params.debug;
+xvals = shotnums(1, :);
 
-% use params dfinfo if none supplied
-if nargin < 4
-    dfinfo = params.dfinfo;
-end
-
-% use shots as xvals if none supplied
-if nargin < 3
-    if isstruct(shots)
-        xvals = shots.shots;
-    else
-        xvals = shots;
+% process varargin
+for setting = 1:2:length(varargin)
+    switch varargin{setting}
+        case 'xvalname'
+            xvalname = varargin{setting + 1};
+        case 'figname'
+            figname = varargin{setting + 1};
+        case 'bginfo' 
+            bginfo = varargin{setting + 1};
+        case 'macrocalc' 
+            macrocalc = varargin{setting + 1};
+        case 'debug'
+            debug = varargin{setting + 1};
+        case 'xvals'
+            xvals = varargin{setting + 1};
+        otherwise
+            error('Invalid input: %s', varargin{setting});
     end
 end
 
 % save all inputs to a struct
-inputs = struct('shots', shots, 'params', params, 'xvals', xvals, ...
-    'dfinfo', dfinfo, 'bginfo', bginfo, 'figname', figname, 'xvalname', xvalname);
+inputs = struct();
+inputs.shots = shots;
+inputs.params = params;
+inputs.xvals = xvals;
+inputs.dfinfo = dfinfo;
+inputs.bginfo = bginfo;
+inputs.figname = figname;
+inputs.xvalname = xvalname;
+inputs.macrocalc = macrocalc;
+inputs.debug = debug;
 
+% get image sizes
+view = params.view;
+mask = params.mask;
+viewx = view(4) - view(3) + 1;
+viewy = view(2) - view(1) + 1;
+maskx = mask(4) - mask(3) + 1;
+masky = mask(2) - mask(1) + 1;
 
 %% figure out how the user supplied bginfo.
+if debug
+    disp('Loading bg');
+end
 % bgcase tells us about the method
 % bg is the actual background we will subtract
 if ischar(bginfo)
@@ -52,81 +70,67 @@ if ischar(bginfo)
         case 'none'
             % Case 1: "none" - Do no bg subtraction (V images).
             bgcase = 1;
+            Abg = zeros(1, viewx, viewy);
+            Lbg = Abg;
         case 'self'
             % Case 2: "self" - Use the background frame (H images).
             bgcase = 2;
         otherwise
             error('Invalid bginfo input');
     end
-elseif isstruct(bginfo) && isfield(bginfo, 'shots') && isfield(bginfo, 'date')
-    % Case 3: Shots struct - Use a struct containing shots and date information.
+elseif isnumeric(bginfo) || iscell(bginfo)
+    % Case 3: array of shots, assuming today, or cell with date and shots
     bgcase = 3;
     bg = mean(load_img(bginfo, params), 1);
+    Abg = bg(:, :, :, 1);
+    Lbg = bg(:, :, :, 2);
 else
     error('Invalid bginfo input');
 end
 
-% distinguish between H and V images 
-if bgcase == 3
-    if params.cam == 'H'
-        Abg = bg(:, :, :, 2);
-        Lbg = bg(:, :, :, 3);
-    else
-        Abg = bg(:, :, :, 1);
-        Lbg = bg(:, :, :, 2);
-    end
-end
-
 %% figure out how the user supplied dfinfo.
+if debug
+    disp('Loading df');
+end
 % dfcase tells us about the method
-% L is the actual light frames we will use
+% L is the light frames 
 if ischar(dfinfo)
     switch dfinfo
         case 'none'
-            % Case 1: "none" - Do no defringeing.
+            % Case 1: "none" - Do no defringing.
             dfcase = 1;
             ndf = 0;
         case 'self'
-            % Case 2: "self" - Use just the light images from the 
+            % Case 2: "self" - Defringe using only images from dataset.
             dfcase = 2;
             ndf = 0;
         otherwise
             error('Invalid dfinfo input');
     end
-elseif isnumeric(dfinfo) && size(dfinfo, 1) == 1
-    % Case 3: 1D array of shots - Use a 1D array of shots data.
+elseif isnumeric(dfinfo) || iscell(dfinfo)
+    % Case 3: array of shots, assuming today, or cell with date and shots
     dfcase = 3;
-    loadL = load_img(dfinfo, params);
-    loadL = loadL(:, :, :, 2);
-    ndf = size(loadL, 1);
-elseif isstruct(dfinfo) && isfield(dfinfo, 'shots') && isfield(dfinfo, 'date')
-    % Case 3: Shots struct - Use a struct containing shots and date information.
-    dfcase = 3;
-    loadL = load_img(dfinfo, params);
-    loadL = loadL(:, :, :, 2);
-    ndf = size(loadL, 1);
+    dfload = load_img(dfinfo, params);
+    switch bgcase
+        case 1 
+            Lload = dfload(:, :, :, 2);
+        case 2
+            Lload = dfload(:, :, :, 2) - dfload(:, :, :, 3);
+        case 3
+            Lload = dfload(:, :, :, 2) - bg(:, :, :, 2);
+    end
+    ndf = size(Lload, 1);
 else
     error('Invalid dfinfo input');
 end
 
 
+
 %% initialize all the image variables and arrays 
 
-view = params.view;
-mask = params.mask;
-
 % get the number of shots
-if isstruct(shots)
-    nA = numel(shots.shots);
-else
-    nA = numel(shots);
-end
-
-% number of light images
-nL = nA + ndf;
-
-% size of the images
-sz = [view(4) - view(3) + 1, view(2) - view(1) + 1]; % size of the images
+nshots = numel(shotnums);
+[nreps, nxvals] = size(shotnums);
 
 % number of frames in each raw image
 if params.cam == 'H'
@@ -135,88 +139,124 @@ else
     nF = 2;
 end
 
-raw = NaN(nA, sz(1), sz(2), nF); % raw images
-A = NaN(nA, sz(1), sz(2)); % atom frames
-% cA = NaN(nA, sz(1), sz(2)); % atom frames with background subtracted
-% dA = NaN(nA, sz(1), sz(2)); % mean subtracted atom frames
-% Aprime = NaN(nA, sz(1), sz(2)); % defringed ideal light pattern for atom frames
-dAprime = NaN(nA, sz(1), sz(2)); % mean subtracted defringed ideal light pattern for atom frames
-OD = NaN(nA, sz(1), sz(2)); % optical density images
-L = NaN(nL, sz(1), sz(2)); % light frames
-% cL = NaN(nL, sz(1), sz(2)); % light frames with background subtracted
-% dL = NaN(nL, sz(1), sz(2)); % mean subtracted light frames
+% create blank image arrays 
+raw = NaN(nshots, viewx, viewy, nF); % raw images
+L = NaN(nshots + ndf, viewx, viewy); % light images
+A = NaN(nshots, viewx, viewy); % atom images
+Aprime = NaN(nshots, viewx, viewy); % ideal light for atom images
+ND = NaN(nshots, viewx, viewy); % number density images 
 if dfcase == 3
-    L(1:ndf, :, :) = loadL; % insert preloaded light frames
+    L(1:ndf, :, :) = Lload; % insert preloaded light frames
 end
 if bgcase == 2
-    bg = NaN(nA, sz(1), sz(2)); % background frames
+    bg = NaN(nshots, sz(1), sz(2)); % background frames
 end
 
 
 
-%% MAIN LOOP %%
-for ind = 1:nA
+%% MAIN LOOP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+loadind = 1;
+procind = 1;
 
-fprintf('Loading shot %d of %d\r', ind, nA);
-% wait till file exists
-fexists = false;
-while ~fexists 
-    try 
-        raw = load_img(shots, params, ind);
-        fexists = true;
-    catch 
-        pause(0.5);
+while procind <= nshots
+    
+    % this block of while loops continues to load images until you reach 
+    % one that doesn't exist 
+    loading = true;
+    while loading
+        if debug
+            fprintf('Loading shot %d of %d\r', loadind, nshots);
+        end
+        fexists = false;
+        while ~fexists
+            try 
+                raw = load_img(shots, params, loadind);
+                fexists = true;
+            catch 
+                pause(0.5);
+                loading = false;
+            end
+        end
+        if debug
+            fprintf('Shot %d of %d loaded\r', loadind, nshots);
+        end
+        % load frames into stack
+        A(loadind, :, :) = raw(:, :, :, 1); % atom frames
+        L(loadind + ndf, :, :) = raw(:, :, :, 2); % light frames
+        if bgcase == 2
+            bg(loadind, :, :) = raw(:, :, :, 3); % bg frame
+        end
+
+        % increment load index
+        loadind = loadind + 1;
+
+        % stop if we've loaded everything
+        if loadind > nshots
+            loading = false;
+        end
+        
     end
-end
-fprintf('Shot %d of %d loaded\r', ind, nA);
-
-A(ind, :, :) = raw(:, :, :, 1); % atom frames
-L(ind + ndf, :, :) = raw(:, :, :, 2);
-if bgcase == 2
-    bg(ind, :, :) = raw(:, :, :, 3);
-    Abg = mean(bg(1:ind, :, :), 1);
-    Lbg = Abg;
-end
 
 
-% analyze the images
-cA = A - Abg;
-cL = L - Lbg;
-Lavg = mean(cL(1:ind, :, :), 1);
-dA = cA - Lavg;
-dL = cL - Lavg;
-dfobj = dfobj_create(dL(1:ind, :, :), params.mask, params.pcanum);
-dAprime(1:ind, :, :) = dfobj_apply(dA(1:ind, :, :), dfobj);
-Aprime = dAprime + Lavg;
-% OD = od_calc(cA, Aprime, params);
-OD = od_calc(cA + Lavg, Lavg, params);
+    % create background set 
+    if bgcase == 2 % use background from current shots 
+        Abg = mean(bg(1:loadin, :, :), 1);
+        Lbg = Abg;
+    end
 
-% perform fits
-if ind == 1
-    fd = fit1Dflex(squeeze(OD(ind, :, :)), params);
-else
-    fd = fit1Dflex(squeeze(OD(ind, :, :)), params, fd);
-end
+    % subtract background 
+    A(procind:loadind-1, :, :) = A(procind:loadind-1, :, :) - Abg;
+    L(ndf + (procind:loadind-1), :, :) = ...
+        L(ndf + (procind:loadind-1), :, :) - Lbg;
 
-% update plots
-if ind == 1
-    h = scanfig_init(params, figname);
-end
-h = scanfig_update(h, params, xvals, OD, fd, ind, xvalname);
+    % create defringe set
+    dfobj = cvpcreatedefringeset(L(1:(loadind-1 + ndf), :, :), ...
+        params.mask, params.pcanum); 
 
+    % defringe and calculate images 
+    for ind = procind:loadind-1
+        Aprime(ind, :, :) = cvpdefringe(A(ind, :, :), dfobj);
+        ND(ind, :, :) = nd_calc(A(ind, :, :), Aprime(ind, :, :), params);
+        
+    end
 
-end % end of main loop
+    % perform fits 
+    for ind = procind:loadind-1
+        if ind == 1
+            fd = scan_fit1Dflex(squeeze(ND(ind, :, :)), params);
+        else
+            fd = scan_fit1Dflex(squeeze(ND(ind, :, :)), params, fd);
+        end
+    end
+
+    
+    % update plots
+    if procind == 1
+        % Initialize the plot
+        fig = figure('Name', figname, 'NumberTitle', 'off',...
+            'Units', 'normalized', 'OuterPosition', [0 0 1 1],...
+            'Theme', 'light');
+        sgtitle(fig, figname, 'FontSize', 35);
+    end
+    fig = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
+        loadind-1, nreps, nxvals);
+
+    procind = loadind;
+
+end %%%% end of main loop %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 % save the figure 
-savefig(h.fig, strcat(figname, '.fig'));
+smart_fig_export(fig, figname);
 
 % save the data
-save(strcat('scan', figname, '.mat'), 'inputs', 'OD', 'fd');
+save([figname, '.mat'], 'inputs', 'ND', 'fd');
 
-scan.OD = OD;
+scan.ND = ND;
 scan.fd = fd;
 scan.inputs = inputs;
 
-end % end of function
+end 
+
+%%%% end of function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
