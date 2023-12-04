@@ -1,4 +1,43 @@
 function imagestack = load_img(shots, params, ind)
+% LOAD_IMG Load image stack from a given set of shots
+%
+%   imagestack = LOAD_IMG(shots, params) loads the image stack for the
+%   given set of shots. The shots can be given as a vector or a cell array
+%   of vectors. The params struct should contain the following fields:
+%       params.view - the view of the image stack to load
+%       params.cam - the camera to load
+%       params.atom - the atom type to load
+%       params.date - the date of the shots
+%
+%   imagestack = LOAD_IMG(shots, params, ind) loads only the shot at index
+%   ind from the given set of shots.
+%
+%   See also: LOCALPATH, which defines the file template for loading the
+%   image stack.
+% 
+%  INPUTS:
+%   shots:  [vector] or [cell array] of vectors of shots to load. If a cell
+%           array is given, the first element should be the date of the
+%           shots, and the second element should be the vector of shots. 
+%           Otherwise, the date is taken from params.date.
+%   params: [struct] containing the fields view, cam, atom, and date:
+%           params.view - [vector] of the form [xmin, xmax, ymin, ymax]
+%           params.cam - [char] either 'V' or 'H'
+%           params.atom - [char] either 'L' or 'C'
+%           params.date - [vector] of the form [year, month, day]
+%   ind:    [scalar] index of the shot to load. If ind is given, then only
+%           the shot at index ind is loaded. Otherwise, all shots are
+%           loaded.
+%
+%  OUTPUTS:
+%   imagestack: [array] image stack of the given shots. The first dimension
+%               is the shot number, the second and third dimensions are the
+%               x and y dimensions of the image, and the fourth dimension
+%               is the frame index (atoms, light, background). If the input 
+%               shots array was 2d, it gets flattened before loading. So the 
+%               output imagestack will be 4d regardless of whether shots is 
+%               1d or 2d.
+%
 
 
 % relevant parts of params

@@ -1,7 +1,21 @@
 function out_struct = cvpcreatedefringeset(imagestack, mask, pca_number)
-
-% originally written by Colin Parker
-% modified by Henry in November 2023
+% function out_struct = cvpcreatedefringeset(imagestack, mask, pca_number)
+% 
+% This function creates a defringe set from a stack of images.  The
+% defringe set is a set of images that can be used to remove fringes from
+% images.  The defringe set is created by taking the PCA of the image
+% stack.  The PCA is only performed on the pixels that are not masked out
+% by the mask.  The mask is a 4 element vector that specifies the top,
+% bottom, left, and right of the mask. pca_number specifies the number of
+% PCA vectors to keep for the defringe set.  The output is a structure 
+% with two fields.  The first field is the defringe set.  The second field
+% is a sparse matrix that can be used to mask out the pixels that are not
+% in the mask.
+% 
+% Originally written by Colin Parker
+% Modified very slightly by Henry in November 2023
+% Sorry that this code isn't commented properly...Colin didn't leave a lot 
+% of comments in his code
 
 
 imagestack = real(imagestack);

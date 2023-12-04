@@ -1,38 +1,63 @@
-function params = load_params(load_day)
+function load_params(today)
+% LOAD_PARAMS Load the parameters for the current day
+%
+%   LOAD_PARAMS loads the parameters for the current day. If no day is
+%   specified, the current day is used. 
+%   
+%   LOAD_PARAMS(TODAY) loads the parameters for the day specified by TODAY.
+%   TODAY should be a vector of the form [YYYY, MM, DD].
+%
+%   The parameters are loaded from the
+%   folder specified as 'loadparams' in your localpath.m file. The
+%   parameters are loaded into the workspace. This function will search 
+%   for the most recent parameters file that is not in the future, so you 
+%   don't have to have a parameters file for every single day, just for 
+%   when you actually change the parameters. 
+%
 
-    if nargin < 1
-        clk = clock;
-        load_day = [clk(1), clk(2), clk(3)];
-    end
 
-    % List all files in the folder
-    folderpath = localpath('params');
-    files = dir(fullfile(folderPath, 'params_*.mat')); % Adjust the file extension as needed
-
-    % Get today's date
-    load_day = str2double(sprintf('%d%d%d', load_day(1), load_day(2), load_day(3)));
-
-    % Initialize variables to store the most recent date and file path
-    recent_day = 0;
-    recent_file = '';
-
-    % Loop through each file and extract its date
-    for i = 1:length(files)
-        fname = files(i).name;
-        
-        % Extract the date part of the file name 
-        fday = regexpi(fname, '\d{8}', 'match', 'once');
-        
-        % Compare and update 
-        if ~isempty(fday) && (fday > recent_day) && (fday <= load_day)
-            recent_day = fday;
-            recent_file = fname;
-        end
-    end
-    
-    % load the params
-    params = load(fullfile(folderpath, recent_file), 'params*');
-
+% Use today's date if no day is supplied
+if nargin < 1
+    clk = clock;
+    today = [clk(1), clk(2), clk(3)];
 end
 
+% List all files in the folder
+folderpath = localpath('loadparams');
+files = dir(fullfile(folderpath, 'params_*.mat')); 
+
+% Get today's date
+today = str2double(sprintf('%04.4d%02.2d%02.2d', today(1), today(2), today(3)));
+
+% Loop through each file and extract its date
+fdays = zeros(length(files), 1);
+for i = 1:length(files)
+    fname = files(i).name;
+    
+    % Extract the date part of the file name 
+    C = regexpi(fname, '\d{8}', 'match', 'once');
+    fdays(i) = str2double(strrep(C,',','.')); 
+end
+
+% Sort the files by date 
+[fdays, idx] = sort(fdays);
+files = files(idx);
+
+% Remove future days 
+future = fdays > today;
+files = files(~future);
+
+% The right day to load is the last non-future day 
+load_file = files(end);
+
+% Load the params
+params = load(fullfile(folderpath, load_file.name), 'params*');
+
+% Transport the params into the workspace
+names = fieldnames(params);
+for i = 1:length(names)
+    assignin('base', names{i}, params.(names{i}));
+end
+
+end
 
