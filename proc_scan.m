@@ -1,4 +1,51 @@
 function scan = proc_scan(params, shots, dfinfo, varargin)
+% proc_scan(params, shots, dfinfo, varargin)
+%
+% This function processes a scan of images. It loads the images, subtracts
+% the background, defringes the images, calculates the number density, and
+% fits the number density. It then plots the results. Plotting is live, so
+% you can watch the plots update as the images are taken.
+%
+% INPUTS
+%   params - struct containing the parameters for the scan. Needs the 
+%       following fields:
+%       cam - 'H' or 'V'
+%       atom - 'Rb' or 'K'
+%       date - date of the scan, in the format [yyyy, mm, dd]
+%       view - [ymin, ymax, xmin, xmax] of the view window
+%       mask - [ymin, ymax, xmin, xmax] of the mask window
+%       pcanum - number of principal components to use for defringing
+%       bginfo - how to get the background. Can be 'none', 'self', or an
+%           array of shots. If 'none', no background subtraction is done.
+%           If 'self', the background is taken from the same shots as the
+%           data. If an array of shots, the background is taken from those
+%           shots.
+%   shots - array of shots to process. Can be an array of shot numbers, or
+%       a cell array with the date and shot numbers. If the date is not
+%       supplied, it is assumed to be the same as params.date.
+%   dfinfo - how to get the defringing data. Can be 'none', 'self', or an
+%       array of shots. If 'none', no defringing is done. If 'self', the
+%       defringing is done using only the shots in the scan. If an array of
+%       shots, the defringing is done using those shots.
+%   varargin - optional inputs. Can be any of the following:
+%       'xvalname' - name of the x value. If supplied, the x value is
+%           plotted on the x axis instead of the shot number.
+%       'figname' - name of the figure. If supplied, the figure is saved
+%           with this name.
+%       'bginfo' - how to get the background. Overrides the bginfo in
+%           params.
+%       'macrocalc' - cell array of macroscopic calculation parameters. If
+%           supplied, the macroscopic calculation is done and plotted.
+%       'debug' - if true, prints out debug statements.
+%       'xvals' - array of x values. If supplied, the x values are plotted
+%           on the x axis instead of the shot number.
+%
+% OUTPUTS
+%   scan - struct containing the following fields:
+%       ND - number density images
+%       fd - fit data. Contains the following fields:.....
+%       inputs - struct containing the inputs to the function
+
 
 
 %% build a shots cell if not supplied 
@@ -149,7 +196,7 @@ if dfcase == 3
     L(1:ndf, :, :) = Lload; % insert preloaded light frames
 end
 if bgcase == 2
-    bg = NaN(nshots, sz(1), sz(2)); % background frames
+    bg = NaN(nshots, viewx, viewy); % background frames
 end
 
 
@@ -200,7 +247,7 @@ while procind <= nshots
 
     % create background set 
     if bgcase == 2 % use background from current shots 
-        Abg = mean(bg(1:loadin, :, :), 1);
+        Abg = mean(bg(1:loadind-1, :, :), 1);
         Lbg = Abg;
     end
 

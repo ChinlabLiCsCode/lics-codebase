@@ -1,3 +1,3 @@
-addpath C:\\Users/henry/Documents/MATLAB/helperfuncs/
-addpath /Users/henry/Documents/MATLAB/export_fig/
-addpath /Users/henry/Documents/MATLAB/imaging/
+addpath C:\Users\chinl\Documents\MATLAB\imaging
+addpath C:\Users\chinl\Documents\MATLAB\helperfuncs
+addpath C:\Users\chinl\Documents\MATLAB\labviewseqcode
