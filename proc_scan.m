@@ -285,8 +285,8 @@ while procind <= nshots
             'Theme', 'light');
         sgtitle(fig, figname, 'FontSize', 35);
     end
-    fig = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
-        loadind-1, nreps, nxvals);
+    fig, calcs = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
+        loadind-1, nreps, nxvals, macrocalc);
 
     procind = loadind;
 

@@ -1,5 +1,5 @@
-function fig = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
-    ind, nreps, nxvals)
+function fig, calcs = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
+    ind, nreps, nxvals, macrocalc)
 
 % extract fittype args
 ft = params.fittype;
@@ -10,6 +10,8 @@ else
     x_fit_type = ft;
     y_fit_type = ft;
 end
+
+calcs = macrocalc;
 
 view = params.view;
 mask = params.mask;
@@ -161,4 +163,19 @@ function update_ax(xvals, yvals, xvalname, yvalname, sftitle, ind, nreps, nxvals
     title(sftitle);
     hold off;
     
+end
+
+
+%%%% function to do macrocalcs %%%%%%%%%%%%%%%%%%%
+function macrocalcplot(currparam, macrocalc, calcs)
+
+calcpars = {macrocalc{1:2:end}};
+calcfuncs = {macrocalc{2:2:end}};
+
+for i = 1:length(calcpars)
+    if strcmp(currparam, calcpars{i})
+        
+    end
+end
+
 end
