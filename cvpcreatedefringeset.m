@@ -31,9 +31,9 @@ end
 if size(mask,1) < 2
     mask_x = zeros(orig_size(2:3));
     mask_y = mask_x;
-    mask_x(mask(3):mask(4),:) = 1;
-    mask_y(:,mask(1):mask(2)) = 1;
-    mask = mask_x.*mask_y;
+    mask_y(mask(1):mask(2), :) = 1;
+    mask_x(:, mask(3):mask(4)) = 1;
+    mask = mask_x .* mask_y;
     mask = ~mask;
 end
 

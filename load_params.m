@@ -1,4 +1,4 @@
-function load_params(today)
+function load_params(today, replacedate)
 % LOAD_PARAMS Load the parameters for the current day
 %
 %   LOAD_PARAMS loads the parameters for the current day. If no day is
@@ -6,6 +6,10 @@ function load_params(today)
 %   
 %   LOAD_PARAMS(TODAY) loads the parameters for the day specified by TODAY.
 %   TODAY should be a vector of the form [YYYY, MM, DD].
+%
+%   LOAD_PARAMS(TODAY, REPLACEDATE) loads the params corresponding to 
+%   TODAY but then replaces the date field. If REPLACEDATE is just 'true',
+%   it uses TODAY. Otherwise you can specify a specific date.
 %
 %   The parameters are loaded from the
 %   folder specified as 'loadparams' in your localpath.m file. The
@@ -20,6 +24,18 @@ function load_params(today)
 if nargin < 1
     clk = clock;
     today = [clk(1), clk(2), clk(3)];
+end
+
+% Don't overwrite the date if it isn't specified
+if nargin < 2
+    replace = false;
+elseif isnumeric(replacedate)
+    replace = true;
+elseif replacedate
+    replace = true;
+    replacedate = today;
+else
+    replace = false;
 end
 
 % List all files in the folder
@@ -56,6 +72,9 @@ params = load(fullfile(folderpath, load_file.name), 'params*');
 % Transport the params into the workspace
 names = fieldnames(params);
 for i = 1:length(names)
+    if replace
+        params.(names{i}).date = replacedate;
+    end
     assignin('base', names{i}, params.(names{i}));
 end
 

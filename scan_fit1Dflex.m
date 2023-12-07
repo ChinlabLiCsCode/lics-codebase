@@ -12,16 +12,16 @@ end
 
 % integrate traces over mask
 mask = params.mask;
-x_trace = sum(ND(mask(3):mask(4), :), 1);
-y_trace = sum(ND(:, mask(1):mask(2)), 2);
+x_trace = sum(ND(mask(1):mask(2), :), 1);
+y_trace = sum(ND(:, mask(3):mask(4)), 2);
 x_trace = x_trace';
 
 % perform fits 
-xdata = fit1D(x_trace, x_fit_type, mask(1:2), params);
-ydata = fit1D(y_trace, y_fit_type, mask(3:4), params);
+xdata = fit1D(x_trace, x_fit_type, mask(3:4), params);
+ydata = fit1D(y_trace, y_fit_type, mask(1:2), params);
 
 % calculate total flourescence for image
-n_count = sum(sum(ND(mask(3):mask(4), mask(1):mask(2))));
+n_count = sum(sum(ND(mask(1):mask(2), mask(3):mask(4))));
 
 % output
 if nargin < 3

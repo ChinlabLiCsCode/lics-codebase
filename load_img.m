@@ -44,6 +44,7 @@ function imagestack = load_img(shots, params, ind)
 view = params.view;
 cam = params.cam;
 atom = params.atom;
+transpose = params.transpose;
 
 % allow shots to include a date
 if iscell(shots)
@@ -76,15 +77,21 @@ imagestack(1, :, :, :) = vars.imagestack;
 
 % load the full image stack
 if n > 1
-    for a=2:n
+    for a = 2:n
         fname = sprintf(file_template, date(1), date(2), date(3), fshots(a));
         vars = load(fname, 'imagestack');
         imagestack(a, :, :, :) = vars.imagestack;
     end
 end
 
+% do transpose if necessary
+if transpose
+    imagestack = permute(imagestack, [1, 3, 2, 4]);
+end
+
 % only return the relevant parts of the image stack
-imagestack = imagestack(:, view(3):view(4), view(1):view(2), :);
+
+imagestack = imagestack(:, view(1):view(2), view(3):view(4), :);
 if cam == 'V'
     if atom == 'L'
         imagestack = imagestack(:, :, :, [1, 3]);

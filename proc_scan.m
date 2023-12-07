@@ -117,7 +117,7 @@ if ischar(bginfo)
         case 'none'
             % Case 1: "none" - Do no bg subtraction (V images).
             bgcase = 1;
-            Abg = zeros(1, viewx, viewy);
+            Abg = zeros(1, viewy, viewx);
             Lbg = Abg;
         case 'self'
             % Case 2: "self" - Use the background frame (H images).
@@ -187,16 +187,16 @@ else
 end
 
 % create blank image arrays 
-raw = NaN(nshots, viewx, viewy, nF); % raw images
-L = NaN(nshots + ndf, viewx, viewy); % light images
-A = NaN(nshots, viewx, viewy); % atom images
-Aprime = NaN(nshots, viewx, viewy); % ideal light for atom images
-ND = NaN(nshots, viewx, viewy); % number density images 
+raw = NaN(nshots, viewy, viewx, nF); % raw images
+L = NaN(nshots + ndf, viewy, viewx); % light images
+A = NaN(nshots, viewy, viewx); % atom images
+Aprime = NaN(nshots, viewy, viewx); % ideal light for atom images
+ND = NaN(nshots, viewy, viewx); % number density images 
 if dfcase == 3
     L(1:ndf, :, :) = Lload; % insert preloaded light frames
 end
 if bgcase == 2
-    bg = NaN(nshots, viewx, viewy); % background frames
+    bg = NaN(nshots, viewy, viewx); % background frames
 end
 
 
@@ -285,25 +285,33 @@ while procind <= nshots
             'Theme', 'light');
         sgtitle(fig, figname, 'FontSize', 35);
     end
-    fig, calcs = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
+    [fig, calcs] = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
         loadind-1, nreps, nxvals, macrocalc);
-
     procind = loadind;
 
 end %%%% end of main loop %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% report results
+for i = 1:(length(calcs)/3)
+    fld = calcs{3*i - 2};
+    type = calcs{3*i - 1};
+    val = calcs{3*i};
+    fprintf('%s of %s = %.6f (%.6f)\n\n', type, fld, val(1), val(2));
+end 
 
 % save the figure 
 smart_fig_export(fig, figname);
 
 % save the data
-save([figname, '.mat'], 'inputs', 'ND', 'fd');
+save([figname, '.mat'], 'inputs', 'ND', 'fd', 'calcs');
 
+% return object 
 scan.ND = ND;
 scan.fd = fd;
 scan.inputs = inputs;
+scan.calcs = calcs;
 
-end 
+
 
 %%%% end of function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
