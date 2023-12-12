@@ -1,38 +1,45 @@
-function out_info = soundplot_2023(params, shots, df_set, times, abf, ...
-    mask, imgsin, fittimes, savefig)
+function out_info = sound_fit(params, shots, dfset, times, varargin)
 % this version does a 2-d surface fit
 % rewritten almost from scratch by Henry in November 2023 to remove dead
 % weight
 
-if nargin < 9
-    savefig = false;
-end
+abf = NaN;
+linum = NaN;
+mask = params.mask;
+savefig = true;
+fittimes = 1:times;
+imgsin = false;
 
-% fittimes are for if you want to only fit to a certain time range
-if nargin < 8
-    fittimes = 1:length(times);
-end
-
-% allow user to pass the preloaded images
-if nargin < 7
-    imgs = proc_imgs(params, shots, df_set);
-else
-    if imgsin
-        imgs = imgsin;
-    else 
-        imgs = proc_imgs(params, shots, df_set);
+% process varargin
+for setting = 1:2:length(varargin)
+    switch varargin{setting}
+        case 'abf'
+            abf = varargin{setting + 1};
+        case 'linum'
+            linum = varargin{setting + 1};
+        case 'mask' 
+            mask = varargin{setting + 1};
+        case 'savefig' 
+            savefig = varargin{setting + 1};
+        case 'fittimes'
+            fittimes = varargin{setting + 1};
+        case 'imgsin'
+            imgsin = varargin{setting + 1};
+        otherwise
+            error('Invalid input: %s', varargin{setting});
     end
 end
 
-
-% allow user to pass their own mask for cropping
-if nargin < 6
-    mask = params.mask;
+if imgsin
+    imgs = imgsin;
+else 
+    imgs = proc_imgs(params, shots, dfset);
 end
 
 
 % name string for output figures
-namestr = sprintf('Sound propagation aBF = %d a0', round(abf, 2-floor(log10(abs(abf)))));
+namestr = sprintf('Sound propagation aBF=%d linum=%.2f', ...
+    round(abf, 2-floor(log10(abs(abf)))), linum);
 
 % start saving inputs to output structure
 out_info = struct();
@@ -42,6 +49,7 @@ out_info.times = times;
 out_info.params = params;
 out_info.imgs = imgs;
 out_info.abf = abf;
+out_info.linum = linum;
 out_info.namestr = namestr;
 
 
@@ -57,11 +65,11 @@ end
 imgsavgc = imgsavg(:, mask(1):mask(2), mask(3):mask(4));
 
 % integrate along y axis 
-n1d = squeeze(trapz(imgsavgc, 3));
+n1d = squeeze(trapz(imgsavgc, 2));
 norm1d = n1d ./ max(n1d, [], 2);
 
 % get dimensions
-[nT, nX, nY] = size(imgsavgc);
+[nT, nY, nX] = size(imgsavgc);
 xpix = ((1:nX)') - nX/2;
 ypix = (1:nY)';
 
@@ -146,6 +154,8 @@ out_info.sgamma = sgamma;
 out_info.n0 = n0;
 out_info.sn0 = sn0;
 
+fprintf('c = %.2f (%.2f)', c, sc);
+
 
 % plotting section
 
@@ -157,7 +167,7 @@ sgtitle(namestr, FontSize=30);
 
 % show a single raw image 
 nexttile([1, 2]);
-imagesc(xpix, ypix, squeeze(imgsavgc(1, :, :))');
+imagesc(xpix, ypix, squeeze(imgsavgc(1, :, :)));
 axis image;
 xlabel('x position [pix]');
 ylabel('y position [pix]');
