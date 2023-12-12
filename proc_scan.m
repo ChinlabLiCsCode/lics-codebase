@@ -205,45 +205,43 @@ end
 loadind = 1;
 procind = 1;
 
+
+
 while procind <= nshots
-    
-    % this block of while loops continues to load images until you reach 
-    % one that doesn't exist 
+    havenewdata = false;
     loading = true;
     while loading
         if debug
             fprintf('Loading shot %d of %d\r', loadind, nshots);
         end
-        fexists = false;
-        while ~fexists
-            try 
-                raw = load_img(shots, params, loadind);
-                fexists = true;
-            catch 
-                pause(0.5);
+        try
+            raw = load_img(shots, params, loadind);
+            % load frames into stack
+            A(loadind, :, :) = raw(:, :, :, 1); % atom frames
+            L(loadind + ndf, :, :) = raw(:, :, :, 2); % light frames
+            if bgcase == 2
+                bg(loadind, :, :) = raw(:, :, :, 3); % bg frame
+            end
+
+            % increment load index
+            loadind = loadind + 1;
+
+            % register having loaded something
+            havenewdata = true;
+
+            % stop if we've loaded everything
+            if loadind > nshots
                 loading = false;
             end
-        end
-        if debug
-            fprintf('Shot %d of %d loaded\r', loadind, nshots);
-        end
-        % load frames into stack
-        A(loadind, :, :) = raw(:, :, :, 1); % atom frames
-        L(loadind + ndf, :, :) = raw(:, :, :, 2); % light frames
-        if bgcase == 2
-            bg(loadind, :, :) = raw(:, :, :, 3); % bg frame
-        end
+        catch
+            if havenewdata
+                loading = false;
+            else
+                pause(0.5);
+            end
 
-        % increment load index
-        loadind = loadind + 1;
-
-        % stop if we've loaded everything
-        if loadind > nshots
-            loading = false;
         end
-        
     end
-
 
     % create background set 
     if bgcase == 2 % use background from current shots 

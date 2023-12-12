@@ -56,6 +56,7 @@ end
 
 if nargin == 3
     % if we are given an index, then we only want to load one shot
+    shots = shots'; % realized this flip was necessary because proc scan was getting very messed up.
     shots = shots(ind);
 end
 

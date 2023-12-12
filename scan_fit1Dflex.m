@@ -115,7 +115,6 @@ case 'tf'
     p0 = [max(trace(low:high)), (high - low)/10, (low + high)/2];
     plb = [0, 0, low];
     pub = [2.*max(trace(low:high)), high-low, high];
-    
     % perform fit
     fo = fit(x, trace, ft, ...
         StartPoint=p0, Lower=plb, Upper=pub);
