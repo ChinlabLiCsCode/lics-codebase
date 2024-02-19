@@ -51,3 +51,6 @@ nd = params.pixel^2/(3*params.wavelength^2/(2*pi)) .* od;
 
 % set any non-finite values to zero
 nd(~isfinite(nd)) = 0;
+
+% set any complex values to be real
+nd = real(nd);
