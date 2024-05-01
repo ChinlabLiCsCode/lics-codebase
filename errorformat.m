@@ -19,6 +19,10 @@ if decval <= decerr
 else
     % error exceeds value 
     val = round(val, decval);
-    err = round(err, decerr);
-    str = sprintf('%g +- %g', val, err);
+    if isfinite(decerr)
+        err = round(err, decerr);
+        str = sprintf('%g +- %g', val, err);
+    else
+        str = sprintf('%g +- inf', val);
+    end
 end
