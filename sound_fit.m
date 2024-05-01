@@ -3,12 +3,13 @@ function out_info = sound_fit(params, shots, dfset, times, varargin)
 % rewritten almost from scratch by Henry in November 2023 to remove dead
 % weight
 
-abf = NaN;
-linum = NaN;
+abf = 1;
+linum = 1;
 mask = params.mask;
 savefig = true;
 fittimes = 1:times;
 imgsin = false;
+sound = true;
 
 % process varargin
 for setting = 1:2:length(varargin)
@@ -25,6 +26,8 @@ for setting = 1:2:length(varargin)
             fittimes = varargin{setting + 1};
         case 'imgsin'
             imgsin = varargin{setting + 1};
+        case 'sound'
+            sound = varargin{setting + 1};
         otherwise
             error('Invalid input: %s', varargin{setting});
     end
@@ -51,6 +54,7 @@ out_info.imgs = imgs;
 out_info.abf = abf;
 out_info.linum = linum;
 out_info.namestr = namestr;
+out_info.sound = sound;
 
 
 % average over multiple images
