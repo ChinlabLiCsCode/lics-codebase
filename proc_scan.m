@@ -65,6 +65,7 @@ bginfo = params.bginfo;
 macrocalc = {};
 debug = params.debug;
 xvals = shotnums(1, :);
+savefig = true;
 
 % process varargin
 for setting = 1:2:length(varargin)
@@ -81,6 +82,8 @@ for setting = 1:2:length(varargin)
             debug = varargin{setting + 1};
         case 'xvals'
             xvals = varargin{setting + 1};
+        case 'savefig'
+            savefig = varargin{setting + 1};
         otherwise
             error('Invalid input: %s', varargin{setting});
     end
@@ -298,7 +301,9 @@ for i = 1:(length(calcs)/3)
 end 
 
 % save the figure 
-smart_fig_export(fig, figname);
+if savefig
+    smart_fig_export(fig, figname);
+end
 
 % save the data
 save([figname, '.mat'], 'inputs', 'ND', 'fd', 'calcs');
