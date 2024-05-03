@@ -59,7 +59,7 @@ shotdate = shots{1};
 
 % initialize default values 
 xvalname = '';
-figname = sprintf('scan %d-%d-%d %c%c shots %d-%d', shotdate(1), shotdate(2), ...
+figname = sprintf('scan %04d-%02d-%02d %c%c shots %d-%d', shotdate(1), shotdate(2), ...
     shotdate(3), params.cam, params.atom, shotnums(1), shotnums(end));
 bginfo = params.bginfo;
 macrocalc = {};
@@ -281,6 +281,7 @@ while procind <= nshots
     % update plots
     if procind == 1
         % Initialize the plot
+        plot_defaults;
         fig = figure('Name', figname, 'NumberTitle', 'off',...
             'Units', 'normalized', 'OuterPosition', [0 0 1 1],...
             'Theme', 'light');
