@@ -165,13 +165,13 @@ if dfcase == 3
 end
 
 % create defringeset object
-dfobj = cvpcreatedefringeset(L, params.mask, params.pcanum);
+dfobj = new_cvpcreatedefringeset(L, params.mask, params.pcanum);
 
 % perform defringing
 Aprime = A; % initialize Aprime
 for a = 1:size(A, 1)
     % Aprime is the ideal light frame corresponding to A
-    Aprime(a, :, :) = cvpdefringe(A(a, :, :), dfobj);
+    Aprime(a, :, :) = new_cvpdefringe(A(a, :, :), dfobj);
 end
 
 % calculate atom number density

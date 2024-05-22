@@ -258,12 +258,12 @@ while procind <= nshots
         L(ndf + (procind:loadind-1), :, :) - Lbg;
 
     % create defringe set
-    dfobj = cvpcreatedefringeset(L(1:(loadind-1 + ndf), :, :), ...
+    dfobj = new_cvpcreatedefringeset(L(1:(loadind-1 + ndf), :, :), ...
         params.mask, params.pcanum); 
 
     % defringe and calculate images 
     for ind = procind:loadind-1
-        Aprime(ind, :, :) = cvpdefringe(A(ind, :, :), dfobj);
+        Aprime(ind, :, :) = new_cvpdefringe(A(ind, :, :), dfobj);
         ND(ind, :, :) = nd_calc(A(ind, :, :), Aprime(ind, :, :), params);
         
     end

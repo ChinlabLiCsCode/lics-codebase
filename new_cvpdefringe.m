@@ -1,4 +1,4 @@
-function out_image = cvpdefringe(in_image,defringeset)
+function out_image = new_cvpdefringe(in_image,defringeset)
 % function out_image = cvpdefringe(in_image,defringeset)
 %
 % This function removes the fringes from the image in_image using the

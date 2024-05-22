@@ -1,4 +1,4 @@
-function out_struct = cvpcreatedefringeset(imagestack, mask, pca_number)
+function out_struct = new_cvpcreatedefringeset(imagestack, mask, pca_number)
 % function out_struct = cvpcreatedefringeset(imagestack, mask, pca_number)
 % 
 % This function creates a defringe set from a stack of images.  The
