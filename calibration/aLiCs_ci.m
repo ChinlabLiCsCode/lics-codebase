@@ -1,4 +1,7 @@
 function sabf = aLiCs_ci(abf, fielderr, invflag)
+% sabf = aLiCs_ci(abf, fielderr, invflag)
+% Calculate the confidence interval on the LiCs scattering length abf given the field error fielderr.
+% If invflag is true, then abf and sabf will be interpreted as 1/abf and 1/sabf.
 
 if nargin < 3
     invflag = false;

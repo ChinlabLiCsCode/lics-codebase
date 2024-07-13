@@ -1,4 +1,12 @@
-function [a] = aCsCs(B)
+function a = aCsCs(B)
+% aCsCs - returns the scattering length of two Cs atoms in the |3, 3> state.
+% B is the magnetic field in Gauss.
+% a is the scattering length in Bohr radii.
+% The data is from Berninger et. al. "Feshbach resonances, weakly bound molecular states, 
+% and coupled-channel potentials for cesium at high magnetic fields" Phys. Rev. A 87, 032517 (2013)
+% Here we store it in Cs_a_vs_B.txt. Then this functiona basically just interpolates the data.
+
+
 
 a = zeros(1,length(B));
 %B = round(B*10)/10;
