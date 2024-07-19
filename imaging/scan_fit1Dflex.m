@@ -69,7 +69,7 @@ case 'gauss'
     % initial guesses and bounds
     p0 = [max(trace(low:high)), (high - low)/10, (low + high)/2];
     plb = [0, 0, low];
-    pub = [2.*max(trace(low:high)), high-low, high];
+    pub = [Inf, high-low, high];
     
     % perform fit
     fo = fit(x, trace, ft, ...
@@ -91,7 +91,7 @@ case 'dbl'
     % initial guesses and bounds
     p0 = [max(trace(low:high)), (high - low)/10, (low + high)/2, (low + high)/2];
     plb = [0, 0, low, 0];
-    pub = [2.*max(trace(low:high)), high-low, high, high-low];
+    pub = [Inf, high-low, high, high-low];
     
     % perform fit
     fo = fit(x, trace, ft, ...
@@ -114,7 +114,7 @@ case 'tf'
     % initial guesses and bounds
     p0 = [max(trace(low:high)), (high - low)/10, (low + high)/2];
     plb = [0, 0, low];
-    pub = [2.*max(trace(low:high)), high-low, high];
+    pub = [Inf, high-low, high];
     % perform fit
     fo = fit(x, trace, ft, ...
         StartPoint=p0, Lower=plb, Upper=pub);
