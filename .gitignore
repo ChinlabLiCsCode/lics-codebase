@@ -6,3 +6,4 @@ localpath.m
 *.pdf
 *.fig
 *.png
+.DS_Store
