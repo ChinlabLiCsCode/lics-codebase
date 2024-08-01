@@ -10,6 +10,21 @@ muB = 9.27401007e-24; % bohr magneton in SI
 mu0 = 1.2566370614e-6; 
 epsilon0 = 8.8541878176e-12;
 
+%%% from makeconstants.m
+% qe = 1.602e-19;
+% amu = 1.660539040e-27;
+% a0 = 5.29177e-11;
+% muB = 9.274e-24;
+% mLi = 6.*amu; %mass of lithium (kg)
+% mCs = 133.*amu; %mass of Cesium (kg)
+% hbar = 1.054572e-34; %reduced plank's constant
+% h = hbar.*2.*pi;
+% kb = 1.38064852e-23; %2020-04-21
+% sigmali = 2.15e-13;
+% lambdaLi = 671e-9;
+% pixsize = 8.2e-6;
+%%%
+
 mLi = 6.*amu;   % mass of lithium (kg)
 mCs = 133.*amu; % mass of Cesium (kg)
 
