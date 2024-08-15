@@ -20,6 +20,6 @@ cmd = ['save(''', savepath, ''', ''params*'')'];
 disp(cmd);
 
 % Evaluate the save command in the base workspace
-evalin('base', cmd);
+evalin('caller', cmd);
 
 end

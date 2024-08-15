@@ -75,7 +75,7 @@ for i = 1:length(names)
     if replace
         params.(names{i}).date = replacedate;
     end
-    assignin('base', names{i}, params.(names{i}));
+    assignin('caller', names{i}, params.(names{i}));
 end
 
 end
