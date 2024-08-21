@@ -10,7 +10,7 @@ function scan = proc_scan(params, shots, dfinfo, varargin)
 %   params - struct containing the parameters for the scan. Needs the 
 %       following fields:
 %       cam - 'H' or 'V'
-%       atom - 'Rb' or 'K'
+%       atom - 'C' or 'L'
 %       date - date of the scan, in the format [yyyy, mm, dd]
 %       view - [ymin, ymax, xmin, xmax] of the view window
 %       mask - [ymin, ymax, xmin, xmax] of the mask window
@@ -57,49 +57,38 @@ shotdate = shots{1};
 
 %% handle varargin
 
-% initialize default values 
-xvalname = '';
-figname = sprintf('scan %04d-%02d-%02d %c%c shots %d-%d', shotdate(1), shotdate(2), ...
-    shotdate(3), params.cam, params.atom, shotnums(1), shotnums(end));
-bginfo = params.bginfo;
-macrocalc = {};
-debug = params.debug;
-xvals = shotnums(1, :);
-savefig = true;
+% Initialize input parser
+p = inputParser;
 
-% process varargin
-for setting = 1:2:length(varargin)
-    switch varargin{setting}
-        case 'xvalname'
-            xvalname = varargin{setting + 1};
-        case 'figname'
-            figname = varargin{setting + 1};
-        case 'bginfo' 
-            bginfo = varargin{setting + 1};
-        case 'macrocalc' 
-            macrocalc = varargin{setting + 1};
-        case 'debug'
-            debug = varargin{setting + 1};
-        case 'xvals'
-            xvals = varargin{setting + 1};
-        case 'savefig'
-            savefig = varargin{setting + 1};
-        otherwise
-            error('Invalid input: %s', varargin{setting});
-    end
-end
+% Add optional parameters
+addParameter(p, 'xvalname', 'shot');
+addParameter(p, 'figname', sprintf('scan %04d-%02d-%02d %c%c shots %d-%d', ...
+    shotdate(1), shotdate(2), shotdate(3), params.cam, params.atom, ...
+    shotnums(1), shotnums(end)));
+addParameter(p, 'bginfo', params.bginfo);
+addParameter(p, 'macrocalc', {});
+addParameter(p, 'debug', params.debug);
+addParameter(p, 'xvals', shotnums(1, :));
+addParameter(p, 'savefigures', false);
+
+% Parse inputs
+parse(p, varargin{:});
+
+% Assign parsed values to variables
+xvalname = p.Results.xvalname;
+figname = p.Results.figname;
+bginfo = p.Results.bginfo;
+macrocalc = p.Results.macrocalc;
+debug = p.Results.debug;
+xvals = p.Results.xvals;
+savefigures = p.Results.savefigures;
 
 % save all inputs to a struct
-inputs = struct();
-inputs.shots = shots;
+inputs = p.Results;
 inputs.params = params;
-inputs.xvals = xvals;
+inputs.shots = shots;
 inputs.dfinfo = dfinfo;
-inputs.bginfo = bginfo;
-inputs.figname = figname;
-inputs.xvalname = xvalname;
-inputs.macrocalc = macrocalc;
-inputs.debug = debug;
+
 
 % get image sizes
 view = params.view;
@@ -302,12 +291,40 @@ for i = 1:(length(calcs)/3)
 end 
 
 % save the figure 
-if savefig
-    smart_fig_export(fig, figname);
+% we want to save the figure in the /figures folder of the subsidiary
+% folder to the calling file
+% or otherwise we want to save
+% it to a /figures folder in the current directory
+
+stack = dbstack("-completenames");
+if length(stack) < 3
+    % we must be calling this function directly from a script, or from
+    % command line 
+    loc = pwd;
+else
+    % we must be calling this function from a secondary function
+    [loc,~,~] = fileparts(stack(2).file);
+end
+
+loc = fullfile(loc, 'procscans');
+if ~isfolder(loc)
+    mkdir(loc);
+end
+
+fname = fullfile(loc, figname);
+
+% save the figure
+if savefigures
+    smart_fig_export(fig, fname);
 end
 
 % save the data
-save([figname, '.mat'], 'inputs', 'ND', 'fd', 'calcs');
+save([fname, '.mat'], 'inputs', 'ND', 'fd', 'calcs');
+
+
+
+
+
 
 % return object 
 scan.ND = ND;
