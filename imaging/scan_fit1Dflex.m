@@ -1,7 +1,30 @@
-function fd = scan_fit1Dflex(ND, params, fd)
+function data = scan_fit1Dflex(data, index, nshots)
+% scan_fit1Dflex: fits 1D traces of an image to a specified fit type.
+% Takes in a data structure and an index to the image to be analyzed.
+% Returns a data structure with the fit results appended to it.
+% 
+% Usage: data = scan_fit1Dflex(data, index)
+% 
+% Arguments:
+% data: data structure containing the fields:
+%   .ND: 2D array of the image data
+%   .params: structure containing the fields:
+%       .fittype: cell array of fit types for x and y traces
+%       .mask: 1x4 array of the mask for the image
+%       .pixel: scalar of the pixel size
+% index: index of the image to be analyzed
+% nshots: number of total shots in this scan
+% 
+% Returns:
+% data: original data structure with the fields (updated or added 
+% after the first time):
+%   .n_count: scalar of the total fluorescence in the image
+%   .x_foo: various fit results for the x trace
+%   .y_foo: various fit results for the y trace
+% 
 
 % extract fittype args
-ft = params.fittype;
+ft = data.params.fittype;
 if iscell(ft)
     x_fit_type = ft{1};
     y_fit_type = ft{2};
@@ -11,36 +34,49 @@ else
 end
 
 % integrate traces over mask
-mask = params.mask;
+mask = data.params.mask;
+ND = squeeze(data.ND(index, :, :));
 x_trace = sum(ND(mask(1):mask(2), :), 1);
 y_trace = sum(ND(:, mask(3):mask(4)), 2);
 x_trace = x_trace';
 
 % perform fits 
-xdata = fit1D(x_trace, x_fit_type, mask(3:4), params);
-ydata = fit1D(y_trace, y_fit_type, mask(1:2), params);
+xdata = fit1D(x_trace, x_fit_type, mask(3:4), data.params);
+ydata = fit1D(y_trace, y_fit_type, mask(1:2), data.params);
 
 % calculate total flourescence for image
 n_count = sum(sum(ND(mask(1):mask(2), mask(3):mask(4))));
 
 % output
-if nargin < 3
-    % create fd struct
-    fd = struct();
-    fd.n_count = n_count;
-else
-    % append to fd if you've already 
-    fd(end+1).n_count = n_count;
+if index == 1
+    % create n_count entry if it's the first time
+    data.n_count = NaN(nshots, 1);
 end
 
+% store fit results into the data structure
+data.n_count(index) = n_count;
+
 % store axis specific information into the data structure
-for d = ['x', 'y']
-    eval(sprintf('data = %cdata;', d));
-    flds = fields(data);
+for r = 1:2
+    if r == 1
+        ds = xdata;
+        name = 'x';
+    else
+        ds = ydata;
+        name = 'y';
+    end
+    flds = fields(ds);
     for f = 1:length(flds)
-        fd(end).(sprintf('%c_%s', d, flds{f})) = data.(flds{f});
+        fld = sprintf('%c_%s', name, flds{f});
+        l = length(ds.(flds{f}));
+        if index == 1
+            % create the field if it's the first time
+            data.(fld) = NaN(nshots, l);
+        end
+        data.(fld)(index, :) = ds.(flds{f});
     end
 end
+
 
 end
 %%%% end main function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,8 +167,6 @@ end
 
 data.trace = trace;
 data.fit_trace = fit_trace;
-data.fit_object = fo;
-data.fit_type = fittype;
 
 end
 %%%% end of fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%

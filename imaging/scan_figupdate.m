@@ -1,8 +1,11 @@
-function [fig, calcresults] = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
-    ind, nreps, nxvals, macrocalc)
+function [fig, data] = scan_figupdate(fig, data, ind, nreps, nxvals)
+data
+xvals = data.xvals;
+xvalname = data.xvalname;
+macrocalc = data.macrocalc;
 
 % extract fittype args
-ft = params.fittype;
+ft = data.params.fittype;
 if iscell(ft)
     x_fit_type = ft{1};
     y_fit_type = ft{2};
@@ -19,15 +22,15 @@ end
 % initialize a cell array to store the results of macrocalcs
 res = cell(1, length(macrocalc)/2);
 
-view = params.view;
-mask = params.mask;
+view = data.params.view;
+mask = data.params.mask;
 viewy = view(2) - view(1) + 1;
 viewx = view(4) - view(3) + 1;
 
 figure(fig);
 % update the OD image axis 
 subplot(3, 3, 1:2, 'replace');
-imagesc(1:viewx, 1:viewy, squeeze(ND(ind, :, :)));
+imagesc(1:viewx, 1:viewy, squeeze(data.ND(ind, :, :)));
 axis image;
 hold on;
 boxy = mask([1, 1, 2, 2, 1]);
@@ -44,7 +47,7 @@ title('number density');
 % update the n_count axis
 subplot(3, 3, 3, 'replace');
 fld = 'n_count';
-y = vertcat(fd.(fld));
+y = data.(fld);
 lbl = 'n\_count [atoms]';
 update_ax(xvals, y, xvalname, lbl, ind, nreps, nxvals);
 res = macrocalcplot(fld, macrocalc, xvals, y, res);
@@ -53,11 +56,11 @@ res = macrocalcplot(fld, macrocalc, xvals, y, res);
 for r = 1:2
     % get type of fitting and mask 
     if r == 1
-        mask = params.mask(3:4);
+        mask = data.params.mask(3:4);
         fit_type = x_fit_type;
         name = 'x';
     else
-        mask = params.mask(1:2);
+        mask = data.params.mask(1:2);
         fit_type = y_fit_type;
         name = 'y';
     end
@@ -71,12 +74,12 @@ for r = 1:2
 
     % update the trace axis 
     subplot(3, nplt, r*nplt + 1, 'replace');
-    update_trace(fd, ind, mask, name);
+    update_trace(data, ind, mask, name);
 
     % update the fitted number axis
     subplot(3, nplt, r*nplt + 2, 'replace');
     fld = [name, '_nfit'];
-    y = vertcat(fd.(fld));
+    y = data.(fld);
     lbl = [name, '\_nfit [atoms]'];
     update_ax(xvals, y, xvalname, lbl, ind, nreps, nxvals);
     res = macrocalcplot(fld, macrocalc, xvals, y, res);
@@ -84,7 +87,7 @@ for r = 1:2
     % update the center position axis
     subplot(3, nplt, r*nplt + 3, 'replace');
     fld = [name, '_center'];
-    y = 1e6 .* vertcat(fd.(fld));
+    y = 1e6 .* data.(fld);
     lbl = [name, '\_center [µm]'];
     update_ax(xvals, y, xvalname, lbl, ind, nreps, nxvals);
     res = macrocalcplot(fld, macrocalc, xvals, y, res);
@@ -94,7 +97,7 @@ for r = 1:2
         % sigma
         subplot(3, nplt, r*nplt + 4, 'replace');
         fld = [name, '_sigma'];
-        y = 1e6 .* vertcat(fd.(fld));
+        y = 1e6 .* data.(fld);
         lbl = [name, '\_sigma [µm]'];
         update_ax(xvals, y, xvalname, lbl, ind, nreps, nxvals);
         res = macrocalcplot(fld, macrocalc, xvals, y, res);
@@ -103,7 +106,7 @@ for r = 1:2
         % sep
         subplot(3, nplt, r*nplt + 5, 'replace');
         fld = [name, '_sep'];
-        y = 1e6 .* vertcat(fd.(fld));
+        y = 1e6 .* data.(fld);
         lbl = [name, '\_sep [µm]'];
         update_ax(xvals, y, xvalname, lbl, ind, nreps, nxvals);
         res = macrocalcplot(fld, macrocalc, xvals, y, res);
@@ -112,7 +115,7 @@ for r = 1:2
         % rtf
         subplot(3, nplt, r*nplt + 4, 'replace');
         fld = [name, '_rTF'];
-        y = 1e6 .* vertcat(fd.(fld));
+        y = 1e6 .* data.(fld);
         lbl = [name, '\_rTF [µm]'];
         update_ax(xvals, y, xvalname, lbl, ind, nreps, nxvals);
         res = macrocalcplot(fld, macrocalc, xvals, y, res);
@@ -128,14 +131,18 @@ for a = 1:length(res)
     calcresults{3*a} = res{a};
 end
 
+data.calcs = calcresults;
+
 end
 
 
 %%%% function to update trace axes %%%%%%%%%%%%%%%%%%%
-function update_trace(fd, ind, mask, name)
+function update_trace(data, ind, mask, name)
 
-    trace = vertcat(fd(ind).([name, '_trace']));
-    fit_trace = vertcat(fd(ind).([name, '_fit_trace']));
+    trace = data.([name, '_trace']);
+    trace = trace(ind, :);
+    fit_trace = data.([name, '_fit_trace']);
+    fit_trace = fit_trace(ind, :);
 
     co = colororder();
 
@@ -218,6 +225,11 @@ switch calcfuncs{i}
         % save result
         res{i} = [m, se];
     case 'peak'
+        while length(x) < length(y)
+            x = [x; x];
+        end
+        x = x(1:length(y));
+
         % perform skew normal fit
         ft = fittype(@(x0, amp, sigma, skew, bg, x) ...
             skewgauss(x0, amp, sigma, skew, bg, x));

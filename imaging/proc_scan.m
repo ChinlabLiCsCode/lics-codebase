@@ -1,4 +1,4 @@
-function scan = proc_scan(params, shots, dfinfo, varargin)
+function data = proc_scan(params, shots, dfinfo, varargin)
 % proc_scan(params, shots, dfinfo, varargin)
 %
 % This function processes a scan of images. It loads the images, subtracts
@@ -34,7 +34,7 @@ function scan = proc_scan(params, shots, dfinfo, varargin)
 %           with this name.
 %       'bginfo' - how to get the background. Overrides the bginfo in
 %           params.
-%       'macrocalc' - cell array of macroscopic calculation parameters. If
+%       'macrocalcs' - cell array of macroscopic calculation parameters. If
 %           supplied, the macroscopic calculation is done and plotted.
 %       'debug' - if true, prints out debug statements.
 %       'xvals' - array of x values. If supplied, the x values are plotted
@@ -84,19 +84,24 @@ xvals = p.Results.xvals;
 savefigures = p.Results.savefigures;
 
 % save all inputs to a struct
-inputs = p.Results;
-inputs.params = params;
-inputs.shots = shots;
-inputs.dfinfo = dfinfo;
-
+data = p.Results;
+data.params = params;
+data.shots = shots;
+data.dfinfo = dfinfo;
+data.xvalname = xvalname;
+data.figname = figname;
+data.bginfo = bginfo;
+data.macrocalc = macrocalc;
+data.debug = debug;
+data.xvals = xvals;
+data.savefigures = savefigures;
 
 % get image sizes
 view = params.view;
 mask = params.mask;
 viewx = view(4) - view(3) + 1;
 viewy = view(2) - view(1) + 1;
-maskx = mask(4) - mask(3) + 1;
-masky = mask(2) - mask(1) + 1;
+
 
 %% figure out how the user supplied bginfo.
 if debug
@@ -171,19 +176,11 @@ end
 nshots = numel(shotnums);
 [nreps, nxvals] = size(shotnums);
 
-% number of frames in each raw image
-if params.cam == 'H'
-    nF = 3; % number of frames
-else
-    nF = 2;
-end
-
 % create blank image arrays 
-raw = NaN(nshots, viewy, viewx, nF); % raw images
 L = NaN(nshots + ndf, viewy, viewx); % light images
 A = NaN(nshots, viewy, viewx); % atom images
 Aprime = NaN(nshots, viewy, viewx); % ideal light for atom images
-ND = NaN(nshots, viewy, viewx); % number density images 
+data.ND = NaN(nshots, viewy, viewx); % number density images 
 if dfcase == 3
     L(1:ndf, :, :) = Lload; % insert preloaded light frames
 end
@@ -253,17 +250,16 @@ while procind <= nshots
     % defringe and calculate images 
     for ind = procind:loadind-1
         Aprime(ind, :, :) = defringe(A(ind, :, :), dfobj);
-        ND(ind, :, :) = nd_calc(A(ind, :, :), Aprime(ind, :, :), params);
+        data.ND(ind, :, :) = nd_calc(A(ind, :, :), Aprime(ind, :, :), params);
         
     end
 
     % perform fits 
     for ind = procind:loadind-1
-        if ind == 1
-            fd = scan_fit1Dflex(squeeze(ND(ind, :, :)), params);
-        else
-            fd = scan_fit1Dflex(squeeze(ND(ind, :, :)), params, fd);
+        if debug
+            fprintf('Fitting shot %d of %d\r', ind, nshots);
         end
+        data = scan_fit1Dflex(data, ind, nshots);
     end
 
     
@@ -276,25 +272,40 @@ while procind <= nshots
             'Theme', 'light');
         sgtitle(fig, figname, 'FontSize', 35);
     end
-    [fig, calcs] = scan_figupdate(fig, params, xvals, fd, ND, xvalname,...
-        loadind-1, nreps, nxvals, macrocalc);
+    [fig, data] = scan_figupdate(fig, data, ind, nreps, nxvals);
     procind = loadind;
 
 end %%%% end of main loop %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % report results
-for i = 1:(length(calcs)/3)
-    fld = calcs{3*i - 2};
-    type = calcs{3*i - 1};
-    val = calcs{3*i};
-    fprintf('%s of %s = %.6f (%.6f)\n\n', type, fld, val(1), val(2));
+for i = 1:(length(data.calcs)/3)
+    fld = data.calcs{3*i - 2};
+    type = data.calcs{3*i - 1};
+    val = data.calcs{3*i};
+    if strcmp(type, 'mean')
+        fprintf('mean of %s = %s\n\n', fld, errorformat(val(1), val(2)));
+    elseif strcmp(type, 'peak')
+        fprintf('max value of %s is %.2f at x = %.2f\n\n', fld, val(2), val(1));
+    end
 end 
 
+% reshape results
+data.ND = permute(reshape(data.ND, nxvals, nreps, viewy, viewx), [2 1 3 4]);
+data.n_count = reshape(data.n_count, nxvals, nreps)';
+flds = fields(data);
+for f = 1:length(flds)
+    if contains(flds{f}, ("x"|"y") + "_")
+        [~, l] = size(data.(flds{f}));
+        data.(flds{f}) = permute(reshape(data.(flds{f}), nxvals, nreps, l), [2 1 3]);
+    end
+end
+
+
 % save the figure 
-% we want to save the figure in the /figures folder of the subsidiary
+% we want to save the figure in the /procscans folder of the subsidiary
 % folder to the calling file
 % or otherwise we want to save
-% it to a /figures folder in the current directory
+% it to a /procscans folder in the current directory
 
 stack = dbstack("-completenames");
 if length(stack) < 3
@@ -319,18 +330,8 @@ if savefigures
 end
 
 % save the data
-save([fname, '.mat'], 'inputs', 'ND', 'fd', 'calcs');
+save([fname, '.mat'], 'data');
 
-
-
-
-
-
-% return object 
-scan.ND = ND;
-scan.fd = fd;
-scan.inputs = inputs;
-scan.calcs = calcs;
 
 
 
