@@ -32,7 +32,7 @@ if ~isstr(in_target)
         my_num = in_target;
     end
 
-    in_target = sprintf('//DESKTOP-L5NCGH6/Experimentalcontroll/ExpControl%4d/timingsettings/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
+    in_target = sprintf('//LiCs_NAS/Data_Backup/expcontrolbackup/ExpControl%4d/timingsettings/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
 end
 % End Henry addition
  

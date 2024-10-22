@@ -65,6 +65,7 @@ files = files(~future);
 
 % The right day to load is the last non-future day 
 load_file = files(end);
+fprintf('loading %s\n', fullfile(folderpath, load_file.name));
 
 % Load the params
 params = load(fullfile(folderpath, load_file.name), 'params*');

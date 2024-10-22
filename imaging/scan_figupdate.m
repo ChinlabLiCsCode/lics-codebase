@@ -1,5 +1,5 @@
 function [fig, data] = scan_figupdate(fig, data, ind, nreps, nxvals)
-data
+
 xvals = data.xvals;
 xvalname = data.xvalname;
 macrocalc = data.macrocalc;

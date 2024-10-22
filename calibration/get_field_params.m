@@ -292,9 +292,9 @@ else
 %cal_set = [-0.7, 3.85, 6.25]; %2021-04-09 Cs- |a> FR
 %cal_set = [-0.85, 3.85, 3.6]; %2021-06-23 Cs- Li|a> FR   After Current Carrying Screw Heating issue
 %cal_set = [-0.85, 3.85, 3]; %temp_FRANK
-cal_set = [-0.85, 3.85, 7.5]; %2021-09-17 sympathetic cooling field
+% cal_set = [-0.85, 3.85, 7.5]; %2021-09-17 sympathetic cooling field
 %cal_set = [-0.85, 3.85, 3.9]; 
-
+cal_set = [-0.85, 3.85, 2.95]; %2024-05-25 start of Shim Jump
 
 
 
