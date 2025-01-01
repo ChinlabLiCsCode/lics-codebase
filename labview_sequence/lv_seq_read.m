@@ -12,7 +12,8 @@ if ~isstr(in_file_name) %#ok<REMFF1>
     %exp control died
     %my_file_name = sprintf('y:/ExpControl%4d/timingsettings/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
     %new path
-    my_file_name = sprintf('//LiCs_NAS/Data_Backup/expcontrolbackup/ExpControl%4d/timingsettings/%04d%02d%02d/%04d%02d%02d%04d',my_clock(1),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
+    lpath = localpath('lvseqread');
+    my_file_name = sprintf(lpath,my_clock(1),my_clock(1),my_clock(2),my_clock(3),my_clock(1),my_clock(2),my_clock(3),my_num);
     
 else
     my_file_name = in_file_name;
