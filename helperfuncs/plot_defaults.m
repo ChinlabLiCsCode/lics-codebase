@@ -41,3 +41,5 @@ gray = co(10, :);
 teal = co(11, :);
 brown = co(12, :);
 magenta = co(13, :);
+black = [0 0 0];
+white = [1 1 1];
