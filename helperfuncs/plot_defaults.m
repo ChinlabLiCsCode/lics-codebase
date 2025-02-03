@@ -10,9 +10,10 @@ set(groot, 'defaultAxesFontSize', 12);
 cs_cbar = cubehelix(256, -0.25, 0, 2, 1.1, [0,0.95], [0,0.95]);
 li_cbar = cubehelix(256, 1, 0, 2, 1.1, [0,0.95], [0,0.95]);
 
-cs_blue = "#0072BD";
-li_red = "#A2142F";
-
+% cs_blue = "#0072BD";
+% li_red = "#A2142F";
+li_red = li_cbar(128,:);
+cs_blue = cs_cbar(128,:);
 
 co = [...        
     0    0.4470    0.7410
