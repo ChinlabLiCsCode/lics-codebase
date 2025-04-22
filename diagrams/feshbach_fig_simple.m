@@ -4,8 +4,8 @@ clc;
 
 plot_defaults;
 
-xi = 878;
-xf = 898;
+xi = 879;
+xf = 897;
 yi = -600;
 yf = 600;
 co = colororder();
@@ -32,12 +32,12 @@ cs(abs(cs)>2*yf) = NaN;
 
 
 
-fig = figure('Position', [0, 0, 400, 220]);
+fig = figure('Position', [0, 0, 300, 220]);
 % tiledlayout(3, 1, 'TileSpacing','tight');
 
 %%% lics figure
-specialvals = [880.65, 892.65];
-specialvalcolors = [Ccs; Ca];
+specialvals = 892.648; %[880.65, 892.65];
+specialvalcolors = Ca; %[Ccs; Ca];
 
 hold on;
 box("on");
@@ -46,19 +46,19 @@ plot(bvals, cs, 'LineWidth', 1.5, 'Color', Ccs);
 xlim([xi, xf]);
 ylim([yi, yf]);
 for ii = 1:length(specialvals)
-    xline(specialvals(ii), '--', 'LineWidth', 1, 'Color', specialvalcolors(ii, :));
+    xline(specialvals(ii), ':', 'LineWidth', 1, 'Color', specialvalcolors(ii, :));
 end
 % set(gca, 'XTickLabels', []);
 yticks(-500:250:500)
-ylabel("scattering length (a_0)");
-xlabel("magnetic field (G)");
+ylabel("Scattering Length (a_0)");
+xlabel("Magnetic Field (G)");
 % legend({'Li_a-Cs', 'Li_b-Cs'}, 'location', 'northwest')
-text(882, 70, 'Cs-Cs scattering length a_{BB}', ...
-    'Color', Ccs, 'Rotation', 11, 'HorizontalAlignment', 'left', ...
-    'VerticalAlignment', 'bottom', 'fontsize', 11)
-text(882, -80, 'Li-Cs scattering length a_{BF}', ...
-    'Color', Ca, 'Rotation', 0, 'HorizontalAlignment', 'left', ...
-    'VerticalAlignment', 'top', 'fontsize', 11)
+% text(882, 20, 'Cs-Cs', ...
+%     'Color', Ccs, 'Rotation', 0, 'HorizontalAlignment', 'left', ...
+%     'VerticalAlignment', 'bottom', 'fontsize', 13)
+% text(882, -80, 'Li-Cs', ...
+%     'Color', Ca, 'Rotation', 0, 'HorizontalAlignment', 'left', ...
+%     'VerticalAlignment', 'top', 'fontsize', 13)
 % grid on;
 yline(0, 'k-')
 ax1 = gca;
@@ -71,6 +71,6 @@ fontsize(gcf, 12, "points")
 % set(ax1top, 'XTick', specialvals, 'YTick', []);
 % xtickangle(ax1top, 0);
 % ax1top.FontSize = 11;
-title(ax1, 'LiCs Scattering Lengths')
+% title(ax1, 'LiCs Scattering Lengths')
 
 smart_fig_export(fig, 'feshbachfig_simple');
