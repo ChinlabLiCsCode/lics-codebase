@@ -1,6 +1,7 @@
 *.asv
 *~
 localpath.m
+startup.m
 .vscode*
 *.mat
 *.pdf
