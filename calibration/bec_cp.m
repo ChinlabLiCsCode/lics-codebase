@@ -20,7 +20,7 @@ Rx = sqrt(2.*mu./(mCs.*wx^2)); Ry = sqrt(2.*mu./(mCs*wy^2)); Rz = sqrt(2.*mu./(m
 %transition temperature
 TC = 0.94.*(hbar.*w./k_B).*N.^(1/3);
 
-dTC0=(-0.73.*((wx+wy+w)./3)./w).*N.^(-1/3);
+dTC0=(-0.73.*((wx+wy+wz)./3)./w).*N.^(-1/3);
 dTCint=(-1.33.*a.*a_0./aho).*N.^(1/6);
 
 crit_a = 0.575.*aho./N./a_0; %spherical symmetry crit a
