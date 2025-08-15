@@ -1,0 +1,27 @@
+from labscript import start, stop, add_time_marker, Trigger, DigitalOut, load_globals
+from labscript.remote import RemoteBLACS
+from labscript_devices.DummyPseudoclock.labscript_devices import DummyPseudoclock
+from labscript_devices.NI_DAQmx.models.NI_PXIe_6536 import NI_PXIe_6536
+
+from labscriptlib.example_apparatus4.connection_table import ConnectionTable
+
+if __name__ == '__main__':
+    ct = ConnectionTable()
+
+    # Begin issuing labscript primitives
+    # A timing variable t is used for convenience
+    # start() elicits the commencement of the shot
+    t = 0
+    add_time_marker(t, "Start", verbose=True)
+    start()
+
+    for i in range (1, 31):
+        t=2*i
+        for out in ct.digOuts:
+            ct.digOuts[out].go_high(t=t)
+        t += 1
+
+        for out in ct.digOuts:
+            ct.digOuts[out].go_low(t=t)
+
+    stop(t)
