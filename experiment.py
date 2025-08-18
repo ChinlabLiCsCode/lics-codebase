@@ -15,11 +15,11 @@ if __name__ == '__main__':
     add_time_marker(t, "Start", verbose=True)
     start()
 
-    for i in range (1, 31):
-        t=2*i
+    for i in range (1, int(31e4)):
+        t=2*i *1e-5
         for out in ct.digOuts:
             ct.digOuts[out].go_high(t=t)
-        t += 1
+        t += 1 *1e-5
 
         for out in ct.digOuts:
             ct.digOuts[out].go_low(t=t)
