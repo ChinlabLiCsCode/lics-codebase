@@ -1,8 +1,4 @@
-from labscript import start, stop,add_time_marker, DigitalOut, AnalogOut
-from labscript.remote import RemoteBLACS
-from labscript_devices.DummyPseudoclock.labscript_devices import DummyPseudoclock
-from labscript_devices.NI_DAQmx.models.NI_PXIe_6536 import NI_PXIe_6536
-from labscript_devices.NI_DAQmx.models.NI_PXIe_6738 import NI_PXIe_6738
+from labscript import start, stop,add_time_marker
 
 from labscriptlib.LiCs_ExperimentApparatus.connection_table import ConnectionTable
 
