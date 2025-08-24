@@ -1,8 +1,9 @@
-from labscript import start, stop,add_time_marker, DigitalOut, AnalogOut
+from labscript import start, stop,add_time_marker, DigitalOut, AnalogOut, StaticAnalogOut
 from labscript.remote import RemoteBLACS
 from labscript_devices.DummyPseudoclock.labscript_devices import DummyPseudoclock
 from labscript_devices.NI_DAQmx.models.NI_PXIe_6536 import NI_PXIe_6536
 from labscript_devices.NI_DAQmx.models.NI_PXIe_6738 import NI_PXIe_6738
+from LiCs_devices.DP832.labscript_devices import DP832
 
 class ConnectionTable:
     """
@@ -11,6 +12,7 @@ class ConnectionTable:
     Devices:
         2x NI PXIe-6536 Digital Cards
         2x NI PXIe-6738 Analog Cards
+        1x Rigol DP832 Power supply
         
     """
     def __init__(self):
@@ -26,16 +28,27 @@ class ConnectionTable:
         #NI cards
         NiCards = {
             'DC1':NI_PXIe_6536(name='DC1', 
-                                    parent_device=dummyClock.clockline,
+                                    parent_device=dummyClock.clockline, # type: ignore
                                     clock_terminal='PFI4',
                                     MAX_name='PXI1Slot2',
                                     worker=remotes['NiControlComputer']),
 
             'DC2':NI_PXIe_6536(name='DC2',
-                                    parent_device=dummyClock.clockline,
+                                    parent_device=dummyClock.clockline, # type: ignore
                                     clock_terminal='PFI4',
                                     MAX_name='PXI1Slot3',
                                     worker=remotes['NiControlComputer'])
+        }
+
+        #power supplies
+        powerSupplies = {
+            "ps1":DP832(name='ps1', VISA_name="USB0::0x1AB1::0x0E11::DP8C272M00087::INSTR", limited='current')
+        }
+
+        self.psOut = {
+            'ch1':StaticAnalogOut("ch1", powerSupplies['ps1'], 'channel 1'),
+            'ch2':StaticAnalogOut('ch2', powerSupplies['ps1'], 'channel 2'),
+            'ch3':StaticAnalogOut('ch3', powerSupplies['ps1'], 'channel 3')
         }
 
         #--------------------------------------------------------------------digital output for NI-PXIe 6536 cards--------------------------------------------------------------------------
