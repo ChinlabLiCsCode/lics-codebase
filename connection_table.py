@@ -22,26 +22,26 @@ class ConnectionTable:
     def __init__(self):
         
         #Define remote connections to other computers
-        remotes = {
-            'NiControlComputer': RemoteBLACS(name='NiControlComputer', host='192.168.1.39')
+        # remotes = {
+        #     'NiControlComputer': RemoteBLACS(name='NiControlComputer', host='192.168.1.39')
 
-        }
-        """        
-        #dummy master pseudoclock
-        DummyPseudoclock(name="linetriggerdummyclk") 
+        # }
+              
+        # #dummy master pseudoclock
+        # DummyPseudoclock(name="linetriggerdummyclk") 
 
-        #dummy trigger
-        DummyIntermediateDevice(name='linetrigger', parent_device=linetriggerdummyclk.clockline)
-        self.linetriggerout = DigitalOut(name='linetriggerout', parent_device=linetrigger, connection="dummy_dout")
+        # #dummy trigger
+        # DummyIntermediateDevice(name='linetrigger', parent_device=linetriggerdummyclk.clockline)
+        # self.linetriggerout = DigitalOut(name='linetriggerout', parent_device=linetrigger, connection="dummy_dout")
+        
+
+        # #Pseudoclock
+        # PrawnBlaster(name='prawnblaster', com_port='COM3', num_pseudoclocks=4, in_pins=[0],
+        #              trigger_device=linetrigger, trigger_connection=linetriggerout)
         
 
         #Pseudoclock
-        PrawnBlaster(name='prawnblaster', com_port='COM3', num_pseudoclocks=4, in_pins=[0],
-                     trigger_device=linetrigger, trigger_connection=linetriggerout)
-        """
-
-        # #Pseudoclock
-        PrawnBlaster(name='prawnblaster', com_port='COM3', num_pseudoclocks=4, pico_board="pico2")
+        prawnblaster = PrawnBlaster(name='prawnblaster', com_port='COM3', num_pseudoclocks=4, pico_board="pico2")
 
 
         #NI cards
@@ -64,17 +64,19 @@ class ConnectionTable:
             
             'AC1':NI_PXIe_6738(
                 name='AC1',
-                parent_device=prawnblaster.clocklines[3],
-                clock_terminal='PFI4',
+                parent_device=prawnblaster.clocklines[2],
+                clock_terminal='/PXI1Slot4/PFI2',
                 MAX_name='PXI1Slot4',
+                max_AO_sample_rate=4e5
                 #worker=remotes['NiControlComputer']
                 ),
             
             'AC2':NI_PXIe_6738(
                 name='AC2',
-                parent_device=prawnblaster.clocklines[2],
-                clock_terminal='PFI4',
+                parent_device=prawnblaster.clocklines[3],
+                clock_terminal='/PXI1Slot5/PFI2',
                 MAX_name='PXI1Slot5',
+                max_AO_sample_rate=4e5
                 #worker=remotes['NiControlComputer']
                 ),
                                 
@@ -100,7 +102,7 @@ class ConnectionTable:
         
         #--------------------------------------------------------------------digital output for NI-PXIe 6536 cards--------------------------------------------------------------------------
         self.DC1Outs = {
-            'DC1O0':DigitalOut(name='DC1O0', parent_device=NiCards['DC1'], connection='port0/line0'),
+            'DC1O0':DigitalOut(name='DC1O0', parent_device=NiCards['DC1'], connection='port0/line0', default_value=0),
             'DC1O1':DigitalOut(name='DC1O1', parent_device=NiCards['DC1'], connection='port0/line1'),
             'DC1O2':DigitalOut(name='DC1O2', parent_device=NiCards['DC1'], connection='port0/line2'),
             'DC1O3':DigitalOut(name='DC1O3', parent_device=NiCards['DC1'], connection='port0/line3'),
@@ -133,6 +135,7 @@ class ConnectionTable:
             'DC1O30':DigitalOut(name='DC1O30', parent_device=NiCards['DC1'], connection='port3/line6'),
             'DC1O31':DigitalOut(name='DC1O31', parent_device=NiCards['DC1'], connection='port3/line7')
         }
+
 
         self.DC2Outs = {
             'DC2O0':DigitalOut(name='DC2O0', parent_device=NiCards['DC2'], connection='port0/line0'),
@@ -171,7 +174,7 @@ class ConnectionTable:
         
         #-------------------------------------------------------------------analog outputs for NI PXIe-6738 cards---------------------------------------------------------------------------
         self.AC1Outs = {
-            'AC1O0':AnalogOut(name='AC1O0', parent_device=NiCards['AC1'], connection='ao0'),
+            'AC1O0':AnalogOut(name='AC1O0', parent_device=NiCards['AC1'], connection='ao0', default_value=0),
             'AC1O1':AnalogOut(name='AC1O1', parent_device=NiCards['AC1'], connection='ao1'),
             'AC1O2':AnalogOut(name='AC1O2', parent_device=NiCards['AC1'], connection='ao2'),
             'AC1O3':AnalogOut(name='AC1O3', parent_device=NiCards['AC1'], connection='ao3'),
@@ -179,30 +182,30 @@ class ConnectionTable:
             'AC1O5':AnalogOut(name='AC1O5', parent_device=NiCards['AC1'], connection='ao5'),
             'AC1O6':AnalogOut(name='AC1O6', parent_device=NiCards['AC1'], connection='ao6'),
             'AC1O7':AnalogOut(name='AC1O7', parent_device=NiCards['AC1'], connection='ao7'),
-            'AC1O8':AnalogOut(name='AC1O8', parent_device=NiCards['AC1'], connection='ao0'),
-            'AC1O9':AnalogOut(name='AC1O9', parent_device=NiCards['AC1'], connection='ao1'),
-            'AC1O10':AnalogOut(name='AC1O10', parent_device=NiCards['AC1'], connection='ao2'),
-            'AC1O11':AnalogOut(name='AC1O11', parent_device=NiCards['AC1'], connection='ao3'),
-            'AC1O12':AnalogOut(name='AC1O12', parent_device=NiCards['AC1'], connection='ao4'),
-            'AC1O13':AnalogOut(name='AC1O13', parent_device=NiCards['AC1'], connection='ao5'),
-            'AC1O14':AnalogOut(name='AC1O14', parent_device=NiCards['AC1'], connection='ao6'),
-            'AC1O15':AnalogOut(name='AC1O15', parent_device=NiCards['AC1'], connection='ao7'),
-            'AC1O16':AnalogOut(name='AC1O16', parent_device=NiCards['AC1'], connection='ao0'),
-            'AC1O17':AnalogOut(name='AC1O17', parent_device=NiCards['AC1'], connection='ao1'),
-            'AC1O18':AnalogOut(name='AC1O18', parent_device=NiCards['AC1'], connection='ao2'),
-            'AC1O19':AnalogOut(name='AC1O19', parent_device=NiCards['AC1'], connection='ao3'),
-            'AC1O20':AnalogOut(name='AC1O20', parent_device=NiCards['AC1'], connection='ao4'),
-            'AC1O21':AnalogOut(name='AC1O21', parent_device=NiCards['AC1'], connection='ao5'),
-            'AC1O22':AnalogOut(name='AC1O22', parent_device=NiCards['AC1'], connection='ao6'),
-            'AC1O23':AnalogOut(name='AC1O23', parent_device=NiCards['AC1'], connection='ao7'),
-            'AC1O24':AnalogOut(name='AC1O24', parent_device=NiCards['AC1'], connection='ao0'),
-            'AC1O25':AnalogOut(name='AC1O25', parent_device=NiCards['AC1'], connection='ao1'),
-            'AC1O26':AnalogOut(name='AC1O26', parent_device=NiCards['AC1'], connection='ao2'),
-            'AC1O27':AnalogOut(name='AC1O27', parent_device=NiCards['AC1'], connection='ao3'),
-            'AC1O28':AnalogOut(name='AC1O28', parent_device=NiCards['AC1'], connection='ao4'),
-            'AC1O29':AnalogOut(name='AC1O29', parent_device=NiCards['AC1'], connection='ao5'),
-            'AC1O30':AnalogOut(name='AC1O30', parent_device=NiCards['AC1'], connection='ao6'),
-            'AC1O31':AnalogOut(name='AC1O31', parent_device=NiCards['AC1'], connection='ao7')
+            'AC1O8':AnalogOut(name='AC1O8', parent_device=NiCards['AC1'], connection='ao8'),
+            'AC1O9':AnalogOut(name='AC1O9', parent_device=NiCards['AC1'], connection='ao9'),
+            'AC1O10':AnalogOut(name='AC1O10', parent_device=NiCards['AC1'], connection='ao10'),
+            'AC1O11':AnalogOut(name='AC1O11', parent_device=NiCards['AC1'], connection='ao11'),
+            'AC1O12':AnalogOut(name='AC1O12', parent_device=NiCards['AC1'], connection='ao12'),
+            'AC1O13':AnalogOut(name='AC1O13', parent_device=NiCards['AC1'], connection='ao13'),
+            'AC1O14':AnalogOut(name='AC1O14', parent_device=NiCards['AC1'], connection='ao14'),
+            'AC1O15':AnalogOut(name='AC1O15', parent_device=NiCards['AC1'], connection='ao15'),
+            'AC1O16':AnalogOut(name='AC1O16', parent_device=NiCards['AC1'], connection='ao16'),
+            'AC1O17':AnalogOut(name='AC1O17', parent_device=NiCards['AC1'], connection='ao17'),
+            'AC1O18':AnalogOut(name='AC1O18', parent_device=NiCards['AC1'], connection='ao18'),
+            'AC1O19':AnalogOut(name='AC1O19', parent_device=NiCards['AC1'], connection='ao19'),
+            'AC1O20':AnalogOut(name='AC1O20', parent_device=NiCards['AC1'], connection='ao20'),
+            'AC1O21':AnalogOut(name='AC1O21', parent_device=NiCards['AC1'], connection='ao21'),
+            'AC1O22':AnalogOut(name='AC1O22', parent_device=NiCards['AC1'], connection='ao22'),
+            'AC1O23':AnalogOut(name='AC1O23', parent_device=NiCards['AC1'], connection='ao23'),
+            'AC1O24':AnalogOut(name='AC1O24', parent_device=NiCards['AC1'], connection='ao24'),
+            'AC1O25':AnalogOut(name='AC1O25', parent_device=NiCards['AC1'], connection='ao25'),
+            'AC1O26':AnalogOut(name='AC1O26', parent_device=NiCards['AC1'], connection='ao26'),
+            'AC1O27':AnalogOut(name='AC1O27', parent_device=NiCards['AC1'], connection='ao27'),
+            'AC1O28':AnalogOut(name='AC1O28', parent_device=NiCards['AC1'], connection='ao28'),
+            'AC1O29':AnalogOut(name='AC1O29', parent_device=NiCards['AC1'], connection='ao29'),
+            'AC1O30':AnalogOut(name='AC1O30', parent_device=NiCards['AC1'], connection='ao30'),
+            'AC1O31':AnalogOut(name='AC1O31', parent_device=NiCards['AC1'], connection='ao31')
         }
 
         self.AC2Outs = {
@@ -214,30 +217,30 @@ class ConnectionTable:
             'AC2O5':AnalogOut(name='AC2O5', parent_device=NiCards['AC2'], connection='ao5'),
             'AC2O6':AnalogOut(name='AC2O6', parent_device=NiCards['AC2'], connection='ao6'),
             'AC2O7':AnalogOut(name='AC2O7', parent_device=NiCards['AC2'], connection='ao7'),
-            'AC2O8':AnalogOut(name='AC2O8', parent_device=NiCards['AC2'], connection='ao0'),
-            'AC2O9':AnalogOut(name='AC2O9', parent_device=NiCards['AC2'], connection='ao1'),
-            'AC2O10':AnalogOut(name='AC2O10', parent_device=NiCards['AC2'], connection='ao2'),
-            'AC2O11':AnalogOut(name='AC2O11', parent_device=NiCards['AC2'], connection='ao3'),
-            'AC2O12':AnalogOut(name='AC2O12', parent_device=NiCards['AC2'], connection='ao4'),
-            'AC2O13':AnalogOut(name='AC2O13', parent_device=NiCards['AC2'], connection='ao5'),
-            'AC2O14':AnalogOut(name='AC2O14', parent_device=NiCards['AC2'], connection='ao6'),
-            'AC2O15':AnalogOut(name='AC2O15', parent_device=NiCards['AC2'], connection='ao7'),
-            'AC2O16':AnalogOut(name='AC2O16', parent_device=NiCards['AC2'], connection='ao0'),
-            'AC2O17':AnalogOut(name='AC2O17', parent_device=NiCards['AC2'], connection='ao1'),
-            'AC2O18':AnalogOut(name='AC2O18', parent_device=NiCards['AC2'], connection='ao2'),
-            'AC2O19':AnalogOut(name='AC2O19', parent_device=NiCards['AC2'], connection='ao3'),
-            'AC2O20':AnalogOut(name='AC2O20', parent_device=NiCards['AC2'], connection='ao4'),
-            'AC2O21':AnalogOut(name='AC2O21', parent_device=NiCards['AC2'], connection='ao5'),
-            'AC2O22':AnalogOut(name='AC2O22', parent_device=NiCards['AC2'], connection='ao6'),
-            'AC2O23':AnalogOut(name='AC2O23', parent_device=NiCards['AC2'], connection='ao7'),
-            'AC2O24':AnalogOut(name='AC2O24', parent_device=NiCards['AC2'], connection='ao0'),
-            'AC2O25':AnalogOut(name='AC2O25', parent_device=NiCards['AC2'], connection='ao1'),
-            'AC2O26':AnalogOut(name='AC2O26', parent_device=NiCards['AC2'], connection='ao2'),
-            'AC2O27':AnalogOut(name='AC2O27', parent_device=NiCards['AC2'], connection='ao3'),
-            'AC2O28':AnalogOut(name='AC2O28', parent_device=NiCards['AC2'], connection='ao4'),
-            'AC2O29':AnalogOut(name='AC2O29', parent_device=NiCards['AC2'], connection='ao5'),
-            'AC2O30':AnalogOut(name='AC2O30', parent_device=NiCards['AC2'], connection='ao6'),
-            'AC2O31':AnalogOut(name='AC2O31', parent_device=NiCards['AC2'], connection='ao7')
+            'AC2O8':AnalogOut(name='AC2O8', parent_device=NiCards['AC2'], connection='ao8'),
+            'AC2O9':AnalogOut(name='AC2O9', parent_device=NiCards['AC2'], connection='ao9'),
+            'AC2O10':AnalogOut(name='AC2O10', parent_device=NiCards['AC2'], connection='ao10'),
+            'AC2O11':AnalogOut(name='AC2O11', parent_device=NiCards['AC2'], connection='ao11'),
+            'AC2O12':AnalogOut(name='AC2O12', parent_device=NiCards['AC2'], connection='ao12'),
+            'AC2O13':AnalogOut(name='AC2O13', parent_device=NiCards['AC2'], connection='ao13'),
+            'AC2O14':AnalogOut(name='AC2O14', parent_device=NiCards['AC2'], connection='ao14'),
+            'AC2O15':AnalogOut(name='AC2O15', parent_device=NiCards['AC2'], connection='ao15'),
+            'AC2O16':AnalogOut(name='AC2O16', parent_device=NiCards['AC2'], connection='ao16'),
+            'AC2O17':AnalogOut(name='AC2O17', parent_device=NiCards['AC2'], connection='ao17'),
+            'AC2O18':AnalogOut(name='AC2O18', parent_device=NiCards['AC2'], connection='ao18'),
+            'AC2O19':AnalogOut(name='AC2O19', parent_device=NiCards['AC2'], connection='ao19'),
+            'AC2O20':AnalogOut(name='AC2O20', parent_device=NiCards['AC2'], connection='ao20'),
+            'AC2O21':AnalogOut(name='AC2O21', parent_device=NiCards['AC2'], connection='ao21'),
+            'AC2O22':AnalogOut(name='AC2O22', parent_device=NiCards['AC2'], connection='ao22'),
+            'AC2O23':AnalogOut(name='AC2O23', parent_device=NiCards['AC2'], connection='ao23'),
+            'AC2O24':AnalogOut(name='AC2O24', parent_device=NiCards['AC2'], connection='ao24'),
+            'AC2O25':AnalogOut(name='AC2O25', parent_device=NiCards['AC2'], connection='ao25'),
+            'AC2O26':AnalogOut(name='AC2O26', parent_device=NiCards['AC2'], connection='ao26'),
+            'AC2O27':AnalogOut(name='AC2O27', parent_device=NiCards['AC2'], connection='ao27'),
+            'AC2O28':AnalogOut(name='AC2O28', parent_device=NiCards['AC2'], connection='ao28'),
+            'AC2O29':AnalogOut(name='AC2O29', parent_device=NiCards['AC2'], connection='ao29'),
+            'AC2O30':AnalogOut(name='AC2O30', parent_device=NiCards['AC2'], connection='ao30'),
+            'AC2O31':AnalogOut(name='AC2O31', parent_device=NiCards['AC2'], connection='ao31')
         }
         
         
