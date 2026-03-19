@@ -7,6 +7,7 @@ from labscript_devices.PrawnBlaster.labscript_devices import PrawnBlaster
 from labscript_devices.DummyIntermediateDevice import DummyIntermediateDevice
 from labscript_devices.DummyPseudoclock.labscript_devices import DummyPseudoclock
 
+
 class ConnectionTable:
     """
     Connection table for LiCs Experiment
@@ -19,13 +20,9 @@ class ConnectionTable:
         
     """
 
+
     def __init__(self):
         
-        #Define remote connections to other computers
-        # remotes = {
-        #     'NiControlComputer': RemoteBLACS(name='NiControlComputer', host='192.168.1.39')
-
-        # }
               
         # #dummy master pseudoclock
         # DummyPseudoclock(name="linetriggerdummyclk") 
@@ -45,49 +42,35 @@ class ConnectionTable:
 
 
         #NI cards
-        NiCards = {
-            'DC1':NI_PXIe_6536(
-                name='DC1', 
-                parent_device=prawnblaster.clocklines[0], # type: ignore
-                clock_terminal='PFI4',
-                MAX_name='PXI1Slot2'
-                #worker=remotes['NiControlComputer']
-                ),
+        NIBox1 = NI_PXIe_6536(
+            name = 'NIBox1', 
+            parent_device = prawnblaster.clocklines[0], 
+            clock_terminal = 'PFI4',
+            MAX_name = 'PXI1Slot2')
 
-            'DC2':NI_PXIe_6536(
-                name='DC2',
-                parent_device=prawnblaster.clocklines[1], # type: ignore
-                clock_terminal='PFI4',
-                MAX_name='PXI1Slot3',
-                #worker=remotes['NiControlComputer']
-                ),
+        NIBox2 = NI_PXIe_6536(
+            name = 'NIBox2',
+            parent_device = prawnblaster.clocklines[1], 
+            clock_terminal = 'PFI4',
+            MAX_name = 'PXI1Slot3')
             
-            'AC1':NI_PXIe_6738(
-                name='AC1',
-                parent_device=prawnblaster.clocklines[2],
-                clock_terminal='/PXI1Slot4/PFI2',
-                MAX_name='PXI1Slot4',
-                max_AO_sample_rate=4e5
-                #worker=remotes['NiControlComputer']
-                ),
+        NIBox3 = NI_PXIe_6738(
+            name = 'NIBox3',
+            parent_device = prawnblaster.clocklines[2],
+            clock_terminal = '/PXI1Slot4/PFI2',
+            MAX_name = 'PXI1Slot4',
+            max_AO_sample_rate = 4e5)
             
-            'AC2':NI_PXIe_6738(
-                name='AC2',
-                parent_device=prawnblaster.clocklines[3],
-                clock_terminal='/PXI1Slot5/PFI2',
-                MAX_name='PXI1Slot5',
-                max_AO_sample_rate=4e5
-                #worker=remotes['NiControlComputer']
-                ),
-                                
-        }
-
-        # }
+        NIBox4 = NI_PXIe_6738(
+            name = 'NIBox4',
+            parent_device = prawnblaster.clocklines[3],
+            clock_terminal = '/PXI1Slot5/PFI2',
+            MAX_name = 'PXI1Slot5',
+            max_AO_sample_rate = 4e5)
    
 
-
-        #power supplies
-        """
+        # power supplies
+        
         powerSupplies = {
             "ps1":DP832(name='ps1', VISA_name="USB0::0x1AB1::0x0E11::DP8C272M00087::INSTR", limited='current')
         }
@@ -97,151 +80,147 @@ class ConnectionTable:
             'ch2':StaticAnalogOut('ch2', powerSupplies['ps1'], 'channel 2'),
             'ch3':StaticAnalogOut('ch3', powerSupplies['ps1'], 'channel 3')
         }
-        """
+       
 
         
         #--------------------------------------------------------------------digital output for NI-PXIe 6536 cards--------------------------------------------------------------------------
-        self.DC1Outs = {
-            'DC1O0':DigitalOut(name='DC1O0', parent_device=NiCards['DC1'], connection='port0/line0', default_value=0),
-            'DC1O1':DigitalOut(name='DC1O1', parent_device=NiCards['DC1'], connection='port0/line1'),
-            'DC1O2':DigitalOut(name='DC1O2', parent_device=NiCards['DC1'], connection='port0/line2'),
-            'DC1O3':DigitalOut(name='DC1O3', parent_device=NiCards['DC1'], connection='port0/line3'),
-            'DC1O4':DigitalOut(name='DC1O4', parent_device=NiCards['DC1'], connection='port0/line4'),
-            'DC1O5':DigitalOut(name='DC1O5', parent_device=NiCards['DC1'], connection='port0/line5'),
-            'DC1O6':DigitalOut(name='DC1O6', parent_device=NiCards['DC1'], connection='port0/line6'),
-            'DC1O7':DigitalOut(name='DC1O7', parent_device=NiCards['DC1'], connection='port0/line7'),
-            'DC1O8':DigitalOut(name='DC1O8', parent_device=NiCards['DC1'], connection='port1/line0'),
-            'DC1O9':DigitalOut(name='DC1O9', parent_device=NiCards['DC1'], connection='port1/line1'),
-            'DC1O10':DigitalOut(name='DC1O10', parent_device=NiCards['DC1'], connection='port1/line2'),
-            'DC1O11':DigitalOut(name='DC1O11', parent_device=NiCards['DC1'], connection='port1/line3'),
-            'DC1O12':DigitalOut(name='DC1O12', parent_device=NiCards['DC1'], connection='port1/line4'),
-            'DC1O13':DigitalOut(name='DC1O13', parent_device=NiCards['DC1'], connection='port1/line5'),
-            'DC1O14':DigitalOut(name='DC1O14', parent_device=NiCards['DC1'], connection='port1/line6'),
-            'DC1O15':DigitalOut(name='DC1O15', parent_device=NiCards['DC1'], connection='port1/line7'),
-            'DC1O16':DigitalOut(name='DC1O16', parent_device=NiCards['DC1'], connection='port2/line0'),
-            'DC1O17':DigitalOut(name='DC1O17', parent_device=NiCards['DC1'], connection='port2/line1'),
-            'DC1O18':DigitalOut(name='DC1O18', parent_device=NiCards['DC1'], connection='port2/line2'),
-            'DC1O19':DigitalOut(name='DC1O19', parent_device=NiCards['DC1'], connection='port2/line3'),
-            'DC1O20':DigitalOut(name='DC1O20', parent_device=NiCards['DC1'], connection='port2/line4'),
-            'DC1O21':DigitalOut(name='DC1O21', parent_device=NiCards['DC1'], connection='port2/line5'),
-            'DC1O22':DigitalOut(name='DC1O22', parent_device=NiCards['DC1'], connection='port2/line6'),
-            'DC1O23':DigitalOut(name='DC1O23', parent_device=NiCards['DC1'], connection='port2/line7'),
-            'DC1O24':DigitalOut(name='DC1O24', parent_device=NiCards['DC1'], connection='port3/line0'),
-            'DC1O25':DigitalOut(name='DC1O25', parent_device=NiCards['DC1'], connection='port3/line1'),
-            'DC1O26':DigitalOut(name='DC1O26', parent_device=NiCards['DC1'], connection='port3/line2'),
-            'DC1O27':DigitalOut(name='DC1O27', parent_device=NiCards['DC1'], connection='port3/line3'),
-            'DC1O28':DigitalOut(name='DC1O28', parent_device=NiCards['DC1'], connection='port3/line4'),
-            'DC1O29':DigitalOut(name='DC1O29', parent_device=NiCards['DC1'], connection='port3/line5'),
-            'DC1O30':DigitalOut(name='DC1O30', parent_device=NiCards['DC1'], connection='port3/line6'),
-            'DC1O31':DigitalOut(name='DC1O31', parent_device=NiCards['DC1'], connection='port3/line7')
-        }
 
-
-        self.DC2Outs = {
-            'DC2O0':DigitalOut(name='DC2O0', parent_device=NiCards['DC2'], connection='port0/line0'),
-            'DC2O1':DigitalOut(name='DC2O1', parent_device=NiCards['DC2'], connection='port0/line1'),
-            'DC2O2':DigitalOut(name='DC2O2', parent_device=NiCards['DC2'], connection='port0/line2'),
-            'DC2O3':DigitalOut(name='DC2O3', parent_device=NiCards['DC2'], connection='port0/line3'),
-            'DC2O4':DigitalOut(name='DC2O4', parent_device=NiCards['DC2'], connection='port0/line4'),
-            'DC2O5':DigitalOut(name='DC2O5', parent_device=NiCards['DC2'], connection='port0/line5'),
-            'DC2O6':DigitalOut(name='DC2O6', parent_device=NiCards['DC2'], connection='port0/line6'),
-            'DC2O7':DigitalOut(name='DC2O7', parent_device=NiCards['DC2'], connection='port0/line7'),
-            'DC2O8':DigitalOut(name='DC2O8', parent_device=NiCards['DC2'], connection='port1/line0'),
-            'DC2O9':DigitalOut(name='DC2O9', parent_device=NiCards['DC2'], connection='port1/line1'),
-            'DC2O10':DigitalOut(name='DC2O10', parent_device=NiCards['DC2'], connection='port1/line2'),
-            'DC2O11':DigitalOut(name='DC2O11', parent_device=NiCards['DC2'], connection='port1/line3'),
-            'DC2O12':DigitalOut(name='DC2O12', parent_device=NiCards['DC2'], connection='port1/line4'),
-            'DC2O13':DigitalOut(name='DC2O13', parent_device=NiCards['DC2'], connection='port1/line5'),
-            'DC2O14':DigitalOut(name='DC2O14', parent_device=NiCards['DC2'], connection='port1/line6'),
-            'DC2O15':DigitalOut(name='DC2O15', parent_device=NiCards['DC2'], connection='port1/line7'),
-            'DC2O16':DigitalOut(name='DC2O16', parent_device=NiCards['DC2'], connection='port2/line0'),
-            'DC2O17':DigitalOut(name='DC2O17', parent_device=NiCards['DC2'], connection='port2/line1'),
-            'DC2O18':DigitalOut(name='DC2O18', parent_device=NiCards['DC2'], connection='port2/line2'),
-            'DC2O19':DigitalOut(name='DC2O19', parent_device=NiCards['DC2'], connection='port2/line3'),
-            'DC2O20':DigitalOut(name='DC2O20', parent_device=NiCards['DC2'], connection='port2/line4'),
-            'DC2O21':DigitalOut(name='DC2O21', parent_device=NiCards['DC2'], connection='port2/line5'),
-            'DC2O22':DigitalOut(name='DC2O22', parent_device=NiCards['DC2'], connection='port2/line6'),
-            'DC2O23':DigitalOut(name='DC2O23', parent_device=NiCards['DC2'], connection='port2/line7'),
-            'DC2O24':DigitalOut(name='DC2O24', parent_device=NiCards['DC2'], connection='port3/line0'),
-            'DC2O25':DigitalOut(name='DC2O25', parent_device=NiCards['DC2'], connection='port3/line1'),
-            'DC2O26':DigitalOut(name='DC2O26', parent_device=NiCards['DC2'], connection='port3/line2'),
-            'DC2O27':DigitalOut(name='DC2O27', parent_device=NiCards['DC2'], connection='port3/line3'),
-            'DC2O28':DigitalOut(name='DC2O28', parent_device=NiCards['DC2'], connection='port3/line4'),
-            'DC2O29':DigitalOut(name='DC2O29', parent_device=NiCards['DC2'], connection='port3/line5'),
-            'DC2O30':DigitalOut(name='DC2O30', parent_device=NiCards['DC2'], connection='port3/line6'),
-            'DC2O31':DigitalOut(name='DC2O31', parent_device=NiCards['DC2'], connection='port3/line7')
-        }
+        Bitter_Precision_Disable__b1c00  = DigitalOut(default_value=5,          name='Bitter_Precision_Disable__b1c00',  parent_device=NIBox1, connection='port0/line0')
+        Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=5,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
+        Cs_3DMOT_AO_Sw__b1c02            = DigitalOut(default_value=5,          name='Cs_3DMOT_AO_Sw__b1c02',            parent_device=NIBox1, connection='port0/line2')
+        Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=5,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
+        Cs_Andor_Trig__b1c04             = DigitalOut(default_value=0,          name='Cs_Andor_Trig__b1c04',             parent_device=NIBox1, connection='port0/line4')
+        Cs_HFImg_AO_Sw__b1c05            = DigitalOut(default_value=5,          name='Cs_HFImg_AO_Sw__b1c05',            parent_device=NIBox1, connection='port0/line5')
+        Cs_HFImg_Shutter__b1c06          = DigitalOut(default_value=0,          name='Cs_HFImg_Shutter__b1c06',          parent_device=NIBox1, connection='port0/line6')
+        Cs_HImg_Shutter__b1c07           = DigitalOut(default_value=0,          name='Cs_HImg_Shutter__b1c07',           parent_device=NIBox1, connection='port0/line7')
+        Cs_HOP_AO_Sw__b1c08              = DigitalOut(default_value=5,          name='Cs_HOP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
+        Cs_HOP_Shutter__b1c09            = DigitalOut(default_value=5,          name='Cs_HOP_Shutter__b1c09',            parent_device=NIBox1, connection='port1/line1')
+        Cs_LFImg_AO_Sw__b1c10            = DigitalOut(default_value=5,          name='Cs_LFImg_AO_Sw__b1c10',            parent_device=NIBox1, connection='port1/line2')
+        Cs_LFImg_Shutter__b1c11          = DigitalOut(default_value=5,          name='Cs_LFImg_Shutter__b1c11',          parent_device=NIBox1, connection='port1/line3')
+        Cs_Rep_Shutter__b1c12            = DigitalOut(default_value=5,          name='Cs_Rep_Shutter__b1c12',            parent_device=NIBox1, connection='port1/line4')
+        Cs_RSC_AO_Sw__b1c13              = DigitalOut(default_value=5,          name='Cs_RSC_AO_Sw__b1c13',              parent_device=NIBox1, connection='port1/line5')
+        Cs_RSC_Shutter__b1c14            = DigitalOut(default_value=0,          name='Cs_RSC_Shutter__b1c14',            parent_device=NIBox1, connection='port1/line6')
+        Cs_VImg_Shutter__b1c15           = DigitalOut(default_value=0,          name='Cs_VImg_Shutter__b1c15',           parent_device=NIBox1, connection='port1/line7')
+        Cs_VRep_Shutter__b1c16           = DigitalOut(default_value=5,          name='Cs_VRep_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
+        Cs_Zeeman_Shutter__b1c17         = DigitalOut(default_value=5,          name='Cs_Zeeman_Shutter__b1c17',         parent_device=NIBox1, connection='port2/line1')
+        DMD_AO_FM__b1c18                 = DigitalOut(default_value=0,          name='DMD_AO_FM__b1c18',                 parent_device=NIBox1, connection='port2/line2')
+        DMD_AO_Sw__b1c19                 = DigitalOut(default_value=5,          name='DMD_AO_Sw__b1c19',                 parent_device=NIBox1, connection='port2/line3')
+        DMD_Movie_Trig__b1c20            = DigitalOut(default_value=0,          name='DMD_Movie_Trig__b1c20',            parent_device=NIBox1, connection='port2/line4')
+        DMD_Shutter__b1c21               = DigitalOut(default_value=0,          name='DMD_Shutter__b1c21',               parent_device=NIBox1, connection='port2/line5')
+        Dual_1064_AO_Sw__b1c22           = DigitalOut(default_value=5,          name='Dual_1064_AO_Sw__b1c22',           parent_device=NIBox1, connection='port2/line6')
+        Dual_780_AO_Sw__b1c23            = DigitalOut(default_value=5,          name='Dual_780_AO_Sw__b1c23',            parent_device=NIBox1, connection='port2/line7')
+        FF_Disable__b1c24                = DigitalOut(default_value=0,          name='FF_Disable__b1c24',                parent_device=NIBox1, connection='port3/line0')
+        Li_Andor_Trig__b1c25             = DigitalOut(default_value=0,          name='Li_Andor_Trig__b1c25',             parent_device=NIBox1, connection='port3/line1')
+        Li_EOM_AO_Sw__b1c26              = DigitalOut(default_value=5,          name='Li_EOM_AO_Sw__b1c26',              parent_device=NIBox1, connection='port3/line2')
+        Li_EOM_H_Shutter__b1c27          = DigitalOut(default_value=0,          name='Li_EOM_H_Shutter__b1c27',          parent_device=NIBox1, connection='port3/line3')
+        Li_HImg_Shutter__b1c28           = DigitalOut(default_value=0,          name='Li_HImg_Shutter__b1c28',           parent_device=NIBox1, connection='port3/line4')
+        Li_Img_AO_Sw__b1c29              = DigitalOut(default_value=5,          name='Li_Img_AO_Sw__b1c29',              parent_device=NIBox1, connection='port3/line5')
+        Li_MOT_AO_Sw__b1c30              = DigitalOut(default_value=5,          name='Li_MOT_AO_Sw__b1c30',              parent_device=NIBox1, connection='port3/line6')
+        Li_MOT_Shutter__b1c31            = DigitalOut(default_value=5,          name='Li_MOT_Shutter__b1c31',            parent_device=NIBox1, connection='port3/line7')
+        
+        
+        Li_Rep_AO_Sw__b2c00              = DigitalOut(default_value=5,          name='Li_Rep_AO_Sw__b2c00',              parent_device=NIBox2, connection='port0/line0')
+        Li_Rep_Shutter__b2c01            = DigitalOut(default_value=5,          name='Li_Rep_Shutter__b2c01',            parent_device=NIBox2, connection='port0/line1')
+        Li_VImg_Shutter__b2c02           = DigitalOut(default_value=0,          name='Li_VImg_Shutter__b2c02',           parent_device=NIBox2, connection='port0/line2')
+        Li_Zeeman_Shutter__b2c03         = DigitalOut(default_value=5,          name='Li_Zeeman_Shutter__b2c03',         parent_device=NIBox2, connection='port0/line3')
+        MW_Trig__b2c04                   = DigitalOut(default_value=0,          name='MW_Trig__b2c04',                   parent_device=NIBox2, connection='port0/line4')
+        oTOP_Pos_Lock_Enable__b2c05      = DigitalOut(default_value=0,          name='oTOP_Pos_Lock_Enable__b2c05',      parent_device=NIBox2, connection='port0/line5')
+        Pixelfly_Shutter__b2c06          = DigitalOut(default_value=5,          name='Pixelfly_Shutter__b2c06',          parent_device=NIBox2, connection='port0/line6')
+        Pixelfly_Trig__b2c07             = DigitalOut(default_value=0,          name='Pixelfly_Trig__b2c07',             parent_device=NIBox2, connection='port0/line7')
+        Scope_Trig__b2c08                = DigitalOut(default_value=0,          name='Scope_Trig__b2c08',                parent_device=NIBox2, connection='port1/line0')
+        Spec_Analyzer_Trig__b2c09        = DigitalOut(default_value=0,          name='Spec_Analyzer_Trig__b2c09',        parent_device=NIBox2, connection='port1/line1')
+        b2c10                            = DigitalOut(default_value=0,          name='b2c10',                            parent_device=NIBox2, connection='port1/line2')
+        b2c11                            = DigitalOut(default_value=0,          name='b2c11',                            parent_device=NIBox2, connection='port1/line3')
+        b2c12                            = DigitalOut(default_value=0,          name='b2c12',                            parent_device=NIBox2, connection='port1/line4')
+        b2c13                            = DigitalOut(default_value=0,          name='b2c13',                            parent_device=NIBox2, connection='port1/line5')
+        b2c14                            = DigitalOut(default_value=0,          name='b2c14',                            parent_device=NIBox2, connection='port1/line6')
+        b2c15                            = DigitalOut(default_value=0,          name='b2c15',                            parent_device=NIBox2, connection='port1/line7')
+        b2c16                            = DigitalOut(default_value=0,          name='b2c16',                            parent_device=NIBox2, connection='port2/line0')
+        b2c17                            = DigitalOut(default_value=0,          name='b2c17',                            parent_device=NIBox2, connection='port2/line1')
+        b2c18                            = DigitalOut(default_value=0,          name='b2c18',                            parent_device=NIBox2, connection='port2/line2')
+        b2c19                            = DigitalOut(default_value=0,          name='b2c19',                            parent_device=NIBox2, connection='port2/line3')
+        b2c20                            = DigitalOut(default_value=0,          name='b2c20',                            parent_device=NIBox2, connection='port2/line4')
+        b2c21                            = DigitalOut(default_value=0,          name='b2c21',                            parent_device=NIBox2, connection='port2/line5')
+        b2c22                            = DigitalOut(default_value=0,          name='b2c22',                            parent_device=NIBox2, connection='port2/line6')
+        b2c23                            = DigitalOut(default_value=0,          name='b2c23',                            parent_device=NIBox2, connection='port2/line7')
+        b2c24                            = DigitalOut(default_value=0,          name='b2c24',                            parent_device=NIBox2, connection='port3/line0')    
+        b2c25                            = DigitalOut(default_value=0,          name='b2c25',                            parent_device=NIBox2, connection='port3/line1')
+        b2c26                            = DigitalOut(default_value=0,          name='b2c26',                            parent_device=NIBox2, connection='port3/line2')
+        b2c27                            = DigitalOut(default_value=0,          name='b2c27',                            parent_device=NIBox2, connection='port3/line3')
+        b2c28                            = DigitalOut(default_value=0,          name='b2c28',                            parent_device=NIBox2, connection='port3/line4')
+        b2c29                            = DigitalOut(default_value=0,          name='b2c29',                            parent_device=NIBox2, connection='port3/line5')
+        b2c30                            = DigitalOut(default_value=0,          name='b2c30',                            parent_device=NIBox2, connection='port3/line6')
+        b2c31                            = DigitalOut(default_value=0,          name='b2c31',                            parent_device=NIBox2, connection='port3/line7')
         
         #-------------------------------------------------------------------analog outputs for NI PXIe-6738 cards---------------------------------------------------------------------------
-        self.AC1Outs = {
-            'AC1O0':AnalogOut(name='AC1O0', parent_device=NiCards['AC1'], connection='ao0', default_value=0),
-            'AC1O1':AnalogOut(name='AC1O1', parent_device=NiCards['AC1'], connection='ao1'),
-            'AC1O2':AnalogOut(name='AC1O2', parent_device=NiCards['AC1'], connection='ao2'),
-            'AC1O3':AnalogOut(name='AC1O3', parent_device=NiCards['AC1'], connection='ao3'),
-            'AC1O4':AnalogOut(name='AC1O4', parent_device=NiCards['AC1'], connection='ao4'),
-            'AC1O5':AnalogOut(name='AC1O5', parent_device=NiCards['AC1'], connection='ao5'),
-            'AC1O6':AnalogOut(name='AC1O6', parent_device=NiCards['AC1'], connection='ao6'),
-            'AC1O7':AnalogOut(name='AC1O7', parent_device=NiCards['AC1'], connection='ao7'),
-            'AC1O8':AnalogOut(name='AC1O8', parent_device=NiCards['AC1'], connection='ao8'),
-            'AC1O9':AnalogOut(name='AC1O9', parent_device=NiCards['AC1'], connection='ao9'),
-            'AC1O10':AnalogOut(name='AC1O10', parent_device=NiCards['AC1'], connection='ao10'),
-            'AC1O11':AnalogOut(name='AC1O11', parent_device=NiCards['AC1'], connection='ao11'),
-            'AC1O12':AnalogOut(name='AC1O12', parent_device=NiCards['AC1'], connection='ao12'),
-            'AC1O13':AnalogOut(name='AC1O13', parent_device=NiCards['AC1'], connection='ao13'),
-            'AC1O14':AnalogOut(name='AC1O14', parent_device=NiCards['AC1'], connection='ao14'),
-            'AC1O15':AnalogOut(name='AC1O15', parent_device=NiCards['AC1'], connection='ao15'),
-            'AC1O16':AnalogOut(name='AC1O16', parent_device=NiCards['AC1'], connection='ao16'),
-            'AC1O17':AnalogOut(name='AC1O17', parent_device=NiCards['AC1'], connection='ao17'),
-            'AC1O18':AnalogOut(name='AC1O18', parent_device=NiCards['AC1'], connection='ao18'),
-            'AC1O19':AnalogOut(name='AC1O19', parent_device=NiCards['AC1'], connection='ao19'),
-            'AC1O20':AnalogOut(name='AC1O20', parent_device=NiCards['AC1'], connection='ao20'),
-            'AC1O21':AnalogOut(name='AC1O21', parent_device=NiCards['AC1'], connection='ao21'),
-            'AC1O22':AnalogOut(name='AC1O22', parent_device=NiCards['AC1'], connection='ao22'),
-            'AC1O23':AnalogOut(name='AC1O23', parent_device=NiCards['AC1'], connection='ao23'),
-            'AC1O24':AnalogOut(name='AC1O24', parent_device=NiCards['AC1'], connection='ao24'),
-            'AC1O25':AnalogOut(name='AC1O25', parent_device=NiCards['AC1'], connection='ao25'),
-            'AC1O26':AnalogOut(name='AC1O26', parent_device=NiCards['AC1'], connection='ao26'),
-            'AC1O27':AnalogOut(name='AC1O27', parent_device=NiCards['AC1'], connection='ao27'),
-            'AC1O28':AnalogOut(name='AC1O28', parent_device=NiCards['AC1'], connection='ao28'),
-            'AC1O29':AnalogOut(name='AC1O29', parent_device=NiCards['AC1'], connection='ao29'),
-            'AC1O30':AnalogOut(name='AC1O30', parent_device=NiCards['AC1'], connection='ao30'),
-            'AC1O31':AnalogOut(name='AC1O31', parent_device=NiCards['AC1'], connection='ao31')
-        }
 
-        self.AC2Outs = {
-            'AC2O0':AnalogOut(name='AC2O0', parent_device=NiCards['AC2'], connection='ao0'),
-            'AC2O1':AnalogOut(name='AC2O1', parent_device=NiCards['AC2'], connection='ao1'),
-            'AC2O2':AnalogOut(name='AC2O2', parent_device=NiCards['AC2'], connection='ao2'),
-            'AC2O3':AnalogOut(name='AC2O3', parent_device=NiCards['AC2'], connection='ao3'),
-            'AC2O4':AnalogOut(name='AC2O4', parent_device=NiCards['AC2'], connection='ao4'),
-            'AC2O5':AnalogOut(name='AC2O5', parent_device=NiCards['AC2'], connection='ao5'),
-            'AC2O6':AnalogOut(name='AC2O6', parent_device=NiCards['AC2'], connection='ao6'),
-            'AC2O7':AnalogOut(name='AC2O7', parent_device=NiCards['AC2'], connection='ao7'),
-            'AC2O8':AnalogOut(name='AC2O8', parent_device=NiCards['AC2'], connection='ao8'),
-            'AC2O9':AnalogOut(name='AC2O9', parent_device=NiCards['AC2'], connection='ao9'),
-            'AC2O10':AnalogOut(name='AC2O10', parent_device=NiCards['AC2'], connection='ao10'),
-            'AC2O11':AnalogOut(name='AC2O11', parent_device=NiCards['AC2'], connection='ao11'),
-            'AC2O12':AnalogOut(name='AC2O12', parent_device=NiCards['AC2'], connection='ao12'),
-            'AC2O13':AnalogOut(name='AC2O13', parent_device=NiCards['AC2'], connection='ao13'),
-            'AC2O14':AnalogOut(name='AC2O14', parent_device=NiCards['AC2'], connection='ao14'),
-            'AC2O15':AnalogOut(name='AC2O15', parent_device=NiCards['AC2'], connection='ao15'),
-            'AC2O16':AnalogOut(name='AC2O16', parent_device=NiCards['AC2'], connection='ao16'),
-            'AC2O17':AnalogOut(name='AC2O17', parent_device=NiCards['AC2'], connection='ao17'),
-            'AC2O18':AnalogOut(name='AC2O18', parent_device=NiCards['AC2'], connection='ao18'),
-            'AC2O19':AnalogOut(name='AC2O19', parent_device=NiCards['AC2'], connection='ao19'),
-            'AC2O20':AnalogOut(name='AC2O20', parent_device=NiCards['AC2'], connection='ao20'),
-            'AC2O21':AnalogOut(name='AC2O21', parent_device=NiCards['AC2'], connection='ao21'),
-            'AC2O22':AnalogOut(name='AC2O22', parent_device=NiCards['AC2'], connection='ao22'),
-            'AC2O23':AnalogOut(name='AC2O23', parent_device=NiCards['AC2'], connection='ao23'),
-            'AC2O24':AnalogOut(name='AC2O24', parent_device=NiCards['AC2'], connection='ao24'),
-            'AC2O25':AnalogOut(name='AC2O25', parent_device=NiCards['AC2'], connection='ao25'),
-            'AC2O26':AnalogOut(name='AC2O26', parent_device=NiCards['AC2'], connection='ao26'),
-            'AC2O27':AnalogOut(name='AC2O27', parent_device=NiCards['AC2'], connection='ao27'),
-            'AC2O28':AnalogOut(name='AC2O28', parent_device=NiCards['AC2'], connection='ao28'),
-            'AC2O29':AnalogOut(name='AC2O29', parent_device=NiCards['AC2'], connection='ao29'),
-            'AC2O30':AnalogOut(name='AC2O30', parent_device=NiCards['AC2'], connection='ao30'),
-            'AC2O31':AnalogOut(name='AC2O31', parent_device=NiCards['AC2'], connection='ao31')
-        }
+        Aerotech_Control__b3c00          = AnalogOut(default_value=0,           name='Aerotech_Control__b3c00',          parent_device=NIBox3, connection='ao0')
+        BFL_AO_Sw__b3c01                 = AnalogOut(default_value=5,           name='BFL_AO_Sw__b3c01',                 parent_device=NIBox3, connection='ao1')
+        BFL_Int_Lock__b3c02              = AnalogOut(default_value=0.1,         name='BFL_Int_Lock__b3c02',              parent_device=NIBox3, connection='ao2')
+        Bias_X_AH__b3c03                 = AnalogOut(default_value=1,           name='Bias_X_AH__b3c03',                 parent_device=NIBox3, connection='ao3')
+        Bias_X_HH__b3c04                 = AnalogOut(default_value=-1,          name='Bias_X_HH__b3c04',                 parent_device=NIBox3, connection='ao4')
+        Bias_Y_AH__b3c05                 = AnalogOut(default_value=0,           name='Bias_Y_AH__b3c05',                 parent_device=NIBox3, connection='ao5')
+        Bias_Y_HH__b3c06                 = AnalogOut(default_value=1,           name='Bias_Y_HH__b3c06',                 parent_device=NIBox3, connection='ao6')
+        Bias_Z_AH__b3c07                 = AnalogOut(default_value=-1,          name='Bias_Z_AH__b3c07',                 parent_device=NIBox3, connection='ao7')
+        Bias_Z_HH__b3c08                 = AnalogOut(default_value=-6,          name='Bias_Z_HH__b3c08',                 parent_device=NIBox3, connection='ao8')
+        Bitter_AH_Upper_FF__b3c09        = AnalogOut(default_value=0,           name='Bitter_AH_Upper_FF__b3c09',        parent_device=NIBox3, connection='ao9')
+        Bitter_HH_Upper_FF__b3c10        = AnalogOut(default_value=0,           name='Bitter_HH_Upper_FF__b3c10',        parent_device=NIBox3, connection='ao10')
+        Bitter_IServo_FB_Sw__b3c11       = AnalogOut(default_value=0,           name='Bitter_IServo_FB_Sw__b3c11',       parent_device=NIBox3, connection='ao11')
+        Bitter_Lower_CC__b3c12           = AnalogOut(default_value=1,           name='Bitter_Lower_CC__b3c12',           parent_device=NIBox3, connection='ao12')
+        Bitter_Lower_CV__b3c13           = AnalogOut(default_value=1.5,         name='Bitter_Lower_CV__b3c13',           parent_device=NIBox3, connection='ao13')
+        Bitter_Lower_FF__b3c14           = AnalogOut(default_value=0,           name='Bitter_Lower_FF__b3c14',           parent_device=NIBox3, connection='ao14')
+        Bitter_Upper_AH_Sw__b3c15        = AnalogOut(default_value=5,           name='Bitter_Upper_AH_Sw__b3c15',        parent_device=NIBox3, connection='ao15')
+        Bitter_Upper_CC__b3c16           = AnalogOut(default_value=1,           name='Bitter_Upper_CC__b3c16',           parent_device=NIBox3, connection='ao16')
+        Bitter_Upper_CV__b3c17           = AnalogOut(default_value=2,           name='Bitter_Upper_CV__b3c17',           parent_device=NIBox3, connection='ao17')
+        Bitter_Upper_HH_Sw__b3c18        = AnalogOut(default_value=0,           name='Bitter_Upper_HH_Sw__b3c18',        parent_device=NIBox3, connection='ao18')
+        Bitter_V_AH__b3c19               = AnalogOut(default_value=0.1883,      name='Bitter_V_AH__b3c19',               parent_device=NIBox3, connection='ao19')
+        Bitter_V_HH__b3c20               = AnalogOut(default_value=-0.0183,     name='Bitter_V_HH__b3c20',               parent_device=NIBox3, connection='ao20')
+        Cs_3DMOT_AO_AM__b3c21            = AnalogOut(default_value=2.3,         name='Cs_3DMOT_AO_AM__b3c21',            parent_device=NIBox3, connection='ao21')
+        CS_HFImg_Freq__b3c22             = AnalogOut(default_value=-10,         name='CS_HFImg_Freq__b3c22',             parent_device=NIBox3, connection='ao22')
+        Cs_LFImg_AO_AM__b3c23            = AnalogOut(default_value=10,          name='Cs_LFImg_AO_AM__b3c23',            parent_device=NIBox3, connection='ao23')
+        Cs_MOT_Freq__b3c24               = AnalogOut(default_value=-7.15,       name='Cs_MOT_Freq__b3c24',               parent_device=NIBox3, connection='ao24')
+        Cs_Rep_AO_AM__b3c25              = AnalogOut(default_value=5,           name='Cs_Rep_AO_AM__b3c25',              parent_device=NIBox3, connection='ao25')
+        Cs_Rep_Freq__b3c26               = AnalogOut(default_value=6.51,        name='Cs_Rep_Freq__b3c26',               parent_device=NIBox3, connection='ao26')
+        Cs_RSC_AO_AM__b3c27              = AnalogOut(default_value=5,           name='Cs_RSC_AO_AM__b3c27',              parent_device=NIBox3, connection='ao27')
+        Cs_VImg_AO_AM__b3c28             = AnalogOut(default_value=5,           name='Cs_VImg_AO_AM__b3c28',             parent_device=NIBox3, connection='ao28')
+        DMD_AO_AM__b3c29                 = AnalogOut(default_value=3.8,         name='DMD_AO_AM__b3c29',                 parent_device=NIBox3, connection='ao29')
+        Dual_780_Int_Lock__b3c30         = AnalogOut(default_value=2.5,         name='Dual_780_Int_Lock__b3c30',         parent_device=NIBox3, connection='ao30')
+        Li_EOM_Freq__b3c31               = AnalogOut(default_value=-4.5,        name='Li_EOM_Freq__b3c31',               parent_device=NIBox3, connection='ao31')
+        
+        
+        Li_Img_AO_AM__b4c00              = AnalogOut(default_value=10,          name='Li_Img_AO_AM__b4c00',              parent_device=NIBox4, connection='ao0')
+        Li_Img_Freq__b4c01               = AnalogOut(default_value=-5.2499,     name='Li_Img_Freq__b4c01',               parent_device=NIBox4, connection='ao1')
+        Li_MOT_AO_AM__b4c02              = AnalogOut(default_value=10,          name='Li_MOT_AO_AM__b4c02',              parent_device=NIBox4, connection='ao2')
+        Li_MOT_Freq__b4c03               = AnalogOut(default_value=5.2844,      name='Li_MOT_Freq__b4c03',               parent_device=NIBox4, connection='ao3')
+        Li_MRep_AO_FM__b4c04             = AnalogOut(default_value=0.4086,      name='Li_MRep_AO_FM__b4c04',             parent_device=NIBox4, connection='ao4')
+        Li_Rep_AO_AM__b4c05              = AnalogOut(default_value=10,          name='Li_Rep_AO_AM__b4c05',              parent_device=NIBox4, connection='ao5')
+        oTOP_AO_AM__b4c06                = AnalogOut(default_value=10,          name='oTOP_AO_AM__b4c06',                parent_device=NIBox4, connection='ao6')
+        oTOP_FCarrier__b4c07             = AnalogOut(default_value=1.7999,      name='oTOP_FCarrier__b4c07',             parent_device=NIBox4, connection='ao7')
+        oTOP_Int_Lock__b4c08             = AnalogOut(default_value=0.3,         name='oTOP_Int_Lock__b4c08',             parent_device=NIBox4, connection='ao8')
+        oTOP_Mod_AM__b4c09               = AnalogOut(default_value=0,           name='oTOP_Mod_AM__b4c09',               parent_device=NIBox4, connection='ao9')
+        Zeeman_C1__b4c10                 = AnalogOut(default_value=0,           name='Zeeman_C1__b4c10',                 parent_device=NIBox4, connection='ao10')
+        Zeeman_C2__b4c11                 = AnalogOut(default_value=0,           name='Zeeman_C2__b4c11',                 parent_device=NIBox4, connection='ao11')
+        Zeeman_C3__b4c12                 = AnalogOut(default_value=0,           name='Zeeman_C3__b4c12',                 parent_device=NIBox4, connection='ao12')
+        Zeeman_C4__b4c13                 = AnalogOut(default_value=0,           name='Zeeman_C4__b4c13',                 parent_device=NIBox4, connection='ao13')
+        Zeeman_C5__b4c14                 = AnalogOut(default_value=0,           name='Zeeman_C5__b4c14',                 parent_device=NIBox4, connection='ao14')
+        b4c15                            = AnalogOut(default_value=0,           name='b4c15',                            parent_device=NIBox4, connection='ao15')
+        b4c16                            = AnalogOut(default_value=0,           name='b4c16',                            parent_device=NIBox4, connection='ao16')
+        b4c17                            = AnalogOut(default_value=0,           name='b4c17',                            parent_device=NIBox4, connection='ao17')
+        b4c18                            = AnalogOut(default_value=0,           name='b4c18',                            parent_device=NIBox4, connection='ao18')
+        b4c19                            = AnalogOut(default_value=0,           name='b4c19',                            parent_device=NIBox4, connection='ao19')
+        b4c20                            = AnalogOut(default_value=0,           name='b4c20',                            parent_device=NIBox4, connection='ao20')
+        b4c21                            = AnalogOut(default_value=0,           name='b4c21',                            parent_device=NIBox4, connection='ao21')
+        b4c22                            = AnalogOut(default_value=0,           name='b4c22',                            parent_device=NIBox4, connection='ao22')
+        b4c23                            = AnalogOut(default_value=0,           name='b4c23',                            parent_device=NIBox4, connection='ao23')
+        b4c24                            = AnalogOut(default_value=0,           name='b4c24',                            parent_device=NIBox4, connection='ao24')
+        b4c25                            = AnalogOut(default_value=0,           name='b4c25',                            parent_device=NIBox4, connection='ao25')
+        b4c26                            = AnalogOut(default_value=0,           name='b4c26',                            parent_device=NIBox4, connection='ao26')
+        b4c27                            = AnalogOut(default_value=0,           name='b4c27',                            parent_device=NIBox4, connection='ao27')
+        b4c28                            = AnalogOut(default_value=0,           name='b4c28',                            parent_device=NIBox4, connection='ao28')
+        b4c29                            = AnalogOut(default_value=0,           name='b4c29',                            parent_device=NIBox4, connection='ao29')
+        b4c30                            = AnalogOut(default_value=0,           name='b4c30',                            parent_device=NIBox4, connection='ao30')
+        b4c31                            = AnalogOut(default_value=0,           name='b4c31',                            parent_device=NIBox4, connection='ao31')   
+
         
         
 if __name__ == '__main__':
