@@ -2,8 +2,7 @@ import numpy as np
 import time
 import os
 import struct
-from dataclasses import dataclass, asdict
-import pandas as pd
+from dataclasses import dataclass, field
 
 @dataclass
 class LabviewSeq:
@@ -17,7 +16,7 @@ class LabviewSeq:
     secondary_analog: dict = None
     never_ramp: bool = False
     always_ramp: bool = False
-    channels: list = []
+    channels: list = field(default_factory=list)
 
 
 def seq_read(in_file_name):
@@ -135,7 +134,6 @@ def seq_read(in_file_name):
         check_num = read_single(fid, 'uint32')
         
         raw_ramps = np.array([read_single(fid, 'int32') for i in range(2 * check_num)])
-        raw_ramps = np.reshape(raw_ramps, (2, check_num))
         seq.ramp_params['ramp_every'][:check_num] = raw_ramps[0::2]
         seq.ramp_params['next_ramp'][:check_num] = raw_ramps[1::2]
 
@@ -430,143 +428,389 @@ def write_single(fid, type, data):
                 fid.write(struct.pack('>b', d))
             
 
-def get_channel_info(seq: LabviewSeq, which_channel):
-    """
-    Returns a string with a report about the given channel.
+def channel_report(in_seq: LabviewSeq, which_channel, out_file=None, *,
+                   details=None, on_only=True, proc_on_only=True) -> str:
+    """Channel report for one or more channels. Matches lv_seq_channel_report.m.
 
     Parameters
     ----------
-    seq : LabviewSeq
-
-    which_channel : str or int or list
-        The channel number or name to be reported. If 'all' is passed, all channels are reported. If a list of channel
-        numbers or names is passed, only those channels are reported.
+    in_seq : LabviewSeq
+    which_channel : str or list of int
+        'all', a name substring, or a list of channel numbers.
+    out_file : str or None
+        Output file path. If None, returns content as a string.
+    details : bool or None
+        Per-channel event table. Defaults to True unless which_channel='all'.
+    on_only : bool, default True
+        In the detail table, skip events where the event itself is disabled.
+    proc_on_only : bool, default True
+        In the detail table, skip events where the parent procedure is disabled.
 
     Returns
     -------
-    outstr : str
-        A string with the report about the channel.
-
+    str
+        File path if out_file was given; content string if out_file is None.
     """
-
-    # Get the channel numbers to be reported
-    if isinstance(which_channel, str):
-        if which_channel == 'all':
-            channels = list(range(len(seq.primary_analog['name']) 
-                                  + len(seq.digital['name']) 
-                                  + len(seq.secondary_analog['name'])))
-        else:
-            channels = get_channels_by_name(seq, which_channel)
+    # Resolve channels
+    if isinstance(which_channel, str) and which_channel.upper() == 'ALL':
+        num_channels = (len(in_seq.primary_analog['name']) +
+                        len(in_seq.digital['name']) +
+                        len(in_seq.secondary_analog['name']))
+        channels = list(range(num_channels))
+        default_details = False
+    elif isinstance(which_channel, str):
+        channels = get_channels_by_name(in_seq, which_channel)
+        default_details = True
     else:
-        channels = which_channel
-    
-    # Initialize the channel info dictionary
-    channel_info = {'channel_no': channels, 'events': channels} 
-    for c in range(len(channels)):
-        channel_info['events'][c] = pd.DataFrame(
-            columns=['proc_enabled', 'enabled', 'global_time', 'ramp_res', 'voltage', 'proc_name'])
+        channels = list(which_channel)
+        default_details = True
 
-    # Populate the channel info dictionary
-    for a in range(len(seq.proc_details['channel_no'])):
-        proc_enabled = seq.procedures['enabled'][a]
-        proc_name = seq.procedures['name'][a]
+    if details is None:
+        details = default_details
 
-        for b in range(len(seq.proc_details['channel_no'][a])):
-            for c in range(len(channels)):
-                if seq.proc_details['channel_no'][a, b] == channels[c]:
-                    channel_info[c]['proc_enabled'].append(proc_enabled)
-                    channel_info[c]['enabled'].append(seq.proc_details['enabled'][a, b])
-                    channel_info[c]['global_time'].append(
-                        var_lookup(seq.ramp_params, seq.proc_details['time'][a, b]) +
-                        var_lookup(seq.ramp_params, seq.procedures['time'][a]))
-                    channel_info[c]['ramp_res'].append(seq.proc_details['ramp_res'][a, b])
-                    channel_info[c]['voltage'].append(
-                        var_lookup(seq.ramp_params, seq.proc_details['voltage'][a, b]))
-                    channel_info[c]['proc_name'].append(proc_name)
+    # Collect per-channel event lists
+    ch_info = [{'proc_enabled': [], 'enabled': [], 'global_time': [],
+                 'ramp_res': [], 'voltage': [], 'proc_name': []}
+               for _ in channels]
 
-    # Sort the times
-    ordered_times = sorted(range(len(channel_info[c]['global_time'])), key=lambda d: channel_info[c]['global_time'][d])
-    
+    num_procs = in_seq.proc_details['dims'][0]
+    num_events = in_seq.proc_details['dims'][1]
 
-    return channel_info
+    for a in range(num_procs):
+        proc_enabled = int(in_seq.procedures['enabled'][a])
+        proc_name = in_seq.procedures['name'][a]
+        proc_t = var_lookup(in_seq.ramp_params, in_seq.procedures['time'][a])
+        for b in range(num_events):
+            ch_no = int(in_seq.proc_details['channel_no'][a, b])
+            for c, chan in enumerate(channels):
+                if ch_no == chan:
+                    t = var_lookup(in_seq.ramp_params, in_seq.proc_details['time'][a, b])
+                    ch_info[c]['proc_enabled'].append(proc_enabled)
+                    ch_info[c]['enabled'].append(int(in_seq.proc_details['enabled'][a, b]))
+                    ch_info[c]['global_time'].append(t + proc_t)
+                    ch_info[c]['ramp_res'].append(int(in_seq.proc_details['ramp_res'][a, b]))
+                    ch_info[c]['voltage'].append(
+                        var_lookup(in_seq.ramp_params, in_seq.proc_details['voltage'][a, b]))
+                    ch_info[c]['proc_name'].append(proc_name)
+
+    ramp_labels = {0: 'JUMP', 1: 'FINE', 2: 'COARSE'}
+    out = []
+
+    # Summary table
+    out.append('ch no\tname\t\t\t\t\t\t  init val\tanalog?\t\tused  enabled\tproc enabled\n')
+    out.append('-----\t----\t\t\t\t\t\t  --------\t-------\t\t----  -------\t------------\n')
+    for c, chan in enumerate(channels):
+        ch = get_channel_by_no(in_seq, chan)
+        en = ch_info[c]['enabled']
+        pe = ch_info[c]['proc_enabled']
+        used = int(len(en) > 0)
+        any_en = int(any(en))
+        any_proc_en = int(any(e * p for e, p in zip(en, pe)))
+        out.append(
+            f"{ch['chan_no']:03d}\t\t{ch['name'][:24]:<24}\t{ch['ival']:10.4f}\t\t"
+            f"{int(ch['is_analog'])}\t\t{used}\t\t{any_en}\t\t{any_proc_en}\n"
+        )
+
+    # Per-channel detail tables
+    if details:
+        for c, chan in enumerate(channels):
+            ch = get_channel_by_no(in_seq, chan)
+            out.append(f'\nchannel {ch["chan_no"]:03d}: {ch["name"]}\n\n')
+            out.append('global time\tpr enbl\tenabled\t\tvoltage\tramp\tproc name\n')
+            out.append('-----------\t-------\t-------\t\t-------\t----\t---------\n')
+            order = sorted(range(len(ch_info[c]['global_time'])),
+                           key=lambda d: ch_info[c]['global_time'][d])
+            for d in order:
+                pe_d = ch_info[c]['proc_enabled'][d]
+                en_d = ch_info[c]['enabled'][d]
+                if (pe_d and en_d) or (not proc_on_only and en_d) or (not proc_on_only and not on_only):
+                    ramp_str = ramp_labels.get(ch_info[c]['ramp_res'][d], '????')
+                    out.append(
+                        f"{ch_info[c]['global_time'][d]:10.4f}\t\t"
+                        f"{pe_d}\t\t"
+                        f"{en_d}\t"
+                        f"{ch_info[c]['voltage'][d]:10.4f}\t"
+                        f"{ramp_str}\t"
+                        f"{ch_info[c]['proc_name'][d]}\n"
+                    )
+
+    content = ''.join(out)
+
+    if out_file is None:
+        return content
+
+    with open(out_file, 'w') as f:
+        f.write(content)
+    return out_file
 
 
 
-def channel_report(seq: LabviewSeq, channel_info: list):
-    """
-    Returns a string with a report about the given channel. Channel info can be obtained using the get_channel_info
-    function.
+def seq_dump(in_seq: LabviewSeq, in_target: str = None, *, sort: bool = True,
+             show_disabled: bool = False, seperate_disabled: bool = False) -> str:
+    """Dumps the sequence to a human-readable text format. Matches lv_seq_dump.m.
 
     Parameters
     ----------
-    seq : LabviewSeq
-
-    channel_info : list of dicts 
-
-    The dicts have the following keys:
-
-    channel_info[c]['chan_no'] : int
-
-    channel_info[c]['proc_enabled'] : list of bool
-
-    channel_info[c]['enabled'] : list of bool
-
-    channel_info[c]['global_time'] : list of float
-
-    channel_info[c]['ramp_res'] : list of int
-
-    channel_info[c]['voltage'] : list of float
-
-    channel_info[c]['proc_name'] : list of str
-
+    in_seq : LabviewSeq
+    in_target : str, optional
+        Output file path. If None, returns content as a string instead of writing.
+    sort : bool, default True
+        Sort events by time within each procedure.
+    show_disabled : bool, default False
+        Include disabled events inline with enabled events.
+    seperate_disabled : bool, default False
+        Append disabled events in a separate block after enabled ones.
+        Forced to False when show_disabled=True (matches MATLAB behaviour).
 
     Returns
     -------
-    outstr : str
-        A string with the report about the channel.
-
+    str
+        File path if in_target was given; content string if in_target is None.
     """
+    if show_disabled:
+        seperate_disabled = False
 
-    # Create the output string
-    outstr  = 'ch no  name                         init val  analog  used  enabled  proc enabled\n'
-    outstr += '-----  ---------------------------  --------  ------  ----  -------  ------------\n'
-    
-    # Populate the channel info dictionary
-    for c in range(len(channel_info)):
-        this_chan = get_channel_by_no(seq, channel_info[c]['chan_no'])
-        outstr += f'{this_chan["chan_no"]:03d}    '
-        outstr += f'{this_chan["name"][:24]:<27s}  '
-        outstr += f'{this_chan["ival"]:<8.4f}  '
-        outstr += f'{this_chan["is_analog"]:<6d}  '
-        outstr += f'{len(channel_info[c]["enabled"]) > 0:<4d}  '
-        outstr += f'{any(channel_info[c]["enabled"]):<7d}  '
-        outstr += f'{any([a*b for a, b in zip(channel_info[c]["enabled"], channel_info[c]["proc_enabled"])])}\n\n'
-    
-    # Create the output string
-    for c in range(len(channel_info)):
-        this_chan = get_channel_by_no(seq, channel_info[c]['chan_no'])
-        outstr += 'global time  pr enbl  enabled  voltage  ramp    proc name\n'
-        outstr += '-----------  -------  -------  -------  ------  ---------\n'
-        
-        # Sort the times
-        ordered_times = sorted(range(len(channel_info[c]['global_time'])), key=lambda d: channel_info[c]['global_time'][d])
-        for d in ordered_times:
-            if (channel_info[c]['proc_enabled'][d] and channel_info[c]['enabled'][d]):
-                outstr += f'{channel_info[c]["global_time"][d]:10.4f}'
-                outstr += f'{channel_info[c]["proc_enabled"][d]:4}'
-                outstr += f'{channel_info[c]["enabled"][d]:9d}'
-                outstr += f'{channel_info[c]["voltage"][d]:15.4f}\t'
-                outstr += {
-                    0: 'JUMP    ',
-                    1: 'FINE    ',
-                    2: 'COARSE  ',
-                }.get(channel_info[c]['ramp_res'][d], '??????  ')
-                outstr += f'{channel_info[c]["proc_name"][d]}\n'
+    out = []
 
-    outstr += '\n'
+    # Header
+    out.append('header\n------\n')
+    out.append(f'version:{in_seq.version}\n')
+    out.append(f'timing:{in_seq.timing}\nnever ramp:{int(in_seq.never_ramp)}\nalways_ramp:{int(in_seq.always_ramp)}\n')
 
-    return outstr
+    num_channels = (len(in_seq.primary_analog['name']) +
+                    len(in_seq.digital['name']) +
+                    len(in_seq.secondary_analog['name']))
+    out.append(f'number of channels:{num_channels}\n')
 
+    num_procs = len(in_seq.procedures['name'])
+    out.append(f'number of procedures:{num_procs}\n')
+
+    # Channel table
+    out.append('\nch no\tname\t\t\t\t\t\t  init val\tanalog?\n'
+               '-----\t----\t\t\t\t\t\t  --------\t-------\n')
+    for a in range(num_channels):
+        ch = get_channel_by_no(in_seq, a)
+        out.append(f"{a:03d}\t\t{ch['name'][:24]:<24}\t{ch['ival']:10.4f}\t\t{int(ch['is_analog'])}\n")
+
+    # Procedure table
+    out.append('\nproc no\tname\t\t\t\t\t\t\t  time\t\tenabled\n'
+               '-------\t----\t\t\t\t\t\t\t  ----\t\t------\n')
+    for a in range(num_procs):
+        out.append(
+            f"{a:03d}\t\t{in_seq.procedures['name'][a][:24]:<24}\t"
+            f"{in_seq.procedures['time'][a]:10.4f}\t\t{int(in_seq.procedures['enabled'][a])}\n"
+        )
+
+    # Per-procedure event listings
+    ramp_labels = {0: 'JUMP', 1: 'FINE', 2: 'COARSE'}
+    num_events = in_seq.proc_details['dims'][1]
+
+    for a in range(num_procs):
+        out.append(f'\nprocedure {a:03d}: {in_seq.procedures["name"][a]}\n')
+        out.append('\nenabled\t\ttime\tchannel\t\t\t\t\t\t   voltage\tramp\n'
+                   '------\t\t----\t-------\t\t\t\t\t\t   -------\t----\n')
+
+        if sort:
+            order = np.argsort(in_seq.proc_details['time'][a, :], kind='stable')
+        else:
+            order = np.arange(num_events)
+
+        for b in range(num_events):
+            idx = order[b]
+            if show_disabled or in_seq.proc_details['enabled'][a, idx]:
+                ch = get_channel_by_no(in_seq, int(in_seq.proc_details['channel_no'][a, idx]))
+                ramp_str = ramp_labels.get(int(in_seq.proc_details['ramp_res'][a, idx]), '????')
+                out.append(
+                    f"{int(in_seq.proc_details['enabled'][a, idx])}\t\t"
+                    f"{in_seq.proc_details['time'][a, idx]:10.4f}\t"
+                    f"{ch['name'][:24]:<24}\t"
+                    f"{in_seq.proc_details['voltage'][a, idx]:10.6f}\t"
+                    f"{ramp_str}\n"
+                )
+
+        if seperate_disabled:
+            for b in range(num_events):
+                idx = order[b]
+                if not in_seq.proc_details['enabled'][a, idx]:
+                    ch = get_channel_by_no(in_seq, int(in_seq.proc_details['channel_no'][a, idx]))
+                    ramp_str = ramp_labels.get(int(in_seq.proc_details['ramp_res'][a, idx]), '????')
+                    # Note: voltage uses %10.4f here (matches lv_seq_dump.m line 87, differs from main loop)
+                    out.append(
+                        f"{int(in_seq.proc_details['enabled'][a, idx])}\t\t"
+                        f"{in_seq.proc_details['time'][a, idx]:10.4f}\t"
+                        f"{ch['name'][:24]:<24}\t"
+                        f"{in_seq.proc_details['voltage'][a, idx]:10.4f}\t"
+                        f"{ramp_str}\n"
+                    )
+
+    # Ramp params table
+    out.append('\ncode\t   cur val\t\tstart\t\tstop\t\tstep\tevery\t next\n'
+               '----\t   -------\t\t-----\t\t----\t\t----\t-----\t ----\n')
+    for a in range(in_seq.ramp_params['num']):
+        out.append(
+            f"{65500 + a:05d}\t"
+            f"{in_seq.ramp_params['cur_val'][a]:10.4f}\t"
+            f"{in_seq.ramp_params['start_val'][a]:10.4f}\t"
+            f"{in_seq.ramp_params['end_val'][a]:10.4f}\t"
+            f"{in_seq.ramp_params['incr_val'][a]:10.4f}\t\t"
+            f"{int(in_seq.ramp_params['ramp_every'][a])}\t\t"
+            f"{int(in_seq.ramp_params['next_ramp'][a])}\n"
+        )
+
+    content = ''.join(out)
+
+    if in_target is None:
+        return content
+
+    with open(in_target, 'w') as f:
+        f.write(content)
+    return in_target
+
+
+def seq_quickdump(date, num, out_path=None, **dump_kwargs) -> str:
+    """Read a sequence by date/num and write a text dump. Matches lv_seq_quickdump.m.
+
+    Parameters
+    ----------
+    date : sequence of int [year, month, day]
+    num : int
+        Sequence number.
+    out_path : str or None
+        Output file path. If None, uses local_path('lvseqdump', ...) from local_paths.py.
+        Pass None and let seq_dump return a string by passing out_path=None after resolution
+        isn't the intent here — if you want a string, use seq_dump directly.
+
+    Returns
+    -------
+    str
+        Path written to (or content string if out_path resolves to None via seq_dump).
+    """
+    import sys as _sys
+    _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _repo_root not in _sys.path:
+        _sys.path.insert(0, _repo_root)
+    from local_paths import local_path
+
+    year, month, day = int(date[0]), int(date[1]), int(date[2])
+    seq_path = local_path('lvseqread', year=year, month=month, day=day, num=num)
+    seq = seq_read(seq_path)
+    if out_path is None:
+        out_path = local_path('lvseqdump', year=year, month=month, day=day, num=num)
+    return seq_dump(seq, out_path, **dump_kwargs)
+
+
+def seq_quickreport(date, num, which_channel, out_file=None, **kwargs) -> str:
+    """Read a sequence by date/num and write a channel report. Matches lv_seq_quickreport.m.
+
+    Parameters
+    ----------
+    date : sequence of int [year, month, day]
+    num : int
+    which_channel : str or list of int
+        Passed directly to channel_report.
+    out_file : str or None
+        Output file path. If None, returns content as a string.
+
+    Returns
+    -------
+    str
+        File path if out_file was given; content string if out_file is None.
+    """
+    import sys as _sys
+    _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _repo_root not in _sys.path:
+        _sys.path.insert(0, _repo_root)
+    from local_paths import local_path
+
+    year, month, day = int(date[0]), int(date[1]), int(date[2])
+    seq_path = local_path('lvseqread', year=year, month=month, day=day, num=num)
+    return channel_report(seq_read(seq_path), which_channel, out_file, **kwargs)
+
+
+def seq_block_write(in_seq: LabviewSeq, in_proc_no: int, times, time_offsets,
+                    channel_nos, voltages, ramp_res) -> LabviewSeq:
+    """Write a repeated block of events into a procedure. Matches lv_seq_block_write.m.
+
+    Sorts the sequence, finds the last enabled event in in_proc_no, then appends
+    len(times) repetitions of the channel block immediately after it.
+
+    Parameters
+    ----------
+    in_seq : LabviewSeq
+    in_proc_no : int
+        0-indexed procedure number (MATLAB version is 1-indexed).
+    times : sequence of float
+        Base times for each repetition.
+    time_offsets : sequence of float
+        Per-channel time offsets within each repetition.
+    channel_nos : sequence of str
+        Channel name substrings; the first matching channel is used for each.
+    voltages : sequence of float
+        Per-channel voltages.
+    ramp_res : sequence of int
+        Per-channel ramp resolution values.
+
+    Returns
+    -------
+    LabviewSeq
+        New sequence with in_proc_no's proc_details updated; in_seq is not modified.
+    """
+    import copy
+    sort_seq = seq_sort(copy.deepcopy(in_seq))
+
+    proc_len = sort_seq.proc_details['dims'][1]
+    repeat_len = len(time_offsets)
+
+    real_channel_nos = [get_channels_by_name(in_seq, name)[0] for name in channel_nos]
+
+    # max_val: 1-based index of last enabled event (0 if no enabled events).
+    # Conveniently equals the 0-based insertion start index.
+    indices = np.arange(1, proc_len + 1)
+    max_val = int(np.max(sort_seq.proc_details['enabled'][in_proc_no, :] * indices))
+
+    for a in range(len(times)):
+        if max_val + (a + 1) * repeat_len > proc_len:
+            break
+        for b in range(repeat_len):
+            idx = max_val + a * repeat_len + b
+            sort_seq.proc_details['enabled'][in_proc_no, idx] = 1
+            sort_seq.proc_details['time'][in_proc_no, idx] = times[a] + time_offsets[b]
+            sort_seq.proc_details['channel_no'][in_proc_no, idx] = real_channel_nos[b]
+            sort_seq.proc_details['ramp_res'][in_proc_no, idx] = ramp_res[b]
+            sort_seq.proc_details['voltage'][in_proc_no, idx] = voltages[b]
+
+    out_seq = copy.deepcopy(in_seq)
+    for field in ('enabled', 'time', 'ramp_res', 'channel_no', 'voltage'):
+        out_seq.proc_details[field][in_proc_no, :] = sort_seq.proc_details[field][in_proc_no, :]
+    return out_seq
+
+
+def seq_clear_disabled(seq: LabviewSeq) -> LabviewSeq:
+    """Zero out time/voltage/channel_no/ramp_res for every disabled event. Matches lv_seq_clear_disabled.m."""
+    mask = seq.proc_details['enabled'] == 0
+    seq.proc_details['time'][mask] = 0
+    seq.proc_details['voltage'][mask] = 0
+    seq.proc_details['channel_no'][mask] = 0
+    seq.proc_details['ramp_res'][mask] = 0
+    return seq
+
+
+def seq_sort(seq: LabviewSeq) -> LabviewSeq:
+    """Sorts each procedure's events: ascending by time, with enabled events before disabled on ties.
+
+    Matches lv_seq_sort.m exactly.
+    """
+    for a in range(seq.proc_details['dims'][0]):
+        init_sort_order = np.argsort(seq.proc_details['time'][a, :], kind='stable')
+        sort_order = np.argsort(-seq.proc_details['enabled'][a, init_sort_order], kind='stable')
+        final_order = init_sort_order[sort_order]
+        sorted_enablings = seq.proc_details['enabled'][a, init_sort_order][sort_order]
+        seq.proc_details['enabled'][a, :] = sorted_enablings
+        seq.proc_details['time'][a, :] = seq.proc_details['time'][a, final_order]
+        seq.proc_details['voltage'][a, :] = seq.proc_details['voltage'][a, final_order]
+        seq.proc_details['channel_no'][a, :] = seq.proc_details['channel_no'][a, final_order]
+        seq.proc_details['ramp_res'][a, :] = seq.proc_details['ramp_res'][a, final_order]
+    return seq
 
 
 def var_lookup(ramp_params, in_val):
@@ -695,6 +939,4 @@ if __name__ == "__main__":
     # print(test_seq2)
 
     # Test 3: Channel report
-    # print(test_seq.proc_details['dims'])
-    # print(test_seq.proc_details['channel_no'])
     print(channel_report(test_seq2, '3.0'))

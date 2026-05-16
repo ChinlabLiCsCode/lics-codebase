@@ -2,9 +2,12 @@
 *~
 localpath.m
 startup.m
+local_paths.py
 .vscode*
 *.mat
 *.pdf
 *.fig
 *.png
 .DS_Store
+__pycache__/
+*.pyc
