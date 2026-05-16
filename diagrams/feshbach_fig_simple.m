@@ -4,15 +4,15 @@ clc;
 
 plot_defaults;
 
-xi = 879;
-xf = 897;
-yi = -600;
-yf = 600;
+xi = 878;
+xf = 901;
+yi = -800;
+yf = 800;
 co = colororder();
 
 Ca = co(2, :);
-Cb = co(2, :);
-Cc = co(3, :);
+Cb = co(3, :);
+Cc = co(4, :);
 Ccs = co(1, :);
 Cab = co(5, :);
 Cac = co(6, :);
@@ -32,7 +32,7 @@ cs(abs(cs)>2*yf) = NaN;
 
 
 
-fig = figure('Position', [0, 0, 300, 220]);
+fig = figure('Position', [0, 0, 500, 300]);
 % tiledlayout(3, 1, 'TileSpacing','tight');
 
 %%% lics figure
@@ -41,18 +41,20 @@ specialvalcolors = Ca; %[Ccs; Ca];
 
 hold on;
 box("on");
-plot(bvals, a, 'LineWidth', 1.5, 'Color', Ca);
-plot(bvals, cs, 'LineWidth', 1.5, 'Color', Ccs);
+l1 = plot(bvals, a, 'LineWidth', 1.5, 'Color', Ca);
+l2 = plot(bvals, b, 'LineWidth', 1.5, 'Color', Cb);
+l3 = plot(bvals, cs, 'LineWidth', 1.5, 'Color', Ccs);
 xlim([xi, xf]);
 ylim([yi, yf]);
-for ii = 1:length(specialvals)
-    xline(specialvals(ii), ':', 'LineWidth', 1, 'Color', specialvalcolors(ii, :));
-end
+% for ii = 1:length(specialvals)
+%     xline(specialvals(ii), ':', 'LineWidth', 1, 'Color', specialvalcolors(ii, :));
+% end
 % set(gca, 'XTickLabels', []);
 yticks(-500:250:500)
 ylabel("Scattering Length (a_0)");
 xlabel("Magnetic Field (G)");
-% legend({'Li_a-Cs', 'Li_b-Cs'}, 'location', 'northwest')
+yline(0, 'k-')
+legend([l1, l2, l3], {'Li_a-Cs', 'Li_b-Cs', 'Cs-Cs'}, 'location', 'northwest');
 % text(882, 20, 'Cs-Cs', ...
 %     'Color', Ccs, 'Rotation', 0, 'HorizontalAlignment', 'left', ...
 %     'VerticalAlignment', 'bottom', 'fontsize', 13)
@@ -60,7 +62,7 @@ xlabel("Magnetic Field (G)");
 %     'Color', Ca, 'Rotation', 0, 'HorizontalAlignment', 'left', ...
 %     'VerticalAlignment', 'top', 'fontsize', 13)
 % grid on;
-yline(0, 'k-')
+
 ax1 = gca;
 fontsize(gcf, 12, "points")
 
