@@ -40,7 +40,22 @@ desktop-app install blacs lyse runmanager runviewer
 conda remove conda # optional but highly recommended
 ```
 
-The `labscript-profile-create` will put a bunch of things in places you don't necessarily want, so you'll have to modify the labscript `.ini` file afterwards. I'll write a guide on this once I get to the lab.
+The `labscript-profile-create` will set up a template user library in ~/labscript-suite, which is actually outside where you store the codebase on your machine. That's fine. Go into the labconfig/your_computer.ini file, and change the relevant paths to point to the locations you actually want them to point to:
+
+```
+apparatus_name = lics-labscript-apparatus   # should be this without needing to modify
+shared_drive = ___  # point to the real shared drive on the experiment computer, or to the shared Box folder if on a separate analyzing computer.
+experiment_shot_storage = %(shared_drive)s/Experiments/%(apparatus_name)s
+userlib = ___/lics-codebase   # root for user code: point to lics-codebase.
+pythonlib = %(userlib)s   # for helper python functions. redundant in our case.
+labscriptlib = ___/lics-codebase/lics-labscript-apparatus   # for apparatus and sequence files
+analysislib = ___/lics-codebase/lics-labscript-analysis   # for standard analysis code
+app_saved_configs = %(labscript_suite)s/app_saved_configs/%(apparatus_name)s # don't change this one
+user_devices = ___/lics-codebase/lics-labscript-devices   # for our custom devices
+```
+
+Setting these should take care of it. 
+
 
 ## Handling updates
 
