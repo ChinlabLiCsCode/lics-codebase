@@ -1,0 +1,21 @@
+[submodule "labscript-suite/labscript"]
+	path = labscript-suite/labscript
+	url = git@github.com:ChinlabLiCsCode/labscript.git
+[submodule "labscript-suite/labscript-devices"]
+	path = labscript-suite/labscript-devices
+	url = git@github.com:ChinlabLiCsCode/labscript-devices.git
+[submodule "labscript-suite/labscript-utils"]
+	path = labscript-suite/labscript-utils
+	url = git@github.com:ChinlabLiCsCode/labscript-utils.git
+[submodule "labscript-suite/blacs"]
+	path = labscript-suite/blacs
+	url = git@github.com:ChinlabLiCsCode/blacs.git
+[submodule "labscript-suite/runviewer"]
+	path = labscript-suite/runviewer
+	url = git@github.com:ChinlabLiCsCode/runviewer.git
+[submodule "labscript-suite/lyse"]
+	path = labscript-suite/lyse
+	url = git@github.com:ChinlabLiCsCode/lyse.git
+[submodule "labscript-suite/runmanager"]
+	path = labscript-suite/runmanager
+	url = git@github.com:ChinlabLiCsCode/runmanager.git
