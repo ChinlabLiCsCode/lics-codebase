@@ -1,8 +1,8 @@
-from labscript import start, stop,add_time_marker, DigitalOut, AnalogOut, VirtualAnalogOut, StaticAnalogOut
+from labscript import start, stop, add_time_marker, DigitalOut, AnalogOut, VirtualAnalogOut, StaticAnalogOut
 from labscript.remote import RemoteBLACS
 from labscript_devices.NI_DAQmx.models.NI_PXIe_6536 import NI_PXIe_6536
 from labscript_devices.NI_DAQmx.models.NI_PXIe_6738 import NI_PXIe_6738
-from LiCs_devices.DP832.labscript_devices import DP832
+from lics_labscript_devices.DP832.labscript_devices import DP832
 from labscript_devices.PrawnBlaster.labscript_devices import PrawnBlaster
 from labscript_devices.DummyIntermediateDevice import DummyIntermediateDevice
 from labscript_devices.DummyPseudoclock.labscript_devices import DummyPseudoclock

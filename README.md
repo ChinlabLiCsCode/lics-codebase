@@ -21,7 +21,7 @@ In order to automatically download and process images from the experiment, you'l
 I then recommend cloning repositories for specific projects into a common folder on your machine, such as `Documents/CodeProjects` or something like this. You can also clone the Daily repository, which has all the daily analysis scripts we use as we take data. 
 
 ### Python / labscript-suite
-To use the new python and labscript-suite code, you'll need to set up a conda environment with the required configurations. From [the labscript suite](https://labscriptsuite.org/en/latest/installation/setting-up-an-environment/#anaconda-python), you want to first set up a bare conda environment with Python 3. They use 3.11 but let's use the newest version that works, which is 3.13 as of this writing. I tried 3.14 and it had conflicts. Run:
+To use the new python and labscript-suite code, you'll need to set up a conda environment with the required configurations. From [the labscript suite](https://labscriptsuite.org/en/latest/installation/setting-up-an-environment/#anaconda-python), you want to first set up a bare conda environment with Python 3. They use 3.11 and I had some conflicts with 3.14 so just using 3.11. Run:
 
 `conda create -n labscript python=3.13`
 
@@ -37,7 +37,7 @@ setuptools-conda install-requirements labscript runmanager blacs lyse runviewer 
 pip install --no-build-isolation --no-deps -e labscript -e runmanager -e blacs -e lyse -e runviewer -e labscript-devices -e labscript-utils
 ```
 
-At this point I had an error on Windows and had to run this: `conda install -c conda-forge pyzmq --force-reinstall`. Continuing on:
+At this point I had an error on Windows and had to run this: `pip install pyzmq --force-reinstall`. Continuing on:
 
 ```
 labscript-profile-create -n lics-labscript-apparatus -c

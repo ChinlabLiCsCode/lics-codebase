@@ -1,6 +1,5 @@
 from labscript import start, stop,add_time_marker, wait
-
-from labscriptlib.LiCs_ExperimentApparatus.connection_table import ConnectionTable
+from lics_labscript_apparatus.connection_table import ConnectionTable
 
 if __name__ == '__main__':
     ct = ConnectionTable()

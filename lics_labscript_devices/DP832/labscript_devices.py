@@ -8,7 +8,7 @@
 
 import numpy as np
 
-from LiCs_devices.VISA.labscript_devices import VISA
+from lics_labscript_devices.VISA.labscript_devices import VISA
 from labscript import StaticAnalogOut, LabscriptError, set_passed_properties, config
 from labscript_utils import dedent
 
