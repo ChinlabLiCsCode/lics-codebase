@@ -11,3 +11,4 @@ local_paths.py
 .DS_Store
 __pycache__/
 *.pyc
+lics-codebase.code-workspace

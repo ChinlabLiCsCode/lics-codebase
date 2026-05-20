@@ -1,0 +1,1516 @@
+header
+------
+version:4
+timing:100
+never ramp:0
+always_ramp:1
+number of channels:126
+number of procedures:39
+
+ch no	name						  init val	analog?
+-----	----						  --------	-------
+000		3.0_N_V_AH              	    0.1883		1
+001		3.1_Dual_1064_Int_Lock  	    3.9999		1
+002		3.2_Li_Img_Freq         	   -5.2499		1
+003		3.3_lower_FF            	    0.0000		1
+004		3.4_oTOP_fcarrier       	    1.7999		1
+005		3.5_AH_upper_FF         	    0.0000		1
+006		3.6_HH_upper_FF         	    0.0000		1
+007		3.7_N_V_HH              	   -0.0183		1
+008		2.0_Dual_780nm_Int_Lock 	    2.5000		1
+009		2.1_CS_Rep_AO_AM        	    5.0000		1
+010		2.2_                    	    0.0000		1
+011		2.3_Li_MRep_AO_FM       	    0.4086		1
+012		2.4_                    	    0.0000		1
+013		2.5_                    	    0.0000		1
+014		2.6_V_HH                	   -0.0183		1
+015		2.7_V_AH                	    0.1883		1
+016		7.0_oTOP_Int_lok        	    0.3000		1
+017		7.1_CS_Rep_AO_AM        	    5.0000		1
+018		7.2_Cs_VHF_AO_AM        	    0.4001		1
+019		7.3_oTOP_AO_AM          	   10.0000		1
+020		7.4_oTOP_mod_AM         	    0.0000		1
+021		7.5_Dual_1064_Int_Lock  	    3.9999		1
+022		7.6_oTOP_fcarrier       	    1.7999		1
+023		7.7_N_Cs_MOT_Freq       	   -7.1500		1
+024		1.3_Li_Img_AO_Sw        	    5.0000		0
+025		1.4_Cs_3DMOT_AO_Sw      	    5.0000		0
+026		1.5_DMD_AO_Sw           	    5.0000		0
+027		1.6_AndorCCD_Trig       	    0.0000		0
+028		1.7_Li_EOM_AO_Sw        	    5.0000		0
+029		1.8_Cs_2DMOT_Shutter    	    0.0000		0
+030		1.9_DMD_AO_FM           	    0.0000		0
+031		1.10_Cs_Oneshot_Bypass  	    0.0000		0
+032		1.11_Li_MOT_AO_Sw       	    5.0000		0
+033		1.12_Li_Rep_AO_Sw       	    5.0000		0
+034		1.13_Li_Rep_Shutter     	    5.0000		0
+035		1.14_Li_MOT_Shutter     	    5.0000		0
+036		1.15_Li_V_Img_Shutter   	    0.0000		0
+037		1.16_Li_Zeeman_Shutter  	    5.0000		0
+038		1.17_Cs_H_Img_Shutter   	    0.0000		0
+039		1.18_Li_EOM_H_Shutter   	    0.0000		0
+040		1.19_Cs_ZM_shutter      	    5.0000		0
+041		1.20_MW_pulse_SW        	    0.0000		0
+042		1.21_pixelfly trigger   	    0.0000		0
+043		1.22_MW_INCR_UP         	    0.0000		0
+044		1.23_CS_EOM_SW          	    5.0000		0
+045		1.24_Cs_RSC_AO_SW       	    5.0000		0
+046		1.25_ZDT_AO_SW          	    5.0000		0
+047		1.26_MW_SWEEP           	    5.0000		0
+048		1.27_Real_CS_RSC_AO_SW  	    5.0000		0
+049		1.28_Li_H_Img_shu       	    0.0000		0
+050		1.29_Real_CS_RSC_SHU    	    0.0000		0
+051		1.30_test trigger       	    0.0000		0
+052		1.31_Cs_Li_Zeswitch     	    5.0000		0
+053		1.32_ZCurrents          	    5.0000		0
+054		6.0                     	    5.0000		0
+055		6.1_Mod_AO_Switch       	    5.0000		0
+056		6.2_XDT_AO_SW           	    5.0000		0
+057		6.3_Cs_HF_AO_Sw         	    5.0000		0
+058		6.4_N_V_Rep_Shutter     	    5.0000		0
+059		6.5_N_Cs_Rep_Shutter    	    5.0000		0
+060		6.6_N_Cs_V_Img_Shutter  	    0.0000		0
+061		6.7_N_Cs_H_Img_Shutter  	    0.0000		0
+062		6.8_Dual_780nm_SW       	    5.0000		0
+063		6.9_Dual_1064nm_SW      	    5.0000		0
+064		6.10                    	    0.0000		0
+065		6.11_N_Cs_HF_Img_Shutter	    0.0000		0
+066		6.12_N_Cs_LF_Img_Shutter	    5.0000		0
+067		6.13_N_Cs_Z_Shutter     	    5.0000		0
+068		6.14_N_Cs_2D_MOT_Shutter	    5.0000		0
+069		6.15_N_Cs_3D_MOT_Shutter	    5.0000		0
+070		6.16                    	    0.0000		0
+071		6.17_Spec_Analysis_Trig 	    0.0000		0
+072		6.18                    	    0.0000		0
+073		6.19_N_Cs_3D_SW         	    5.0000		0
+074		6.20_Cs_LF_Img_AO_Sw    	    5.0000		0
+075		6.21_FF_Disable         	    0.0000		0
+076		6.22                    	    0.0000		0
+077		6.23_N_OP_AO_SW         	    5.0000		0
+078		6.24                    	    0.0000		0
+079		6.25_DMD_Shutter        	    0.0000		0
+080		6.26_N_CsOP_Shut_H      	    5.0000		0
+081		6.27_DMD_Movie_Trig     	    0.0000		0
+082		6.28                    	    0.0000		0
+083		6.29_oTOP_Pos_Lock_Enabl	    0.0000		0
+084		6.30_Li_Oneshot_Bypass  	    0.0000		0
+085		6.31_B_Precision_Disable	    5.0000		0
+086		4.0_Li_MOT_AO_AM        	   10.0000		1
+087		4.1_Li_Rep_AO_AM        	   10.0000		1
+088		4.2_Dual_780_AO_AM      	   10.0000		1
+089		4.3_Dual_1064_AO_AM     	   10.0000		1
+090		4.4_DMD_AO_AM           	    3.8000		1
+091		4.5_N_Cs_Repump_Freq    	    6.5100		1
+092		4.6_Li_MRep_AO_FM       	    0.4086		1
+093		4.7_Li_Img_AO_AM        	   10.0000		1
+094		5.8_Dual_780nm_Int_Lock 	    2.5000		1
+095		5.9_Cs_LF_Img_AO_AM     	   10.0000		1
+096		5.10_CS_HF_Img_Freq     	  -10.0000		1
+097		5.11_BFL_AO_AM          	   10.0000		1
+098		5.12_Bias_1/2_HH_x      	   -1.0000		1
+099		5.13_Bias_1/2_AH_-x     	    1.0000		1
+100		5.14_Bias_3/4_AH_-y     	    0.0000		1
+101		5.15_Bias_3/4_HH_y      	    1.0000		1
+102		5.16_Bias_5/6_AH_z      	   -1.0000		1
+103		5.17_Bias_5/6_HH_-z     	   -6.0000		1
+104		5.18_COIL_BOT_CC        	    1.0000		1
+105		5.19_COIL_TOP_CV        	    2.0000		1
+106		5.20_COIL_TOP_CC        	    1.0000		1
+107		5.21_COIL_BOT_CV        	    1.5000		1
+108		5.22_BFL_AO_SW          	    5.0000		1
+109		5.23_COIL_TOP_AH        	    5.0000		1
+110		5.24_COIL_TOP_HH        	    0.0000		1
+111		5.25_N_BFL_INT_LOCK     	    0.1000		1
+112		5.26_H_Pixelfly_Shutter 	    5.0000		1
+113		5.27_IServo_FB_Switch   	    0.0000		1
+114		5.28_aerotech_trigger   	    0.0000		1
+115		5.29_Li_MOT_Freq        	    5.2844		1
+116		5.30_Cs_EOM_Freq        	    9.0000		1
+117		5.31_Cs_3D_AO_AM        	    2.3000		1
+118		8.0_oTOP_Int_lok        	    0.3000		1
+119		8.1_CS_Rep_AO_AM        	    5.0000		1
+120		8.2_Cs_VHF_AO_AM        	    5.0000		1
+121		8.3_oTOP_AO_AM          	   10.0000		1
+122		8.4_oTOP_mod_AM         	    0.0000		1
+123		8.5_Li_EOM_Freq         	   -4.5000		1
+124		8.6_Cs_RSC_AO_AM        	    5.0000		1
+125		8.7_N_Cs_MOT_Freq       	   -7.1500		1
+
+proc no	name							  time		enabled
+-------	----							  ----		------
+000		Cs_MOT_Loading          	11700.0000		1
+001		Cs_Molasses_Cooling     	15495.0000		1
+002		Cs_H_Imaging            	65501.0000		0
+003		Cs_RSC1                 	15500.0000		1
+004		Aerotech_return         	15600.0000		1
+005		Dual_Imaging_H          	65501.0000		0
+006		Dual_Imaging_V          	65501.0000		1
+007		FB_Bias_field           	15600.0000		1
+008		Cs_Dark                 	15534.0000		1
+009		Li_HF_V_Imaging         	65501.0000		0
+010		Cs_Evaporation          	15600.0000		1
+011		Spare                   	29600.0000		1
+012		Li_Feshbach             	10000.0000		1
+013		Dual_Evap               	27700.0000		1
+014		Li_H_Imaging            	65501.0000		0
+015		Li_V_Imaging            	65501.0000		0
+016		Cs_Levitation1          	15532.0000		1
+017		Li_Evaporation          	10000.0000		1
+018		Li_Dark                 	10000.0000		1
+019		Cs_V_Imaging            	65501.0000		0
+020		Li_CMOT                 	10000.0000		1
+021		Cs_CMOT                 	15445.0000		1
+022		Li_MOT_Loading          	    1.0000		1
+023		True_TOF                	65500.0000		1
+024		Li_Killing              	24600.0000		1
+025		Low_Field_BEC_Field     	 7519.0000		0
+026		FB_Bias_Field_off       	65502.0000		0
+027		FB_Field_Gentle_off     	65502.0000		1
+028		Unlevitation            	21600.0000		0
+029		Cs_HF_H_Imaging         	65501.0000		0
+030		Cs_HF_V_Imaging         	65501.0000		0
+031		test_trigger            	65501.0000		0
+032		Cs_molasses_dark        	12500.0000		0
+033		Dual_Color_Combine      	24700.0000		1
+034		Li_Img_Freq_Ramp_Down   	65501.0000		1
+035		coil_cool_down          	65502.0000		1
+036		MW_Calibration_load     	18800.0000		0
+037		MW_Calibration_Molasses 	21850.0000		0
+038		MW_Calibration_Trap     	21887.0000		0
+
+procedure 000: Cs_MOT_Loading
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	6.1_Mod_AO_Switch       	  0.000000	JUMP
+1		    0.0000	5.31_Cs_3D_AO_AM        	  2.300110	JUMP
+1		    0.0000	8.7_N_Cs_MOT_Freq       	 -7.210083	JUMP
+1		    0.0000	4.5_N_Cs_Repump_Freq    	  6.510010	JUMP
+1		    0.0000	1.32_ZCurrents          	  5.000000	JUMP
+1		    0.0000	1.31_Cs_Li_Zeswitch     	  5.000000	JUMP
+1		    0.0000	1.13_Li_Rep_Shutter     	  0.000000	JUMP
+1		    0.0000	1.14_Li_MOT_Shutter     	  0.000000	JUMP
+1		    0.0000	1.16_Li_Zeeman_Shutter  	  0.000000	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	COARSE
+1		    0.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		    0.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	 -2.500000	JUMP
+1		    0.0000	5.13_Bias_1/2_AH_-x     	  1.000061	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	  2.600098	JUMP
+1		    0.0000	5.14_Bias_3/4_AH_-y     	 -3.599854	JUMP
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -0.499878	JUMP
+1		    0.0000	5.16_Bias_5/6_AH_z      	 -0.599976	JUMP
+1		    0.0000	6.15_N_Cs_3D_MOT_Shutter	65506.000061	JUMP
+1		    0.0000	5.21_COIL_BOT_CV        	  2.300110	JUMP
+1		    0.0000	5.19_COIL_TOP_CV        	  2.399902	JUMP
+1		    0.0000	5.20_COIL_TOP_CC        	  5.000000	JUMP
+1		    0.0000	5.18_COIL_BOT_CC        	  5.000000	JUMP
+1		    0.0000	6.13_N_Cs_Z_Shutter     	65506.000061	JUMP
+1		    0.0000	6.14_N_Cs_2D_MOT_Shutter	  5.000000	JUMP
+1		    0.0000	8.0_oTOP_Int_lok        	  0.599976	JUMP
+1		    0.0000	3.4_oTOP_fcarrier       	  1.799927	JUMP
+1		    0.0000	8.4_oTOP_mod_AM         	  5.499878	JUMP
+1		    0.0000	5.8_Dual_780nm_Int_Lock 	  2.500000	JUMP
+1		    0.0000	3.1_Dual_1064_Int_Lock  	  3.750000	JUMP
+1		    0.0000	8.2_Cs_VHF_AO_AM        	  0.400085	JUMP
+1		    0.0000	1.25_ZDT_AO_SW          	  5.000000	JUMP
+1		    1.0000	6.19_N_Cs_3D_SW         	  0.000000	JUMP
+1		    2.0000	5.27_IServo_FB_Switch   	  0.000000	JUMP
+1		    2.0000	5.23_COIL_TOP_AH        	  5.000000	JUMP
+1		    5.0000	3.0_N_V_AH              	 -0.061951	JUMP
+1		    5.0000	3.7_N_V_HH              	  0.046997	JUMP
+1		   50.0000	3.0_N_V_AH              	  0.188293	FINE
+1		   50.0000	3.7_N_V_HH              	 -0.020142	FINE
+1		  100.0000	6.19_N_Cs_3D_SW         	  5.000000	JUMP
+
+procedure 001: Cs_Molasses_Cooling
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		   -2.0000	8.7_N_Cs_MOT_Freq       	 -6.799927	JUMP
+1		   -1.0000	4.5_N_Cs_Repump_Freq    	  5.360107	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		    0.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		    0.0000	5.31_Cs_3D_AO_AM        	  0.700073	JUMP
+1		    0.0000	3.5_AH_upper_FF         	  0.000000	JUMP
+1		    0.0000	8.1_CS_Rep_AO_AM        	  5.000000	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	  0.499878	JUMP
+1		    0.0000	5.13_Bias_1/2_AH_-x     	 -1.000061	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -1.380005	JUMP
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  2.864380	JUMP
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -0.400085	JUMP
+1		    0.0000	5.16_Bias_5/6_AH_z      	 -1.000061	JUMP
+1		    1.0000	4.5_N_Cs_Repump_Freq    	  6.480103	FINE
+1		    4.0000	8.7_N_Cs_MOT_Freq       	 -5.799866	FINE
+1		    5.0000	5.31_Cs_3D_AO_AM        	  0.100098	FINE
+
+procedure 002: Cs_H_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -413.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 -412.9000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  -50.0000	8.7_N_Cs_MOT_Freq       	 -7.730103	JUMP
+1		  -15.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  -13.0000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		  -12.0000	6.4_N_V_Rep_Shutter     	  5.000000	JUMP
+1		  -10.0000	6.7_N_Cs_H_Img_Shutter  	  5.000000	JUMP
+1		  -10.0000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		  -10.0000	5.12_Bias_1/2_HH_x      	  3.999939	JUMP
+1		  -10.0000	5.13_Bias_1/2_AH_-x     	 -3.999939	JUMP
+1		  -10.0000	5.14_Bias_3/4_AH_-y     	  2.699890	JUMP
+1		  -10.0000	5.17_Bias_5/6_HH_-z     	  0.499878	JUMP
+1		  -10.0000	5.16_Bias_5/6_AH_z      	  0.000000	JUMP
+1		   -7.0000	5.15_Bias_3/4_HH_y      	 -2.399902	JUMP
+1		   -5.0000	8.7_N_Cs_MOT_Freq       	 -7.770081	FINE
+1		   -1.0000	6.4_N_V_Rep_Shutter     	  0.000000	JUMP
+1		   -1.0000	8.1_CS_Rep_AO_AM        	  2.999878	JUMP
+1		   -0.1000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		   -0.0200	1.21_pixelfly trigger   	  5.000000	JUMP
+1		    0.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		    0.0000	6.7_N_Cs_H_Img_Shutter  	  0.000000	JUMP
+1		    0.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		    0.0600	1.21_pixelfly trigger   	  0.000000	JUMP
+1		    0.0600	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		    0.1000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		    5.0000	8.4_oTOP_mod_AM         	  0.000000	JUMP
+1		    5.0000	6.1_Mod_AO_Switch       	  0.000000	JUMP
+1		    5.0000	6.2_XDT_AO_SW           	  0.000000	JUMP
+1		    5.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		    5.0000	8.3_oTOP_AO_AM          	  0.000000	JUMP
+1		    7.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		   10.0000	1.25_ZDT_AO_SW          	  5.000000	JUMP
+1		   10.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		   15.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		  625.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  630.0000	6.7_N_Cs_H_Img_Shutter  	  5.000000	JUMP
+1		  630.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		  630.0000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	FINE
+1		  639.9800	1.21_pixelfly trigger   	  5.000000	JUMP
+1		  640.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		  640.0000	6.7_N_Cs_H_Img_Shutter  	  0.000000	JUMP
+1		  640.0600	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  640.0600	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		  647.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		  650.0000	1.25_ZDT_AO_SW          	  5.000000	JUMP
+1		  655.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		 1750.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+
+procedure 003: Cs_RSC1
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -16.0000	6.5_N_Cs_Rep_Shutter    	  0.000000	JUMP
+1		  -10.0000	6.26_N_CsOP_Shut_H      	  5.000000	JUMP
+1		  -10.0000	1.27_Real_CS_RSC_AO_SW  	  0.000000	JUMP
+1		   -9.0000	1.29_Real_CS_RSC_SHU    	  5.000000	JUMP
+1		   -5.0000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		   -4.5000	8.6_Cs_RSC_AO_AM        	  0.000000	JUMP
+1		   -4.0000	1.27_Real_CS_RSC_AO_SW  	  5.000000	JUMP
+1		   -2.5000	4.5_N_Cs_Repump_Freq    	  6.480103	JUMP
+1		   -1.0000	8.6_Cs_RSC_AO_AM        	  0.000000	JUMP
+1		   -1.0000	6.17_Spec_Analysis_Trig 	  0.000000	JUMP
+1		   -0.9800	8.7_N_Cs_MOT_Freq       	 -5.799866	JUMP
+1		   -0.5000	8.6_Cs_RSC_AO_AM        	  2.099915	FINE
+1		   -0.3000	8.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		    0.0000	4.5_N_Cs_Repump_Freq    	  3.829956	FINE
+1		    0.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		    0.0000	8.1_CS_Rep_AO_AM        	  1.409912	JUMP
+1		    0.0200	5.31_Cs_3D_AO_AM        	  0.000000	JUMP
+1		    0.0200	5.12_Bias_1/2_HH_x      	  0.950012	JUMP
+1		    0.0200	5.13_Bias_1/2_AH_-x     	 -0.499878	JUMP
+1		    0.0200	5.15_Bias_3/4_HH_y      	 -1.380005	JUMP
+1		    0.0200	5.14_Bias_3/4_AH_-y     	  2.760010	JUMP
+1		    0.0200	5.17_Bias_5/6_HH_-z     	 -0.499878	JUMP
+1		    0.0200	5.16_Bias_5/6_AH_z      	 -0.350037	JUMP
+1		    0.0200	6.17_Spec_Analysis_Trig 	  5.000000	JUMP
+1		    1.5000	5.31_Cs_3D_AO_AM        	  0.025024	JUMP
+1		    1.5000	8.7_N_Cs_MOT_Freq       	 -0.289917	FINE
+1		    5.0000	6.17_Spec_Analysis_Trig 	  0.000000	JUMP
+1		   31.6000	5.31_Cs_3D_AO_AM        	  0.000000	JUMP
+1		   31.6000	8.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		   31.7000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		   31.7000	6.19_N_Cs_3D_SW         	  0.000000	JUMP
+1		   32.6000	8.6_Cs_RSC_AO_AM        	  2.099915	JUMP
+1		   37.6000	8.6_Cs_RSC_AO_AM        	  0.000000	FINE
+1		   38.0000	1.27_Real_CS_RSC_AO_SW  	  0.000000	JUMP
+
+procedure 004: Aerotech_return
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -250.0000	5.25_N_BFL_INT_LOCK     	  0.710144	JUMP
+1		 -100.0000	5.28_aerotech_trigger   	  5.000000	JUMP
+1		  750.0000	5.28_aerotech_trigger   	  7.000122	JUMP
+1		 1000.0000	5.25_N_BFL_INT_LOCK     	  0.710144	JUMP
+1		 1000.0000	5.8_Dual_780nm_Int_Lock 	  2.000122	JUMP
+1		 1000.0000	3.1_Dual_1064_Int_Lock  	  2.500000	JUMP
+1		 1100.0000	5.25_N_BFL_INT_LOCK     	  0.318909	COARSE
+1		 1200.0000	5.25_N_BFL_INT_LOCK     	  0.219116	COARSE
+1		 1300.0000	5.25_N_BFL_INT_LOCK     	  0.077515	FINE
+1		 1500.0000	3.1_Dual_1064_Int_Lock  	  2.500000	COARSE
+1		 1700.0000	5.25_N_BFL_INT_LOCK     	  0.000000	FINE
+1		 1700.0000	5.8_Dual_780nm_Int_Lock 	  2.000122	JUMP
+1		 1700.0000	3.1_Dual_1064_Int_Lock  	  2.500000	JUMP
+1		 1701.0000	5.11_BFL_AO_AM          	  0.000000	JUMP
+1		 1701.0000	5.22_BFL_AO_SW          	  0.000000	JUMP
+1		 2000.0000	5.28_aerotech_trigger   	  8.999939	JUMP
+1		 3700.0000	3.1_Dual_1064_Int_Lock  	  1.453857	COARSE
+1		 4700.0000	3.1_Dual_1064_Int_Lock  	  0.768127	COARSE
+1		 5700.0000	3.1_Dual_1064_Int_Lock  	  0.405884	COARSE
+1		 6700.0000	3.1_Dual_1064_Int_Lock  	  0.215149	COARSE
+1		 8950.0000	3.1_Dual_1064_Int_Lock  	  0.075073	COARSE
+1		 9100.0000	5.8_Dual_780nm_Int_Lock 	  1.799927	COARSE
+
+procedure 005: Dual_Imaging_H
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -500.0200	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 -499.0600	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  -50.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		  -20.0000	1.7_Li_EOM_AO_Sw        	  5.000000	JUMP
+1		  -17.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  -10.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		   -8.0000	1.28_Li_H_Img_shu       	  5.000000	JUMP
+1		   -0.4000	8.5_Li_EOM_Freq         	 -4.899902	JUMP
+1		   -0.0800	1.7_Li_EOM_AO_Sw        	  0.000000	JUMP
+1		   -0.0600	1.7_Li_EOM_AO_Sw        	  5.000000	JUMP
+1		   -0.0200	1.21_pixelfly trigger   	  5.000000	JUMP
+1		    0.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0000	1.28_Li_H_Img_shu       	  0.000000	JUMP
+1		    0.0000	5.22_BFL_AO_SW          	  0.000000	JUMP
+1		    0.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		    0.0000	5.9_Cs_LF_Img_AO_AM     	  8.500061	JUMP
+1		    0.0000	1.18_Li_EOM_H_Shutter   	  0.000000	JUMP
+1		    0.0000	8.5_Li_EOM_Freq         	  0.000000	JUMP
+1		    0.0200	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    0.0200	4.7_Li_Img_AO_AM        	  0.000000	JUMP
+1		    0.0600	1.21_pixelfly trigger   	  0.000000	JUMP
+1		   17.0000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		   18.0000	6.4_N_V_Rep_Shutter     	  5.000000	JUMP
+1		   18.0000	5.15_Bias_3/4_HH_y      	 -2.000122	JUMP
+1		   20.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		   20.0000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		   20.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		   20.0000	6.7_N_Cs_H_Img_Shutter  	  5.000000	JUMP
+1		   20.0000	1.7_Li_EOM_AO_Sw        	  0.000000	JUMP
+1		   29.0000	6.4_N_V_Rep_Shutter     	  0.000000	JUMP
+1		   29.0000	7.1_CS_Rep_AO_AM        	  2.000122	JUMP
+1		   29.9000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		   30.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		   30.0000	6.7_N_Cs_H_Img_Shutter  	  0.000000	JUMP
+1		   30.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		   30.0600	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		   30.1000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		   35.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		   37.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		   50.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		   55.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		  150.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		  182.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  190.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  192.0000	1.28_Li_H_Img_shu       	  5.000000	JUMP
+1		  199.9800	1.21_pixelfly trigger   	  5.000000	JUMP
+1		  200.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  200.0000	1.28_Li_H_Img_shu       	  0.000000	JUMP
+1		  200.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		  200.0200	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  200.0200	4.7_Li_Img_AO_AM        	  0.000000	JUMP
+1		  200.0600	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  215.0000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		  218.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  218.0000	6.7_N_Cs_H_Img_Shutter  	  5.000000	JUMP
+1		  220.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  228.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		  228.0000	6.7_N_Cs_H_Img_Shutter  	  0.000000	JUMP
+1		  228.0600	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		  235.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		  255.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		  255.0000	7.7_N_Cs_MOT_Freq       	 -7.669983	JUMP
+1		  300.0000	5.9_Cs_LF_Img_AO_AM     	 10.000000	JUMP
+1		 2100.0000	7.7_N_Cs_MOT_Freq       	 -7.149963	COARSE
+
+procedure 006: Dual_Imaging_V 
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		-1000.0000	4.5_N_Cs_Repump_Freq    	  6.510010	JUMP
+1		-1000.0000	5.10_CS_HF_Img_Freq     	-10.000000	JUMP
+1		 -100.0000	6.12_N_Cs_LF_Img_Shutter	  0.000000	JUMP
+1		 -100.0000	5.10_CS_HF_Img_Freq     	65511.000061	FINE
+1		  -80.0000	6.11_N_Cs_HF_Img_Shutter	  5.000000	JUMP
+1		  -50.0000	4.5_N_Cs_Repump_Freq    	  7.000122	COARSE
+1		  -40.0000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		  -35.0000	8.2_Cs_VHF_AO_AM        	  0.000000	JUMP
+1		  -20.0000	4.7_Li_Img_AO_AM        	  3.999939	JUMP
+1		  -10.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  -10.0000	1.15_Li_V_Img_Shutter   	  5.000000	JUMP
+1		  -10.0000	1.18_Li_EOM_H_Shutter   	  5.000000	JUMP
+1		  -10.0000	1.7_Li_EOM_AO_Sw        	  0.000000	JUMP
+1		  -10.0000	8.5_Li_EOM_Freq         	 -1.250000	JUMP
+1		  -10.0000	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		  -10.0000	6.6_N_Cs_V_Img_Shutter  	  5.000000	JUMP
+1		  -10.0000	1.10_Cs_Oneshot_Bypass  	  5.000000	JUMP
+1		   -6.0000	6.26_N_CsOP_Shut_H      	  5.000000	JUMP
+1		   -5.0000	8.2_Cs_VHF_AO_AM        	  0.899963	JUMP
+1		   -2.0000	6.30_Li_Oneshot_Bypass  	  5.000000	JUMP
+1		   -0.4400	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		   -0.4000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+1		    0.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0000	1.7_Li_EOM_AO_Sw        	  5.000000	JUMP
+1		    0.0200	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    0.0200	1.7_Li_EOM_AO_Sw        	  0.000000	JUMP
+1		    0.4000	8.1_CS_Rep_AO_AM        	  2.999878	JUMP
+1		    0.4600	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		    0.4600	1.20_MW_pulse_SW        	  0.000000	JUMP
+1		    0.4600	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		    0.4800	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		    0.4800	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		    0.4800	8.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		    0.4800	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		    0.9000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    1.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    1.0000	1.18_Li_EOM_H_Shutter   	  0.000000	JUMP
+1		    1.0000	8.5_Li_EOM_Freq         	 -5.000000	JUMP
+1		    1.3600	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		    1.3600	6.6_N_Cs_V_Img_Shutter  	  0.000000	JUMP
+1		    1.3800	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		    1.5000	1.10_Cs_Oneshot_Bypass  	  0.000000	JUMP
+1		    1.7200	1.15_Li_V_Img_Shutter   	  0.000000	JUMP
+1		    2.0000	6.30_Li_Oneshot_Bypass  	  0.000000	JUMP
+1		    2.0000	4.7_Li_Img_AO_AM        	  3.999939	JUMP
+1		    3.0000	5.10_CS_HF_Img_Freq     	65511.000061	JUMP
+1		    3.0000	8.7_N_Cs_MOT_Freq       	 -7.730103	JUMP
+1		   20.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		   20.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		   30.0000	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		  100.0000	8.7_N_Cs_MOT_Freq       	 -7.149963	COARSE
+1		 1000.0000	5.10_CS_HF_Img_Freq     	-10.000000	FINE
+
+procedure 007: FB_Bias_field
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -100.0000	5.18_COIL_BOT_CC        	  5.000000	JUMP
+1		 -100.0000	5.20_COIL_TOP_CC        	  5.000000	JUMP
+1		 -100.0000	5.19_COIL_TOP_CV        	  2.200012	JUMP
+1		 -100.0000	5.21_COIL_BOT_CV        	  1.799927	JUMP
+1		  -60.0000	3.7_N_V_HH              	  0.669861	JUMP
+1		  -60.0000	3.0_N_V_AH              	 -0.669861	JUMP
+1		  -50.0000	5.19_COIL_TOP_CV        	  2.399902	JUMP
+1		    0.0000	3.6_HH_upper_FF         	  4.460144	JUMP
+1		   50.0000	3.7_N_V_HH              	  2.778931	COARSE
+1		   50.0000	3.0_N_V_AH              	 -0.826416	FINE
+1		  400.0000	3.6_HH_upper_FF         	  0.000000	COARSE
+1		  401.0000	6.21_FF_Disable         	  5.000000	JUMP
+1		  750.0000	3.7_N_V_HH              	  2.778931	JUMP
+1		  750.0000	5.12_Bias_1/2_HH_x      	  6.000061	JUMP
+1		  750.0000	5.15_Bias_3/4_HH_y      	 -3.591003	JUMP
+1		  750.0000	5.17_Bias_5/6_HH_-z     	 -5.000000	JUMP
+1		  750.0000	5.19_COIL_TOP_CV        	  2.399902	JUMP
+1		  750.0000	5.21_COIL_BOT_CV        	  1.799927	JUMP
+1		  750.0000	5.13_Bias_1/2_AH_-x     	  0.202637	JUMP
+1		  750.0000	5.14_Bias_3/4_AH_-y     	  3.522949	JUMP
+1		  750.0000	5.16_Bias_5/6_AH_z      	 -0.400085	JUMP
+1		  750.0000	3.0_N_V_AH              	 -0.140686	JUMP
+1		  917.7000	3.7_N_V_HH              	  6.439819	FINE
+1		  917.7000	3.0_N_V_AH              	 -0.291443	FINE
+1		  917.7200	3.7_N_V_HH              	  6.431885	JUMP
+1		  917.7200	3.0_N_V_AH              	  3.101501	JUMP
+1		  917.7200	6.31_B_Precision_Disable	  0.000000	JUMP
+1		  950.0000	3.7_N_V_HH              	 -2.000122	FINE
+1		  950.0000	5.12_Bias_1/2_HH_x      	  0.390015	COARSE
+1		  950.0000	5.15_Bias_3/4_HH_y      	  3.999939	COARSE
+1		  950.0000	5.17_Bias_5/6_HH_-z     	 -0.302429	COARSE
+1		  950.0000	5.19_COIL_TOP_CV        	  3.099976	COARSE
+1		  950.0000	5.21_COIL_BOT_CV        	  2.699890	COARSE
+1		  950.0000	5.13_Bias_1/2_AH_-x     	 -0.319519	COARSE
+1		  950.0000	5.14_Bias_3/4_AH_-y     	  2.753296	COARSE
+1		  950.0000	5.16_Bias_5/6_AH_z      	 -0.400085	COARSE
+1		  950.0000	3.0_N_V_AH              	  3.850098	FINE
+1		 1300.0000	3.7_N_V_HH              	 -2.000122	JUMP
+1		 2000.0000	3.7_N_V_HH              	 -0.849915	COARSE
+1		 9000.0000	5.15_Bias_3/4_HH_y      	  3.999939	JUMP
+1		 9100.0000	5.15_Bias_3/4_HH_y      	 -5.000000	COARSE
+
+procedure 008: Cs_Dark
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -50.0000	6.13_N_Cs_Z_Shutter     	  0.000000	JUMP
+1		  -20.0000	6.14_N_Cs_2D_MOT_Shutter	  0.000000	JUMP
+1		  -12.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		   -8.0000	1.29_Real_CS_RSC_SHU    	  0.000000	JUMP
+1		    0.0000	6.19_N_Cs_3D_SW         	  0.000000	JUMP
+1		    0.0000	6.15_N_Cs_3D_MOT_Shutter	  0.000000	JUMP
+1		    0.0000	4.5_N_Cs_Repump_Freq    	  3.829956	JUMP
+1		    0.0000	6.5_N_Cs_Rep_Shutter    	  0.000000	JUMP
+1		    1.0000	8.7_N_Cs_MOT_Freq       	 -0.289917	JUMP
+1		    9.0000	8.7_N_Cs_MOT_Freq       	 -7.730103	FINE
+1		   10.0000	4.5_N_Cs_Repump_Freq    	  6.510010	FINE
+1		  505.0000	6.19_N_Cs_3D_SW         	  5.000000	JUMP
+1		  505.0000	1.27_Real_CS_RSC_AO_SW  	  5.000000	JUMP
+1		  505.0000	8.6_Cs_RSC_AO_AM        	  5.000000	JUMP
+1		  505.0000	8.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		  505.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+
+procedure 009: Li_HF_V_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -20.0000	1.18_Li_EOM_H_Shutter   	  5.000000	JUMP
+1		  -20.0000	1.7_Li_EOM_AO_Sw        	  5.000000	JUMP
+1		  -10.0000	4.7_Li_Img_AO_AM        	  0.000000	JUMP
+1		   -7.0000	1.15_Li_V_Img_Shutter   	  5.000000	JUMP
+1		   -5.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		   -1.0000	1.10_Cs_Oneshot_Bypass  	  5.000000	JUMP
+1		   -0.1200	1.7_Li_EOM_AO_Sw        	  0.000000	JUMP
+1		   -0.1200	8.5_Li_EOM_Freq         	 -8.599854	JUMP
+1		   -0.0600	4.7_Li_Img_AO_AM        	  3.999939	JUMP
+1		    0.0000	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		    0.0000	1.15_Li_V_Img_Shutter   	  0.000000	JUMP
+1		    0.0000	1.18_Li_EOM_H_Shutter   	  0.000000	JUMP
+1		    0.0200	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0200	1.7_Li_EOM_AO_Sw        	  5.000000	JUMP
+1		    0.0200	8.5_Li_EOM_Freq         	 -5.000000	JUMP
+1		    0.0400	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    0.0400	4.7_Li_Img_AO_AM        	  0.000000	JUMP
+1		    0.1000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+1		   10.0000	1.10_Cs_Oneshot_Bypass  	  0.000000	JUMP
+1		   30.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		   30.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		  490.0000	4.7_Li_Img_AO_AM        	  0.000000	JUMP
+1		  493.0000	1.15_Li_V_Img_Shutter   	  5.000000	JUMP
+1		  495.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  499.0000	1.10_Cs_Oneshot_Bypass  	  5.000000	JUMP
+1		  499.9400	4.7_Li_Img_AO_AM        	  3.999939	JUMP
+1		  500.0000	1.15_Li_V_Img_Shutter   	  0.000000	JUMP
+1		  500.0000	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		  500.0200	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  500.0400	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  500.0400	4.7_Li_Img_AO_AM        	  0.000000	JUMP
+1		  500.1000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+1		  510.0000	1.10_Cs_Oneshot_Bypass  	  0.000000	JUMP
+1		  530.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  530.0000	4.7_Li_Img_AO_AM        	  5.000000	JUMP
+1		  990.0000	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		  990.1000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+
+procedure 010: Cs_Evaporation
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -40.0000	8.4_oTOP_mod_AM         	  2.500000	JUMP
+1		   -0.0000	8.0_oTOP_Int_lok        	  2.900085	JUMP
+1		  100.0000	3.4_oTOP_fcarrier       	  1.799927	JUMP
+1		  150.0000	8.0_oTOP_Int_lok        	  2.250061	COARSE
+1		  200.0000	3.4_oTOP_fcarrier       	  2.600098	FINE
+1		  250.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		  350.0000	8.4_oTOP_mod_AM         	  0.799866	COARSE
+1		  500.0000	8.0_oTOP_Int_lok        	  1.265869	COARSE
+1		  650.0000	3.0_N_V_AH              	 -0.826416	JUMP
+1		  700.0000	8.4_oTOP_mod_AM         	  0.000000	FINE
+1		  749.0000	3.0_N_V_AH              	 -0.140686	FINE
+1		  750.0000	3.4_oTOP_fcarrier       	  2.600098	JUMP
+1		  950.0000	3.4_oTOP_fcarrier       	  2.999878	FINE
+1		 2000.0000	8.0_oTOP_Int_lok        	  1.265869	JUMP
+1		 2100.0000	3.4_oTOP_fcarrier       	  2.999878	JUMP
+1		 2250.0000	3.4_oTOP_fcarrier       	  2.099915	COARSE
+1		 3000.0000	8.0_oTOP_Int_lok        	  0.886230	COARSE
+1		 4000.0000	8.0_oTOP_Int_lok        	  0.683594	COARSE
+1		 5000.0000	8.0_oTOP_Int_lok        	  0.549927	COARSE
+1		 6000.0000	8.0_oTOP_Int_lok        	  0.458069	COARSE
+1		 7000.0000	8.0_oTOP_Int_lok        	  0.389099	COARSE
+1		 8000.0000	8.0_oTOP_Int_lok        	  0.239868	COARSE
+
+procedure 011: Spare
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -20.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		  -16.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  -15.0000	1.28_Li_H_Img_shu       	65510.000000	JUMP
+1		    0.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0000	1.28_Li_H_Img_shu       	  0.000000	JUMP
+1		    0.1400	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		   20.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		   20.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+
+procedure 012: Li_Feshbach
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -500.0000	5.18_COIL_BOT_CC        	  3.699951	JUMP
+1		 -500.0000	5.20_COIL_TOP_CC        	  3.900146	JUMP
+1		  -20.0000	5.18_COIL_BOT_CC        	  5.000000	JUMP
+1		  -20.0000	5.20_COIL_TOP_CC        	  5.000000	JUMP
+1		    0.0000	5.19_COIL_TOP_CV        	  2.699890	JUMP
+1		    0.0000	5.21_COIL_BOT_CV        	  2.200012	JUMP
+1		    0.2200	5.24_COIL_TOP_HH        	  5.000000	JUMP
+1		    0.3200	5.27_IServo_FB_Switch   	  0.000000	JUMP
+1		    0.3200	3.7_N_V_HH              	  0.000000	JUMP
+1		    0.3200	3.0_N_V_AH              	  0.000000	JUMP
+1		    1.0000	3.6_HH_upper_FF         	  4.100037	JUMP
+1		    1.0000	3.3_lower_FF            	  2.550049	JUMP
+1		    2.2000	3.3_lower_FF            	  2.200012	FINE
+1		    3.0000	5.19_COIL_TOP_CV        	  2.500000	JUMP
+1		    3.0000	5.21_COIL_BOT_CV        	  2.200012	JUMP
+1		    8.0000	5.19_COIL_TOP_CV        	  2.850037	FINE
+1		    8.0000	5.21_COIL_BOT_CV        	  2.699890	FINE
+1		    8.0000	3.7_N_V_HH              	  6.600037	FINE
+1		    8.0000	3.0_N_V_AH              	 -0.065002	FINE
+1		 1450.0000	5.19_COIL_TOP_CV        	  2.850037	JUMP
+1		 1450.0000	5.21_COIL_BOT_CV        	  2.699890	JUMP
+1		 1470.0000	3.3_lower_FF            	  2.200012	JUMP
+1		 1470.0000	3.6_HH_upper_FF         	  4.100037	JUMP
+1		 1470.0000	3.7_N_V_HH              	  6.600037	JUMP
+1		 1500.0000	5.19_COIL_TOP_CV        	  2.200012	FINE
+1		 1500.0000	5.21_COIL_BOT_CV        	  2.099915	FINE
+1		 1500.0000	3.7_N_V_HH              	  0.000000	FINE
+1		 1500.0000	3.6_HH_upper_FF         	  0.000000	FINE
+1		 1500.0000	3.3_lower_FF            	 -0.075073	FINE
+1		 1500.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		 1500.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+
+procedure 013: Dual_Evap
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -5.000000	JUMP
+1		    5.0000	5.15_Bias_3/4_HH_y      	 -0.799866	JUMP
+1		  100.0000	3.1_Dual_1064_Int_Lock  	  0.950012	JUMP
+1		  100.0000	5.8_Dual_780nm_Int_Lock 	  0.799866	JUMP
+1		  600.0000	3.1_Dual_1064_Int_Lock  	  0.781860	COARSE
+1		  980.0000	4.4_DMD_AO_AM           	  0.000000	JUMP
+1		  980.0000	1.5_DMD_AO_Sw           	  0.000000	JUMP
+1		  990.0000	6.25_DMD_Shutter        	  5.000000	JUMP
+1		 1000.0000	4.4_DMD_AO_AM           	  0.000000	JUMP
+1		 1000.0000	1.5_DMD_AO_Sw           	  5.000000	JUMP
+1		 1400.0000	5.8_Dual_780nm_Int_Lock 	  0.020142	COARSE
+1		 1400.1000	4.2_Dual_780_AO_AM      	  0.000000	JUMP
+1		 1400.1000	6.8_Dual_780nm_SW       	  0.000000	JUMP
+1		 1500.0000	3.1_Dual_1064_Int_Lock  	  0.580139	FINE
+1		 1500.0000	5.15_Bias_3/4_HH_y      	 -0.799866	JUMP
+1		 1500.0000	4.4_DMD_AO_AM           	  3.800049	FINE
+1		 1550.0000	5.15_Bias_3/4_HH_y      	 -5.000000	COARSE
+1		 2002.0000	4.4_DMD_AO_AM           	  0.000000	JUMP
+1		 2002.0000	6.25_DMD_Shutter        	  0.000000	JUMP
+1		 2002.0000	1.5_DMD_AO_Sw           	  0.000000	JUMP
+
+procedure 014: Li_H_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -400.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 -399.0000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  -12.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  -10.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  -10.0000	4.7_Li_Img_AO_AM        	  2.999878	JUMP
+1		   -6.0000	1.28_Li_H_Img_shu       	  5.000000	JUMP
+1		   -3.0000	1.13_Li_Rep_Shutter     	  5.000000	JUMP
+1		   -1.0000	5.12_Bias_1/2_HH_x      	  0.599976	JUMP
+1		   -1.0000	5.17_Bias_5/6_HH_-z     	  0.499878	JUMP
+1		   -0.4000	1.11_Li_MOT_AO_Sw       	  0.000000	JUMP
+1		   -0.0800	4.1_Li_Rep_AO_AM        	 10.000000	JUMP
+1		   -0.0400	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		    0.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		    0.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0000	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		    0.0000	1.13_Li_Rep_Shutter     	  0.000000	JUMP
+1		    0.0000	5.22_BFL_AO_SW          	  0.000000	JUMP
+1		    0.0000	4.1_Li_Rep_AO_AM        	  0.000000	JUMP
+1		    0.1000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    0.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		    1.0000	1.28_Li_H_Img_shu       	  0.000000	JUMP
+1		    1.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		   10.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		   10.0000	4.7_Li_Img_AO_AM        	 10.000000	JUMP
+1		   20.0000	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		   20.0000	4.1_Li_Rep_AO_AM        	 10.000000	JUMP
+1		   20.0000	2.3_Li_MRep_AO_FM       	 -1.000061	JUMP
+1		  488.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  490.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  490.0000	4.7_Li_Img_AO_AM        	  2.999878	JUMP
+1		  494.0000	1.28_Li_H_Img_shu       	  5.000000	JUMP
+1		  496.0000	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		  500.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		  500.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  500.0000	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		  500.0000	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		  500.1000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  500.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  501.0000	1.28_Li_H_Img_shu       	  0.000000	JUMP
+1		  501.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		  510.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  510.0000	4.7_Li_Img_AO_AM        	 10.000000	JUMP
+1		  520.0000	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+
+procedure 015: Li_V_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -400.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 -399.0000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  -10.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  -10.0000	4.7_Li_Img_AO_AM        	  1.000061	JUMP
+1		   -8.0000	5.30_Cs_EOM_Freq        	  5.000000	JUMP
+1		   -5.0000	1.15_Li_V_Img_Shutter   	  5.000000	JUMP
+1		   -3.0000	1.13_Li_Rep_Shutter     	  5.000000	JUMP
+1		   -0.4000	1.11_Li_MOT_AO_Sw       	  0.000000	JUMP
+1		   -0.0800	4.1_Li_Rep_AO_AM        	 10.000000	JUMP
+1		   -0.0400	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		    0.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		    0.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0000	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		    0.0000	1.13_Li_Rep_Shutter     	  0.000000	JUMP
+1		    0.0000	5.22_BFL_AO_SW          	  0.000000	JUMP
+1		    0.0000	4.1_Li_Rep_AO_AM        	  0.000000	JUMP
+1		    0.0800	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    0.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		    2.0000	1.15_Li_V_Img_Shutter   	  0.000000	JUMP
+1		    2.0000	5.30_Cs_EOM_Freq        	  0.000000	JUMP
+1		   10.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		   10.0000	4.7_Li_Img_AO_AM        	 10.000000	JUMP
+1		   20.0000	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		   20.0000	2.3_Li_MRep_AO_FM       	 -1.000061	JUMP
+1		   20.0000	4.1_Li_Rep_AO_AM        	 10.000000	JUMP
+1		  490.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  490.0000	4.7_Li_Img_AO_AM        	  1.000061	JUMP
+1		  492.0000	5.30_Cs_EOM_Freq        	  5.000000	JUMP
+1		  495.0000	1.15_Li_V_Img_Shutter   	  5.000000	JUMP
+1		  496.0000	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		  500.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		  500.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  500.0000	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		  500.0400	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		  500.0800	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		  500.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  502.0000	1.15_Li_V_Img_Shutter   	  0.000000	JUMP
+1		  502.0000	5.30_Cs_EOM_Freq        	  0.000000	JUMP
+1		  510.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		  510.0000	4.7_Li_Img_AO_AM        	 10.000000	JUMP
+1		  520.0000	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		 1032.0000	5.30_Cs_EOM_Freq        	  5.000000	JUMP
+1		 1040.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 1041.0000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		 1042.0000	5.30_Cs_EOM_Freq        	  0.000000	JUMP
+1		 1499.9800	1.12_Li_Rep_AO_Sw       	  5.000000	JUMP
+1		 1500.0000	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		 1500.0000	1.13_Li_Rep_Shutter     	  0.000000	JUMP
+1		 1500.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 1501.0000	1.21_pixelfly trigger   	  0.000000	JUMP
+
+procedure 016: Cs_Levitation1
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -32.0000	5.21_COIL_BOT_CV        	  1.799927	JUMP
+1		  -32.0000	5.18_COIL_BOT_CC        	  5.000000	JUMP
+1		  -32.0000	5.20_COIL_TOP_CC        	  5.000000	JUMP
+1		   -5.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		   -3.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		   -0.5000	5.24_COIL_TOP_HH        	  5.000000	JUMP
+1		   -0.2000	5.12_Bias_1/2_HH_x      	  0.700073	JUMP
+1		   -0.2000	5.13_Bias_1/2_AH_-x     	 -0.290527	JUMP
+1		   -0.2000	5.15_Bias_3/4_HH_y      	 -1.610107	JUMP
+1		   -0.2000	5.14_Bias_3/4_AH_-y     	  2.787170	JUMP
+1		   -0.2000	5.17_Bias_5/6_HH_-z     	 -0.499878	JUMP
+1		   -0.2000	5.16_Bias_5/6_AH_z      	 -0.400085	JUMP
+1		   -0.1000	3.6_HH_upper_FF         	  3.500061	JUMP
+1		    0.0000	3.7_N_V_HH              	  0.669861	JUMP
+1		    0.0000	3.0_N_V_AH              	 -0.669861	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  0.000000	JUMP
+1		    0.0000	1.30_test trigger       	  5.000000	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	  6.000061	FINE
+1		    0.0000	5.13_Bias_1/2_AH_-x     	  0.202637	FINE
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -3.591003	FINE
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  3.522949	FINE
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -5.000000	FINE
+1		    0.0000	5.16_Bias_5/6_AH_z      	 -0.400085	FINE
+1		    0.1000	3.6_HH_upper_FF         	  5.499878	FINE
+1		    0.8000	3.6_HH_upper_FF         	  4.580078	JUMP
+1		    1.0000	3.6_HH_upper_FF         	  4.700012	JUMP
+1		    1.0000	1.30_test trigger       	  0.000000	JUMP
+1		    1.2000	3.6_HH_upper_FF         	  4.549866	FINE
+1		    1.5000	3.6_HH_upper_FF         	  4.549866	FINE
+
+procedure 017: Li_Evaporation
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	5.25_N_BFL_INT_LOCK     	  2.999878	JUMP
+1		    0.0000	5.11_BFL_AO_AM          	 10.000000	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -0.499878	JUMP
+1		  100.0000	5.25_N_BFL_INT_LOCK     	  2.999878	JUMP
+1		  100.0000	5.8_Dual_780nm_Int_Lock 	  2.500000	JUMP
+1		  100.0000	3.1_Dual_1064_Int_Lock  	  3.750000	JUMP
+1		  500.0000	5.25_N_BFL_INT_LOCK     	  1.842041	COARSE
+1		 1000.0000	5.25_N_BFL_INT_LOCK     	  1.140137	COARSE
+1		 1500.0000	5.25_N_BFL_INT_LOCK     	  0.710144	COARSE
+1		 1500.0000	5.8_Dual_780nm_Int_Lock 	  0.000000	COARSE
+1		 1500.0000	3.1_Dual_1064_Int_Lock  	  0.000000	COARSE
+1		 1600.0000	5.28_aerotech_trigger   	  2.999878	JUMP
+
+procedure 018: Li_Dark
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -15.0000	1.16_Li_Zeeman_Shutter  	  0.000000	JUMP
+1		   -3.0000	1.14_Li_MOT_Shutter     	  0.000000	JUMP
+1		   -2.0000	1.13_Li_Rep_Shutter     	  0.000000	JUMP
+1		    0.0000	1.11_Li_MOT_AO_Sw       	  0.000000	JUMP
+1		    0.0000	4.1_Li_Rep_AO_AM        	  0.000000	JUMP
+1		    0.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		    0.0000	3.7_N_V_HH              	  0.000000	JUMP
+1		    0.0000	3.0_N_V_AH              	  0.000000	JUMP
+1		    0.0000	3.5_AH_upper_FF         	  0.000000	JUMP
+1		    0.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	JUMP
+1		    0.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		    1.0000	5.29_Li_MOT_Freq        	  5.719910	JUMP
+1		 1000.0000	5.29_Li_MOT_Freq        	  6.099854	COARSE
+
+procedure 019: Cs_V_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -313.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 -312.9000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  -13.0000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		  -12.0000	6.6_N_Cs_V_Img_Shutter  	  5.000000	JUMP
+1		  -12.0000	6.26_N_CsOP_Shut_H      	  5.000000	JUMP
+1		   -8.0000	5.30_Cs_EOM_Freq        	  5.000000	JUMP
+1		   -2.0000	5.9_Cs_LF_Img_AO_AM     	  2.999878	JUMP
+1		   -1.0000	2.1_CS_Rep_AO_AM        	 10.000000	JUMP
+1		   -1.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		   -0.5000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		    0.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		    0.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		    0.0000	6.6_N_Cs_V_Img_Shutter  	  0.000000	JUMP
+1		    0.0000	5.22_BFL_AO_SW          	  0.000000	JUMP
+1		    0.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		    0.1000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		    0.3000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		    2.0000	5.30_Cs_EOM_Freq        	  0.000000	JUMP
+1		   10.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		  130.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		  150.0000	1.25_ZDT_AO_SW          	  5.000000	JUMP
+1		  628.0000	6.6_N_Cs_V_Img_Shutter  	  5.000000	JUMP
+1		  632.0000	5.30_Cs_EOM_Freq        	  5.000000	JUMP
+1		  640.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		  640.0000	6.20_Cs_LF_Img_AO_Sw    	  5.000000	JUMP
+1		  640.0000	6.6_N_Cs_V_Img_Shutter  	  0.000000	JUMP
+1		  640.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  640.3000	6.20_Cs_LF_Img_AO_Sw    	  0.000000	JUMP
+1		  642.0000	5.30_Cs_EOM_Freq        	  0.000000	JUMP
+1		  750.0000	3.0_N_V_AH              	  0.000000	JUMP
+
+procedure 020: Li_CMOT
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -200.0000	5.19_COIL_TOP_CV        	  3.599854	JUMP
+1		 -200.0000	5.21_COIL_BOT_CV        	  3.299866	JUMP
+1		  -80.0000	5.25_N_BFL_INT_LOCK     	  2.999878	JUMP
+1		  -58.0000	1.16_Li_Zeeman_Shutter  	  0.000000	JUMP
+1		  -50.0000	1.32_ZCurrents          	  0.000000	JUMP
+1		  -50.0000	5.12_Bias_1/2_HH_x      	  5.000000	JUMP
+1		  -50.0000	5.13_Bias_1/2_AH_-x     	  0.000000	JUMP
+1		  -50.0000	5.15_Bias_3/4_HH_y      	 -3.999939	JUMP
+1		  -50.0000	5.14_Bias_3/4_AH_-y     	  0.000000	JUMP
+1		  -50.0000	5.17_Bias_5/6_HH_-z     	 -6.000061	JUMP
+1		  -50.0000	5.16_Bias_5/6_AH_z      	  0.000000	JUMP
+1		  -50.0000	3.7_N_V_HH              	 -0.009460	JUMP
+1		  -50.0000	3.0_N_V_AH              	  0.347595	JUMP
+1		  -18.0000	5.29_Li_MOT_Freq        	  5.344849	JUMP
+1		  -18.0000	4.6_Li_MRep_AO_FM       	  0.400085	JUMP
+1		  -13.5000	4.1_Li_Rep_AO_AM        	  5.000000	JUMP
+1		  -13.5000	4.0_Li_MOT_AO_AM        	  1.900024	JUMP
+1		   -5.0000	5.12_Bias_1/2_HH_x      	  2.500000	FINE
+1		   -5.0000	5.13_Bias_1/2_AH_-x     	  0.000000	FINE
+1		   -5.0000	5.15_Bias_3/4_HH_y      	 -2.399902	FINE
+1		   -5.0000	5.14_Bias_3/4_AH_-y     	 -0.799866	FINE
+1		   -5.0000	5.17_Bias_5/6_HH_-z     	  0.100098	FINE
+1		   -5.0000	5.16_Bias_5/6_AH_z      	 -1.400146	FINE
+1		   -5.0000	3.7_N_V_HH              	 -0.060120	FINE
+1		   -5.0000	3.0_N_V_AH              	  1.000061	FINE
+1		   -3.0000	4.0_Li_MOT_AO_AM        	  1.900024	FINE
+1		   -3.0000	4.1_Li_Rep_AO_AM        	  2.650146	FINE
+1		   -0.0400	1.12_Li_Rep_AO_Sw       	  0.000000	JUMP
+1		   -0.0400	4.1_Li_Rep_AO_AM        	  0.000000	FINE
+1		   -0.0200	4.1_Li_Rep_AO_AM        	  0.000000	JUMP
+1		    0.0000	5.25_N_BFL_INT_LOCK     	  2.999878	FINE
+1		    0.0000	4.0_Li_MOT_AO_AM        	  0.000000	FINE
+1		    0.0000	4.6_Li_MRep_AO_FM       	  0.480042	FINE
+1		    0.0000	5.29_Li_MOT_Freq        	  5.719910	FINE
+
+procedure 021: Cs_CMOT
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -30.0000	5.31_Cs_3D_AO_AM        	  2.300110	JUMP
+1		  -10.0000	1.32_ZCurrents          	  0.000000	JUMP
+1		  -10.0000	6.13_N_Cs_Z_Shutter     	  0.000000	JUMP
+1		  -10.0000	6.14_N_Cs_2D_MOT_Shutter	  0.000000	JUMP
+1		  -10.0000	5.12_Bias_1/2_HH_x      	 -2.500000	JUMP
+1		  -10.0000	5.13_Bias_1/2_AH_-x     	  1.799927	JUMP
+1		  -10.0000	5.15_Bias_3/4_HH_y      	  2.600098	JUMP
+1		  -10.0000	5.14_Bias_3/4_AH_-y     	 -3.599854	JUMP
+1		  -10.0000	5.17_Bias_5/6_HH_-z     	 -0.499878	JUMP
+1		  -10.0000	5.16_Bias_5/6_AH_z      	 -0.599976	JUMP
+1		  -10.0000	5.8_Dual_780nm_Int_Lock 	  2.500000	JUMP
+1		  -10.0000	3.1_Dual_1064_Int_Lock  	  3.750000	JUMP
+1		    0.0000	5.31_Cs_3D_AO_AM        	  0.499878	FINE
+1		    0.0000	8.1_CS_Rep_AO_AM        	  5.000000	JUMP
+1		    0.0000	6.4_N_V_Rep_Shutter     	  0.000000	JUMP
+1		    0.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		    0.0000	3.7_N_V_HH              	 -0.020142	JUMP
+1		    0.0000	3.0_N_V_AH              	  0.188293	JUMP
+1		    0.0000	8.7_N_Cs_MOT_Freq       	 -7.210083	JUMP
+1		    0.0000	5.8_Dual_780nm_Int_Lock 	  0.000000	FINE
+1		    0.0000	3.1_Dual_1064_Int_Lock  	  0.000000	FINE
+1		   40.0000	5.31_Cs_3D_AO_AM        	  0.499878	JUMP
+1		   40.0000	4.5_N_Cs_Repump_Freq    	  6.510010	JUMP
+1		   40.0000	3.7_N_V_HH              	 -0.000916	FINE
+1		   40.0000	3.0_N_V_AH              	  0.112610	FINE
+1		   40.0000	8.7_N_Cs_MOT_Freq       	 -6.799927	FINE
+1		   48.0000	5.31_Cs_3D_AO_AM        	  0.299988	FINE
+1		   48.0000	5.12_Bias_1/2_HH_x      	  2.000122	FINE
+1		   48.0000	5.13_Bias_1/2_AH_-x     	  0.000000	FINE
+1		   48.0000	5.15_Bias_3/4_HH_y      	 -0.899963	FINE
+1		   48.0000	5.14_Bias_3/4_AH_-y     	  0.000000	FINE
+1		   48.0000	5.17_Bias_5/6_HH_-z     	 -1.199951	FINE
+1		   48.0000	5.16_Bias_5/6_AH_z      	  0.599976	FINE
+1		   48.9800	4.5_N_Cs_Repump_Freq    	  5.360107	FINE
+1		   48.9800	3.7_N_V_HH              	  0.010071	FINE
+1		   48.9800	3.0_N_V_AH              	  0.075684	FINE
+1		   85.0000	8.0_oTOP_Int_lok        	  0.599976	JUMP
+1		   90.0000	8.0_oTOP_Int_lok        	  2.900085	FINE
+
+procedure 022: Li_MOT_Loading
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	3.2_Li_Img_Freq         	 -5.249939	JUMP
+1		    0.0000	5.29_Li_MOT_Freq        	  5.344849	JUMP
+1		    0.0000	1.8_Cs_2DMOT_Shutter    	  0.000000	JUMP
+1		    0.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		    0.0000	1.19_Cs_ZM_shutter      	  0.000000	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	  5.000000	JUMP
+1		    0.0000	5.13_Bias_1/2_AH_-x     	  0.000000	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -3.999939	JUMP
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  0.000000	JUMP
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -6.000061	JUMP
+1		    0.0000	5.16_Bias_5/6_AH_z      	  0.000000	JUMP
+1		    0.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		    0.0000	8.0_oTOP_Int_lok        	 -1.000061	JUMP
+1		    0.0000	1.13_Li_Rep_Shutter     	  5.000000	JUMP
+1		    0.0000	1.14_Li_MOT_Shutter     	65505.000000	JUMP
+1		    0.0000	1.16_Li_Zeeman_Shutter  	  5.000000	JUMP
+1		    0.0000	1.32_ZCurrents          	  5.000000	JUMP
+1		    0.0000	5.8_Dual_780nm_Int_Lock 	  2.500000	JUMP
+1		    0.0000	3.1_Dual_1064_Int_Lock  	  3.750000	JUMP
+1		    0.0000	5.19_COIL_TOP_CV        	  2.000122	JUMP
+1		    0.0000	5.21_COIL_BOT_CV        	  1.499939	JUMP
+1		    0.0000	5.18_COIL_BOT_CC        	  1.000061	JUMP
+1		    0.0000	5.20_COIL_TOP_CC        	  1.000061	JUMP
+1		    0.0000	6.4_N_V_Rep_Shutter     	  0.000000	JUMP
+1		    0.0000	6.13_N_Cs_Z_Shutter     	  0.000000	JUMP
+1		    0.0000	6.14_N_Cs_2D_MOT_Shutter	  0.000000	JUMP
+1		    0.0000	6.15_N_Cs_3D_MOT_Shutter	  0.000000	JUMP
+1		    0.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		    0.0000	3.5_AH_upper_FF         	  0.000000	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	JUMP
+1		    0.0000	3.7_N_V_HH              	  0.000000	JUMP
+1		    0.0000	3.0_N_V_AH              	  0.000000	JUMP
+1		    2.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		    2.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		    5.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		   40.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		   40.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		   40.2000	5.23_COIL_TOP_AH        	  5.000000	JUMP
+1		   45.0000	5.27_IServo_FB_Switch   	  0.000000	JUMP
+1		   50.0000	4.0_Li_MOT_AO_AM        	  8.999939	JUMP
+1		   50.0000	1.31_Cs_Li_Zeswitch     	  0.000000	JUMP
+1		   50.0000	3.7_N_V_HH              	 -0.009460	JUMP
+1		   50.0000	3.0_N_V_AH              	  0.347595	JUMP
+1		 5000.0000	3.2_Li_Img_Freq         	65507.000122	COARSE
+
+procedure 023: True_TOF
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	5.22_BFL_AO_SW          	  0.000000	JUMP
+1		    0.0000	5.11_BFL_AO_AM          	  0.000000	JUMP
+1		    0.0000	5.25_N_BFL_INT_LOCK     	  0.000000	JUMP
+1		    0.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		    0.0000	8.3_oTOP_AO_AM          	  0.000000	JUMP
+1		    0.0000	6.2_XDT_AO_SW           	  0.000000	JUMP
+1		    0.0000	8.0_oTOP_Int_lok        	 -1.000061	JUMP
+1		    0.0000	4.2_Dual_780_AO_AM      	  0.000000	JUMP
+1		    0.0000	4.3_Dual_1064_AO_AM     	  0.000000	JUMP
+1		    0.0000	6.8_Dual_780nm_SW       	  0.000000	JUMP
+1		    0.0000	6.9_Dual_1064nm_SW      	  0.000000	JUMP
+1		    0.0200	6.29_oTOP_Pos_Lock_Enabl	  0.000000	JUMP
+
+procedure 024: Li_Killing
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -20.0000	4.7_Li_Img_AO_AM        	  7.000122	JUMP
+1		  -20.0000	8.5_Li_EOM_Freq         	 -3.150024	JUMP
+1		   -8.0000	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		   -6.0000	1.28_Li_H_Img_shu       	  5.000000	JUMP
+1		    0.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		    0.0000	1.18_Li_EOM_H_Shutter   	  0.000000	JUMP
+1		    0.0400	1.3_Li_Img_AO_Sw        	  0.000000	JUMP
+1		    0.0400	1.28_Li_H_Img_shu       	  0.000000	JUMP
+1		   12.0000	1.3_Li_Img_AO_Sw        	  5.000000	JUMP
+1		   12.0000	3.2_Li_Img_Freq         	65507.000122	JUMP
+1		   20.0000	8.5_Li_EOM_Freq         	 -3.150024	JUMP
+1		  200.0000	4.7_Li_Img_AO_AM        	  6.000061	JUMP
+1		 4500.0000	3.2_Li_Img_Freq         	65507.999878	COARSE
+
+procedure 025: Low_Field_BEC_Field
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	5.12_Bias_1/2_HH_x      	  0.390015	JUMP
+1		    0.0000	5.13_Bias_1/2_AH_-x     	 -0.319519	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -1.376038	JUMP
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  2.753296	JUMP
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -0.030212	JUMP
+1		    0.0000	5.16_Bias_5/6_AH_z      	 -0.039978	JUMP
+1		 1750.0000	2.6_V_HH                	  0.180054	JUMP
+1		 2000.0000	2.6_V_HH                	  0.100098	COARSE
+1		 2020.0000	2.6_V_HH                	  0.079956	JUMP
+1		 3000.0000	2.6_V_HH                	  0.055237	COARSE
+1		 4000.0000	2.6_V_HH                	  0.050049	FINE
+1		 4500.0000	2.6_V_HH                	  0.046082	FINE
+
+procedure 026: FB_Bias_Field_off
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	3.7_N_V_HH              	  0.000000	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		    0.0000	3.0_N_V_AH              	  0.000000	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	JUMP
+1		    0.0000	3.5_AH_upper_FF         	  0.000000	JUMP
+1		    0.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		    0.0000	6.31_B_Precision_Disable	  5.000000	JUMP
+
+procedure 027: FB_Field_Gentle_off
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	3.0_N_V_AH              	  3.850098	JUMP
+1		    0.0000	3.7_N_V_HH              	 -0.849915	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	JUMP
+1		    0.0000	3.5_AH_upper_FF         	  0.000000	JUMP
+1		    0.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		    0.0000	5.19_COIL_TOP_CV        	  3.099976	JUMP
+1		    0.0000	5.21_COIL_BOT_CV        	  2.699890	JUMP
+1		    0.0000	1.30_test trigger       	  5.000000	JUMP
+1		    1.0000	1.30_test trigger       	  0.000000	JUMP
+1		    6.0000	3.0_N_V_AH              	  3.101501	FINE
+1		    6.0000	3.7_N_V_HH              	  6.431885	FINE
+1		    6.0000	5.19_COIL_TOP_CV        	  2.000122	FINE
+1		    6.0000	5.21_COIL_BOT_CV        	  2.000122	FINE
+1		    6.0200	3.0_N_V_AH              	 -0.291443	JUMP
+1		    6.0200	3.7_N_V_HH              	  6.439819	JUMP
+1		    6.0200	6.31_B_Precision_Disable	  5.000000	JUMP
+1		   30.0000	3.0_N_V_AH              	  0.000000	FINE
+1		   30.0000	3.7_N_V_HH              	  0.000000	FINE
+1		   30.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		   30.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		   30.0000	5.19_COIL_TOP_CV        	  1.600037	COARSE
+1		   30.0000	5.21_COIL_BOT_CV        	  1.600037	COARSE
+1		   40.0000	5.27_IServo_FB_Switch   	  0.000000	JUMP
+
+procedure 028: Unlevitation
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		    0.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		    0.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		    0.0000	3.3_lower_FF            	  0.000000	JUMP
+1		    0.0000	3.5_AH_upper_FF         	  0.000000	JUMP
+1		    0.0000	2.6_V_HH                	  0.000000	JUMP
+
+procedure 029: Cs_HF_H_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		-1000.0000	5.10_CS_HF_Img_Freq     	-10.000000	JUMP
+1		-1000.0000	7.7_N_Cs_MOT_Freq       	 -7.609863	JUMP
+1		-1000.0000	7.7_N_Cs_MOT_Freq       	 -2.999878	COARSE
+1		 -100.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		 -100.0000	6.12_N_Cs_LF_Img_Shutter	  0.000000	JUMP
+1		  -99.9000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  -80.0000	6.11_N_Cs_HF_Img_Shutter	  5.000000	JUMP
+1		  -30.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		  -20.0000	5.10_CS_HF_Img_Freq     	65511.000061	FINE
+1		  -10.0000	6.7_N_Cs_H_Img_Shutter  	  5.000000	JUMP
+1		  -10.0000	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		  -10.0000	6.27_DMD_Movie_Trig     	  0.000000	JUMP
+1		   -1.0000	1.20_MW_pulse_SW        	  5.000000	JUMP
+1		    0.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		    0.0000	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		    0.0000	1.20_MW_pulse_SW        	  0.000000	JUMP
+1		    0.0000	6.27_DMD_Movie_Trig     	  5.000000	JUMP
+1		    0.0800	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		    0.0800	6.7_N_Cs_H_Img_Shutter  	  0.000000	JUMP
+1		    0.0800	6.27_DMD_Movie_Trig     	  0.000000	JUMP
+1		    0.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		    7.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		   15.0000	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		   15.0000	6.27_DMD_Movie_Trig     	  5.000000	JUMP
+1		   70.0000	5.26_H_Pixelfly_Shutter 	  5.000000	JUMP
+1		   90.0000	6.7_N_Cs_H_Img_Shutter  	  5.000000	JUMP
+1		   90.0000	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		   90.0000	6.27_DMD_Movie_Trig     	  0.000000	JUMP
+1		  100.0000	1.21_pixelfly trigger   	  5.000000	JUMP
+1		  100.0000	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		  100.0000	6.27_DMD_Movie_Trig     	  5.000000	JUMP
+1		  100.0000	5.10_CS_HF_Img_Freq     	65511.000061	JUMP
+1		  100.0800	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		  100.0800	6.7_N_Cs_H_Img_Shutter  	  0.000000	JUMP
+1		  100.0800	6.27_DMD_Movie_Trig     	  0.000000	JUMP
+1		  100.1000	1.21_pixelfly trigger   	  0.000000	JUMP
+1		  107.0000	5.26_H_Pixelfly_Shutter 	  0.000000	JUMP
+1		  115.0000	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		  115.0000	6.27_DMD_Movie_Trig     	  5.000000	JUMP
+1		 1900.0000	7.7_N_Cs_MOT_Freq       	 -2.999878	JUMP
+1		 2000.0000	5.10_CS_HF_Img_Freq     	-10.000000	FINE
+1		 2000.0000	7.7_N_Cs_MOT_Freq       	 -7.609863	COARSE
+1		 2100.0000	7.7_N_Cs_MOT_Freq       	 -7.149963	COARSE
+
+procedure 030: Cs_HF_V_Imaging
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		-1300.0000	5.10_CS_HF_Img_Freq     	-10.000000	JUMP
+1		-1300.0000	7.7_N_Cs_MOT_Freq       	 -7.609863	JUMP
+1		-1200.0000	7.7_N_Cs_MOT_Freq       	 -2.999878	COARSE
+1		-1000.0000	4.5_N_Cs_Repump_Freq    	  7.550049	JUMP
+1		 -100.0000	5.30_Cs_EOM_Freq        	  8.900146	JUMP
+1		 -100.0000	6.12_N_Cs_LF_Img_Shutter	  0.000000	JUMP
+1		 -100.0000	5.10_CS_HF_Img_Freq     	65511.000061	FINE
+1		  -80.0000	6.11_N_Cs_HF_Img_Shutter	  5.000000	JUMP
+1		  -50.0000	4.5_N_Cs_Repump_Freq    	  8.299866	COARSE
+1		  -40.0000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		  -35.0000	6.27_DMD_Movie_Trig     	  0.000000	JUMP
+1		   -7.0000	6.26_N_CsOP_Shut_H      	  5.000000	JUMP
+1		   -5.0000	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		   -5.0000	6.6_N_Cs_V_Img_Shutter  	  5.000000	JUMP
+1		   -5.0000	6.27_DMD_Movie_Trig     	  5.000000	JUMP
+1		   -1.0000	1.10_Cs_Oneshot_Bypass  	  5.000000	JUMP
+1		   -0.0800	1.23_CS_EOM_SW          	  0.000000	JUMP
+1		   -0.0200	8.1_CS_Rep_AO_AM        	  2.999878	JUMP
+1		   -0.0000	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		    0.0000	6.6_N_Cs_V_Img_Shutter  	  0.000000	JUMP
+1		    0.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		    0.0200	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		    0.0200	1.23_CS_EOM_SW          	  5.000000	JUMP
+1		    0.0200	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		    0.0400	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		    0.0400	8.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		    0.0400	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		    0.1000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+1		   10.0000	1.10_Cs_Oneshot_Bypass  	  0.000000	JUMP
+1		   30.0000	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		   60.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		  495.0000	6.6_N_Cs_V_Img_Shutter  	  5.000000	JUMP
+1		  495.0000	6.3_Cs_HF_AO_Sw         	  0.000000	JUMP
+1		  499.0000	1.10_Cs_Oneshot_Bypass  	  5.000000	JUMP
+1		  500.0000	6.6_N_Cs_V_Img_Shutter  	  0.000000	JUMP
+1		  500.0000	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		  500.0200	6.3_Cs_HF_AO_Sw         	  5.000000	JUMP
+1		  500.0400	6.3_Cs_HF_AO_Sw         	  0.000000	FINE
+1		  500.1000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+1		  510.0000	1.10_Cs_Oneshot_Bypass  	  0.000000	JUMP
+1		  600.0000	5.10_CS_HF_Img_Freq     	65511.000061	JUMP
+1		  990.0000	1.6_AndorCCD_Trig       	  5.000000	JUMP
+1		  990.1000	1.6_AndorCCD_Trig       	  0.000000	JUMP
+1		 1900.0000	7.7_N_Cs_MOT_Freq       	 -2.999878	JUMP
+1		 2000.0000	5.10_CS_HF_Img_Freq     	-10.000000	FINE
+1		 2000.0000	7.7_N_Cs_MOT_Freq       	 -7.600098	COARSE
+
+procedure 031: test_trigger
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		    0.0000	6.17_Spec_Analysis_Trig 	  0.000000	JUMP
+1		    1.0000	6.17_Spec_Analysis_Trig 	  0.000000	JUMP
+
+procedure 032: Cs_molasses_dark
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -12.0000	6.15_N_Cs_3D_MOT_Shutter	  0.000000	JUMP
+1		    0.0000	6.19_N_Cs_3D_SW         	  0.000000	JUMP
+1		    3.0000	7.7_N_Cs_MOT_Freq       	 -3.999939	JUMP
+1		    4.0000	7.7_N_Cs_MOT_Freq       	 -7.653503	FINE
+
+procedure 033: Dual_Color_Combine
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 -500.0000	3.4_oTOP_fcarrier       	  2.099915	JUMP
+1		  500.0000	3.4_oTOP_fcarrier       	  1.050110	FINE
+1		  500.0000	3.1_Dual_1064_Int_Lock  	  0.075073	JUMP
+1		  500.0000	5.8_Dual_780nm_Int_Lock 	  1.799927	JUMP
+1		 1000.0000	8.0_oTOP_Int_lok        	  0.239868	JUMP
+1		 1000.0000	3.1_Dual_1064_Int_Lock  	  0.950012	FINE
+1		 1000.0000	5.8_Dual_780nm_Int_Lock 	  0.799866	FINE
+1		 3000.0000	8.0_oTOP_Int_lok        	  0.003052	FINE
+1		 3000.0200	8.3_oTOP_AO_AM          	  0.000000	JUMP
+1		 3001.0000	3.4_oTOP_fcarrier       	  2.000122	JUMP
+1		 3002.0000	8.3_oTOP_AO_AM          	 10.000000	JUMP
+
+procedure 034: Li_Img_Freq_Ramp_Down
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		   20.0000	5.25_N_BFL_INT_LOCK     	  0.000000	JUMP
+1		  501.0000	3.2_Li_Img_Freq         	65507.999878	JUMP
+1		 2501.0000	3.2_Li_Img_Freq         	 -5.249939	COARSE
+1		 2502.0000	3.2_Li_Img_Freq         	 -5.249939	JUMP
+
+procedure 035: coil_cool_down
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		 2000.0000	1.30_test trigger       	  0.000000	JUMP
+
+procedure 036: MW_Calibration_load
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		   -2.0000	3.3_lower_FF            	  0.000000	JUMP
+1		   -2.0000	3.6_HH_upper_FF         	  0.000000	JUMP
+1		   -2.0000	5.24_COIL_TOP_HH        	  0.000000	JUMP
+1		    0.0000	2.7_V_AH                	  0.188293	JUMP
+1		    0.0000	2.6_V_HH                	 -0.020142	JUMP
+1		    0.0000	5.31_Cs_3D_AO_AM        	  2.300110	JUMP
+1		    0.0000	7.7_N_Cs_MOT_Freq       	 -7.300110	JUMP
+1		    0.0000	6.19_N_Cs_3D_SW         	  5.000000	JUMP
+1		    0.0000	4.5_N_Cs_Repump_Freq    	  9.370117	JUMP
+1		    0.0000	1.31_Cs_Li_Zeswitch     	  5.000000	JUMP
+1		    0.0000	1.32_ZCurrents          	  5.000000	JUMP
+1		    0.0000	5.23_COIL_TOP_AH        	  5.000000	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  0.000000	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	 -1.000061	JUMP
+1		    0.0000	5.13_Bias_1/2_AH_-x     	  1.000061	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	  1.000061	JUMP
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  0.000000	JUMP
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -3.999939	JUMP
+1		    0.0000	5.16_Bias_5/6_AH_z      	  0.199890	JUMP
+1		    0.0000	6.15_N_Cs_3D_MOT_Shutter	  5.000000	JUMP
+1		    0.0000	6.13_N_Cs_Z_Shutter     	  5.000000	JUMP
+1		    0.0000	6.14_N_Cs_2D_MOT_Shutter	  5.000000	JUMP
+1		    0.0000	5.21_COIL_BOT_CV        	  2.300110	JUMP
+1		    0.0000	5.19_COIL_TOP_CV        	  2.399902	JUMP
+1		    0.0000	5.20_COIL_TOP_CC        	  5.000000	JUMP
+1		    0.0000	5.18_COIL_BOT_CC        	  5.000000	JUMP
+1		    0.0000	7.0_oTOP_Int_lok        	  0.599976	JUMP
+1		    0.0000	7.6_oTOP_fcarrier       	  1.755981	JUMP
+1		    0.0000	7.4_oTOP_mod_AM         	  1.199951	JUMP
+1		    0.0000	2.1_CS_Rep_AO_AM        	  5.000000	JUMP
+1		    0.0000	7.3_oTOP_AO_AM          	 10.000000	JUMP
+1		    0.0000	7.2_Cs_VHF_AO_AM        	 10.000000	JUMP
+1		    0.0000	1.25_ZDT_AO_SW          	  5.000000	JUMP
+1		    0.0000	6.5_N_Cs_Rep_Shutter    	  5.000000	JUMP
+1		 2970.0000	5.31_Cs_3D_AO_AM        	  2.300110	JUMP
+1		 2990.0000	1.32_ZCurrents          	  0.000000	JUMP
+1		 2990.0000	6.13_N_Cs_Z_Shutter     	  0.000000	JUMP
+1		 2990.0000	6.14_N_Cs_2D_MOT_Shutter	  0.000000	JUMP
+1		 2990.0000	5.12_Bias_1/2_HH_x      	 -2.500000	JUMP
+1		 2990.0000	5.13_Bias_1/2_AH_-x     	  1.000061	JUMP
+1		 2990.0000	5.15_Bias_3/4_HH_y      	  1.000061	JUMP
+1		 2990.0000	5.14_Bias_3/4_AH_-y     	  0.000000	JUMP
+1		 2990.0000	5.17_Bias_5/6_HH_-z     	  0.299988	JUMP
+1		 2990.0000	5.16_Bias_5/6_AH_z      	  0.199890	JUMP
+1		 3000.0000	5.31_Cs_3D_AO_AM        	  0.499878	FINE
+1		 3000.0000	2.1_CS_Rep_AO_AM        	  5.000000	JUMP
+1		 3000.0000	6.4_N_V_Rep_Shutter     	  0.000000	JUMP
+1		 3000.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		 3000.0000	2.6_V_HH                	 -0.020142	JUMP
+1		 3000.0000	2.7_V_AH                	  0.188293	JUMP
+1		 3000.0000	7.7_N_Cs_MOT_Freq       	 -7.300110	JUMP
+1		 3000.0000	7.0_oTOP_Int_lok        	  0.599976	JUMP
+1		 3040.0000	5.31_Cs_3D_AO_AM        	  0.499878	JUMP
+1		 3040.0000	4.5_N_Cs_Repump_Freq    	  9.370117	JUMP
+1		 3040.0000	2.6_V_HH                	 -0.000916	COARSE
+1		 3040.0000	2.7_V_AH                	  0.112610	COARSE
+1		 3040.0000	7.7_N_Cs_MOT_Freq       	 -7.000122	FINE
+1		 3048.0000	5.12_Bias_1/2_HH_x      	  2.000122	COARSE
+1		 3048.0000	5.13_Bias_1/2_AH_-x     	  1.000061	COARSE
+1		 3048.0000	5.15_Bias_3/4_HH_y      	 -0.750122	COARSE
+1		 3048.0000	5.14_Bias_3/4_AH_-y     	  0.499878	COARSE
+1		 3048.0000	5.17_Bias_5/6_HH_-z     	 -0.499878	COARSE
+1		 3048.9800	4.5_N_Cs_Repump_Freq    	  8.374939	FINE
+1		 3048.9800	2.6_V_HH                	  0.014038	COARSE
+1		 3048.9800	2.7_V_AH                	  0.075684	COARSE
+1		 3049.0000	5.31_Cs_3D_AO_AM        	  0.299988	FINE
+1		 3050.0000	7.0_oTOP_Int_lok        	  2.000122	COARSE
+
+procedure 037: MW_Calibration_Molasses
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -11.0000	6.5_N_Cs_Rep_Shutter    	  0.000000	JUMP
+1		   -5.0000	1.27_Real_CS_RSC_AO_SW  	  0.000000	JUMP
+1		   -4.0000	1.29_Real_CS_RSC_SHU    	  5.000000	JUMP
+1		   -1.0000	4.5_N_Cs_Repump_Freq    	  8.374939	JUMP
+1		   -1.0000	6.26_N_CsOP_Shut_H      	  5.000000	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  5.000000	JUMP
+1		    0.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		    0.0000	7.7_N_Cs_MOT_Freq       	 -7.000122	JUMP
+1		    0.0000	5.31_Cs_3D_AO_AM        	  0.700073	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	  0.249939	JUMP
+1		    0.0000	5.13_Bias_1/2_AH_-x     	 -0.390015	JUMP
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -1.700134	JUMP
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  2.864380	JUMP
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -0.299988	JUMP
+1		    0.0000	5.16_Bias_5/6_AH_z      	 -1.000061	JUMP
+1		    0.0000	4.5_N_Cs_Repump_Freq    	  9.370117	FINE
+1		    0.0000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		    0.0200	2.7_V_AH                	 -3.999939	JUMP
+1		    0.5000	3.4_oTOP_fcarrier       	  0.000000	JUMP
+1		    1.0000	1.27_Real_CS_RSC_AO_SW  	  5.000000	JUMP
+1		    3.5000	4.5_N_Cs_Repump_Freq    	  9.370117	JUMP
+1		    4.0000	3.4_oTOP_fcarrier       	  0.000000	JUMP
+1		    4.5000	3.4_oTOP_fcarrier       	  5.000000	FINE
+1		    4.8000	2.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		    5.0000	7.7_N_Cs_MOT_Freq       	 -3.250122	FINE
+1		    5.0000	5.31_Cs_3D_AO_AM        	  0.100098	FINE
+1		    5.0000	4.5_N_Cs_Repump_Freq    	  5.669861	FINE
+1		    5.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+1		    5.0000	7.7_N_Cs_MOT_Freq       	 -3.250122	JUMP
+1		    5.0200	5.31_Cs_3D_AO_AM        	  0.000000	JUMP
+1		    5.0200	5.12_Bias_1/2_HH_x      	  0.700073	JUMP
+1		    5.0200	5.13_Bias_1/2_AH_-x     	 -0.290527	JUMP
+1		    5.0200	5.15_Bias_3/4_HH_y      	 -1.610107	JUMP
+1		    5.0200	5.14_Bias_3/4_AH_-y     	  2.787170	JUMP
+1		    5.0200	5.17_Bias_5/6_HH_-z     	 -0.499878	JUMP
+1		    5.0200	5.16_Bias_5/6_AH_z      	 -0.400085	JUMP
+1		    6.0000	7.7_N_Cs_MOT_Freq       	  0.000000	FINE
+1		    6.5000	5.31_Cs_3D_AO_AM        	  0.025024	JUMP
+1		    9.0000	2.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		   19.0000	2.1_CS_Rep_AO_AM        	  1.749878	FINE
+1		   21.0000	6.26_N_CsOP_Shut_H      	  0.000000	JUMP
+1		   31.0000	1.29_Real_CS_RSC_SHU    	  0.000000	JUMP
+1		   34.0000	2.1_CS_Rep_AO_AM        	  1.749878	JUMP
+1		   34.0000	4.5_N_Cs_Repump_Freq    	  5.669861	JUMP
+1		   35.0000	4.5_N_Cs_Repump_Freq    	  5.750122	FINE
+1		   36.6000	5.31_Cs_3D_AO_AM        	  0.000000	JUMP
+1		   36.6000	2.1_CS_Rep_AO_AM        	  0.000000	FINE
+1		   36.7000	6.23_N_OP_AO_SW         	  0.000000	JUMP
+1		   36.7000	6.19_N_Cs_3D_SW         	  0.000000	JUMP
+1		   37.6000	3.4_oTOP_fcarrier       	  5.000000	JUMP
+1		   38.6000	3.4_oTOP_fcarrier       	  0.000000	FINE
+1		   39.0000	1.27_Real_CS_RSC_AO_SW  	  0.000000	JUMP
+1		   39.0000	6.15_N_Cs_3D_MOT_Shutter	  0.000000	JUMP
+1		   39.0000	6.19_N_Cs_3D_SW         	  0.000000	JUMP
+1		   39.0000	4.5_N_Cs_Repump_Freq    	  5.750122	JUMP
+1		   46.0000	7.7_N_Cs_MOT_Freq       	  0.000000	JUMP
+1		   47.0000	7.7_N_Cs_MOT_Freq       	 -7.650146	FINE
+1		   69.0000	4.5_N_Cs_Repump_Freq    	  9.370117	FINE
+1		  539.0000	6.19_N_Cs_3D_SW         	  5.000000	JUMP
+1		  539.0000	1.27_Real_CS_RSC_AO_SW  	  5.000000	JUMP
+1		  539.0000	3.4_oTOP_fcarrier       	  5.000000	JUMP
+1		  539.0000	2.1_CS_Rep_AO_AM        	  0.000000	JUMP
+1		  539.0000	6.23_N_OP_AO_SW         	  5.000000	JUMP
+
+procedure 038: MW_Calibration_Trap
+
+enabled		time	channel						   voltage	ramp
+------		----	-------						   -------	----
+1		  -32.0000	5.19_COIL_TOP_CV        	  2.300110	JUMP
+1		  -32.0000	5.21_COIL_BOT_CV        	  1.799927	JUMP
+1		  -32.0000	5.18_COIL_BOT_CC        	  5.000000	JUMP
+1		  -32.0000	5.20_COIL_TOP_CC        	  5.000000	JUMP
+1		   -5.0000	5.23_COIL_TOP_AH        	  0.000000	JUMP
+1		   -0.5000	5.24_COIL_TOP_HH        	  5.000000	JUMP
+1		   -0.2000	5.12_Bias_1/2_HH_x      	  0.650024	JUMP
+1		   -0.2000	5.13_Bias_1/2_AH_-x     	 -0.290527	JUMP
+1		   -0.2000	5.15_Bias_3/4_HH_y      	 -1.484985	JUMP
+1		   -0.2000	5.14_Bias_3/4_AH_-y     	  2.787170	JUMP
+1		   -0.2000	5.17_Bias_5/6_HH_-z     	 -0.450134	JUMP
+1		   -0.2000	6.21_FF_Disable         	  0.000000	JUMP
+1		   -0.1000	3.6_HH_upper_FF         	  3.500061	JUMP
+1		    0.0000	2.6_V_HH                	  0.713501	JUMP
+1		    0.0000	2.7_V_AH                	 -0.713501	JUMP
+1		    0.0000	5.27_IServo_FB_Switch   	  0.000000	JUMP
+1		    0.0000	5.12_Bias_1/2_HH_x      	  6.000061	FINE
+1		    0.0000	5.13_Bias_1/2_AH_-x     	  0.199890	FINE
+1		    0.0000	5.15_Bias_3/4_HH_y      	 -3.591003	FINE
+1		    0.0000	5.14_Bias_3/4_AH_-y     	  3.522949	FINE
+1		    0.0000	5.17_Bias_5/6_HH_-z     	 -5.000000	FINE
+1		    0.1000	3.6_HH_upper_FF         	  5.499878	FINE
+1		    0.8000	3.6_HH_upper_FF         	  4.580078	JUMP
+1		    1.0000	3.6_HH_upper_FF         	  4.700012	JUMP
+1		    1.2000	3.6_HH_upper_FF         	  4.570007	FINE
+1		    1.5000	3.6_HH_upper_FF         	  4.460144	FINE
+1		    8.0000	3.6_HH_upper_FF         	  4.460144	JUMP
+1		    8.0000	2.6_V_HH                	  0.713501	JUMP
+1		    8.0000	2.7_V_AH                	 -0.713501	JUMP
+1		   28.0000	7.4_oTOP_mod_AM         	  1.199951	JUMP
+1		  118.0000	2.6_V_HH                	  2.778931	COARSE
+1		  118.0000	2.7_V_AH                	 -0.826416	COARSE
+1		  118.0000	7.4_oTOP_mod_AM         	 -0.650024	COARSE
+1		  408.0000	3.6_HH_upper_FF         	  0.000000	COARSE
+1		  409.0000	6.21_FF_Disable         	  5.000000	JUMP
+1		  500.0000	7.0_oTOP_Int_lok        	  2.000122	JUMP
+1		  568.0000	7.4_oTOP_mod_AM         	 -0.964966	FINE
+1		  568.0000	2.7_V_AH                	 -0.140686	COARSE
+1		  568.0000	7.6_oTOP_fcarrier       	  1.755981	JUMP
+1		  568.0000	1.25_ZDT_AO_SW          	  0.000000	JUMP
+1		  600.0000	2.6_V_HH                	  2.778931	JUMP
+1		  600.0000	2.7_V_AH                	 -0.140686	JUMP
+1		  600.0000	5.13_Bias_1/2_AH_-x     	  0.202637	JUMP
+1		  600.0000	5.14_Bias_3/4_AH_-y     	  3.522949	JUMP
+1		  600.0000	5.12_Bias_1/2_HH_x      	  6.000061	JUMP
+1		  600.0000	5.19_COIL_TOP_CV        	  2.300110	JUMP
+1		  600.0000	5.21_COIL_BOT_CV        	  1.799927	JUMP
+1		  600.0000	5.15_Bias_3/4_HH_y      	 -3.591003	JUMP
+1		  600.0000	5.17_Bias_5/6_HH_-z     	 -5.000000	JUMP
+1		  750.0000	7.0_oTOP_Int_lok        	  1.799927	COARSE
+1		  767.7000	2.6_V_HH                	  6.439819	COARSE
+1		  767.7000	2.7_V_AH                	 -0.291443	COARSE
+1		  767.7200	2.6_V_HH                	  6.431885	JUMP
+1		  767.7200	2.7_V_AH                	  3.101501	JUMP
+1		  767.7200	6.31_B_Precision_Disable	  0.000000	JUMP
+1		  800.0000	7.6_oTOP_fcarrier       	  0.899963	COARSE
+1		  800.0000	2.6_V_HH                	 -0.539856	COARSE
+1		  800.0000	2.7_V_AH                	  3.515930	COARSE
+1		  800.0000	5.13_Bias_1/2_AH_-x     	 -0.319519	COARSE
+1		  800.0000	5.14_Bias_3/4_AH_-y     	  2.753296	COARSE
+1		  800.0000	5.12_Bias_1/2_HH_x      	  0.390015	COARSE
+1		  800.0000	5.19_COIL_TOP_CV        	  3.200073	COARSE
+1		  800.0000	5.21_COIL_BOT_CV        	  2.699890	COARSE
+1		  800.0000	5.15_Bias_3/4_HH_y      	  5.000000	COARSE
+1		  800.0000	5.17_Bias_5/6_HH_-z     	 -0.302429	COARSE
+
+code	   cur val		start		stop		step	every	 next
+----	   -------		-----		----		----	-----	 ----
+65500	29700.5000	19700.0000	30712.0000	    0.0000		1		0
+65501	29700.0000	19700.0000	30712.0000	    0.0000		1		0
+65502	29810.0000	20210.0000	33210.0000	    0.0000		1		0
+65503	    4.4003	   -0.8936	   10.0000	    0.0000		1		0
+65504	 1300.0000	    0.0000	15000.0000	    0.0000		1		0
+65505	    5.0000	    0.0000	    6.0000	    0.0000		1		0
+65506	    5.0000	    0.0000	    6.0000	    0.0000		1		0
+65507	   -2.3050	   -2.3600	   -2.2500	    0.0000		1		0
+65508	   -7.9350	   -7.9600	   -7.8990	    0.0000		1		0
+65509	   -0.1822	   -0.1000	    2.2000	    0.0000		1		0
+65510	    0.0000	    0.0000	    6.0000	    0.0000		1		0
+65511	   -5.4500	   -5.9000	   -4.9900	    0.0000		1		0
+65512	    0.0000	    0.0000	    0.0000	    0.0000		1		0

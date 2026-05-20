@@ -922,6 +922,419 @@ def get_channel_by_no(seq: LabviewSeq, in_channel_no):
     return info
 
 
+def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
+    """Convert a LabVIEW sequence to a labscript Python script.
+
+    Parameters
+    ----------
+    in_seq : LabviewSeq
+    out_path : str
+        Output file path for the generated labscript Python file.
+
+    Returns
+    -------
+    str
+        out_path
+    """
+    import copy, csv, re as _re
+
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _repo_root = os.path.dirname(_here)
+
+    # ── Build Full-code → connection-table attribute name from connection_table.py ──
+    ct_path = os.path.join(_repo_root, 'lics-labscript-apparatus', 'connection_table.py')
+    with open(ct_path) as _f:
+        _ct_src = _f.read()
+    _full_to_attr = {}  # e.g. 'b1c00' -> 'Bitter_Precision_Disable__b1c00'
+    for _m in _re.finditer(r'self\.(\w+)\s*=\s*(?:Digital|Analog)Out\(', _ct_src):
+        _attr = _m.group(1)
+        _fm = _re.search(r'(b\d+c\d+)$', _attr)
+        if _fm:
+            _full_to_attr[_fm.group(1)] = _attr
+
+    # ── Virtual-channel overrides (section 8a of conversion note) ──
+    # OG-prefix → ct attribute name (no __bXcXX suffix)
+    _VIRTUAL = {
+        '3.0': 'Bitter_V_AH', '3.7': 'Bitter_V_HH',
+        '5.13': 'Bias_X_AH', '5.12': 'Bias_X_HH',
+        '5.14': 'Bias_Y_AH', '5.15': 'Bias_Y_HH',
+        '5.16': 'Bias_Z_AH', '5.17': 'Bias_Z_HH',
+    }
+    _ZEEMAN_PREFIXES = {'1.31', '1.32'}
+
+    # ── Build OG-prefix → ct attribute name from CSV ──
+    csv_path = os.path.join(_here, 'NI_channel_map.csv')
+    _og_to_attr = {}  # OG prefix -> ct attr name or None
+    with open(csv_path, newline='') as _f:
+        for row in csv.DictReader(_f):
+            og = row['OG Ch'].strip()
+            if not og:
+                continue
+            fate = row['Fate'].strip()
+            full = row['Full'].strip()
+            if fate == 'Continued' and full and full in _full_to_attr:
+                _og_to_attr[og] = _full_to_attr[full]
+            else:
+                _og_to_attr[og] = None  # defunct / unneeded / not mapped
+    # Apply virtual overrides (override physical mapping)
+    _og_to_attr.update(_VIRTUAL)
+
+    def _og_prefix(lv_name):
+        return lv_name.split('_', 1)[0]
+
+    def _ct_attr(lv_name):
+        """Return ct attribute name for a LabVIEW channel, or None if not mapped."""
+        pfx = _og_prefix(lv_name)
+        if pfx in _ZEEMAN_PREFIXES:
+            return None
+        return _og_to_attr.get(pfx)
+
+    def _is_code(v):
+        return v >= 65499.6
+
+    def _code_idx(v):
+        return int(round(v - 65500))
+
+    def _fmt_v(v):
+        """Format a voltage value (possibly a 655xx code) as a Python expression."""
+        if _is_code(v):
+            return f"code_{65500 + _code_idx(v)}"
+        return f"{v:.6g}"
+
+    def _fmt_t_offset(t_ms):
+        """Format a time offset (in ms) as a Python expression: t ± Xe-3."""
+        if _is_code(t_ms):
+            return f"t + code_{65500 + _code_idx(t_ms)}/1e3"
+        if t_ms == 0.0:
+            return "t"
+        elif t_ms > 0:
+            return f"t + {t_ms:g}e-3"
+        else:
+            return f"t - {abs(t_ms):g}e-3"
+
+    def _fmt_proc_t(t_ms):
+        """Format a procedure start time (in ms) as a Python expression in seconds."""
+        if _is_code(t_ms):
+            return f"code_{65500 + _code_idx(t_ms)}/1e3"
+        return f"{t_ms:g}e-3"
+
+    def _fmt_dur(dur_ms):
+        """Format a ramp duration (in ms) as a Python expression."""
+        return f"{dur_ms:g}e-3"
+
+    # ── Sort sequence ──
+    sseq = seq_sort(copy.deepcopy(in_seq))
+    num_ch = (len(sseq.primary_analog['name']) +
+              len(sseq.digital['name']) +
+              len(sseq.secondary_analog['name']))
+    num_procs = len(sseq.procedures['name'])
+
+    # ── Zeeman initial state from channel init values ──
+    _ze = {'1.31': 5.0, '1.32': 5.0}
+    for _i in range(num_ch):
+        _ch = get_channel_by_no(sseq, _i)
+        _p = _og_prefix(_ch['name'])
+        if _p in _ze:
+            _ze[_p] = float(_ch['ival'])
+    _ze_init = dict(_ze)  # snapshot of Zeeman state from channel list ival
+
+    def _zeeman_cmds(t_expr, lp):
+        s31, s32 = _ze['1.31'], _ze['1.32']
+        lines = []
+        if s32 < 2.5:
+            vals = [0, 0, 0, 0, 0]
+        elif s31 < 2.5:
+            vals = ['ZEEMAN_C1_CS', 'ZEEMAN_C2_CS', 'ZEEMAN_C3_CS',
+                    'ZEEMAN_C4_CS', 'ZEEMAN_C5_CS']
+        else:
+            vals = ['ZEEMAN_C1_LI', 'ZEEMAN_C2_LI', 'ZEEMAN_C3_LI',
+                    'ZEEMAN_C4_LI', 'ZEEMAN_C5_LI']
+        for _i, _v in enumerate(vals, 1):
+            _attr = f"Zeeman_C{_i}__b4c{9 + _i}"
+            lines.append(f"{lp}ct.{_attr}.constant({t_expr}, {_v})\n")
+        return lines
+
+    def _gen_init_cmds(t_expr, lp):
+        """Emit constant/go_high/go_low commands for every mapped channel at its LabVIEW init value."""
+        lines = []
+        _seen = set()
+        _ze_emitted = False
+        for _i in range(num_ch):
+            _ch = get_channel_by_no(sseq, _i)
+            _lv_name = _ch['name']
+            _pfx = _og_prefix(_lv_name)
+            _ival = float(_ch['ival'])
+
+            if _pfx in _ZEEMAN_PREFIXES:
+                if not _ze_emitted:
+                    s31, s32 = _ze_init['1.31'], _ze_init['1.32']
+                    if s32 < 2.5:
+                        _zvals = [0, 0, 0, 0, 0]
+                    elif s31 < 2.5:
+                        _zvals = ['ZEEMAN_C1_CS', 'ZEEMAN_C2_CS', 'ZEEMAN_C3_CS',
+                                  'ZEEMAN_C4_CS', 'ZEEMAN_C5_CS']
+                    else:
+                        _zvals = ['ZEEMAN_C1_LI', 'ZEEMAN_C2_LI', 'ZEEMAN_C3_LI',
+                                  'ZEEMAN_C4_LI', 'ZEEMAN_C5_LI']
+                    for _j, _v in enumerate(_zvals, 1):
+                        _zattr = f"Zeeman_C{_j}__b4c{9 + _j}"
+                        lines.append(f"{lp}ct.{_zattr}.constant({t_expr}, {_v})\n")
+                    _ze_emitted = True
+                continue
+
+            _attr = _ct_attr(_lv_name)
+            if _attr is None or _attr in _seen:
+                continue
+            _seen.add(_attr)
+
+            _is_dig = not bool(_ch['is_analog'])
+            if _is_dig:
+                _v_resolved = var_lookup(sseq.ramp_params, _ival)
+                _method = 'go_low' if _v_resolved < 2.5 else 'go_high'
+                lines.append(f"{lp}ct.{_attr}.{_method}({t_expr})\n")
+            else:
+                lines.append(f"{lp}ct.{_attr}.constant({t_expr}, {_ival:.6g})\n")
+        return lines
+
+    # ── Assemble output ──
+    out = []
+
+    # Section 1: Python header
+    out.append(
+        "from labscript import start, stop, add_time_marker, wait\n"
+        "from labscriptlib.LiCs_ExperimentApparatus.connection_table import ConnectionTable\n"
+        "\n"
+        "SLOW_FREQ = 1e3   # 1 ms per edge\n"
+        "FAST_FREQ = 50e3  # 20 us per edge\n"
+        "\n"
+        "# Cs MOT Zeeman currents\n"
+        "ZEEMAN_C1_CS = 0\n"
+        "ZEEMAN_C2_CS = 0.9\n"
+        "ZEEMAN_C3_CS = 0.4\n"
+        "ZEEMAN_C4_CS = 0.1\n"
+        "ZEEMAN_C5_CS = 0.9\n"
+        "\n"
+        "# Li MOT Zeeman currents\n"
+        "ZEEMAN_C1_LI = 5\n"
+        "ZEEMAN_C2_LI = 7\n"
+        "ZEEMAN_C3_LI = 7\n"
+        "ZEEMAN_C4_LI = 8.5\n"
+        "ZEEMAN_C5_LI = 1.6\n\n"
+    )
+
+    # Section 2: seq_dump header as comment block
+    out.append("# header\n# ------\n")
+    out.append(f"# version:{sseq.version}\n")
+    out.append(f"# timing:{sseq.timing}\n")
+    out.append(f"# never ramp:{int(sseq.never_ramp)}\n")
+    out.append(f"# always_ramp:{int(sseq.always_ramp)}\n")
+    out.append(f"# number of channels:{num_ch}\n")
+    out.append(f"# number of procedures:{num_procs}\n\n")
+
+    # Section 3: channel list with labscript name column
+    out.append("# ch no\tname\t\t\t\t\t\t  init val\tanalog?\tnew labscript name\n")
+    out.append("# -----\t----\t\t\t\t\t\t  --------\t-------\t------------------\n")
+    for _i in range(num_ch):
+        _ch = get_channel_by_no(sseq, _i)
+        _pfx = _og_prefix(_ch['name'])
+        if _pfx in _ZEEMAN_PREFIXES:
+            _note = "(Zeeman logic — see section 8b of conversion note)"
+        else:
+            _attr = _ct_attr(_ch['name'])
+            if _attr:
+                _note = f"ct.{_attr}"
+            else:
+                out.append(
+                    f"# {_i:03d}\t{_ch['name'][:24]:<24}\t"
+                    f"{_ch['ival']:10.4f}\t\t{int(_ch['is_analog'])}\t# no new channel\n"
+                )
+                continue
+        out.append(
+            f"# {_i:03d}\t{_ch['name'][:24]:<24}\t"
+            f"{_ch['ival']:10.4f}\t\t{int(_ch['is_analog'])}\t{_note}\n"
+        )
+    out.append("\n")
+
+    # Section 4: procedure list with times in seconds
+    out.append("# proc no\tname\t\t\t\t\t\t\t  time (ms)e-3\tenabled\n")
+    out.append("# -------\t----\t\t\t\t\t\t\t  ------------\t------\n")
+    for _i in range(num_procs):
+        _t_str = _fmt_proc_t(sseq.procedures['time'][_i])
+        out.append(
+            f"# {_i:03d}\t\t{sseq.procedures['name'][_i][:24]:<24}\t"
+            f"{_t_str}\t\t{int(sseq.procedures['enabled'][_i])}\n"
+        )
+    out.append("\n")
+
+    # Section 5: 655xx code definitions
+    for _i in range(sseq.ramp_params['num']):
+        _code = 65500 + _i
+        _cur = sseq.ramp_params['cur_val'][_i]
+        _s   = sseq.ramp_params['start_val'][_i]
+        _e   = sseq.ramp_params['end_val'][_i]
+        _inc = sseq.ramp_params['incr_val'][_i]
+        _ev  = int(sseq.ramp_params['ramp_every'][_i])
+        _nx  = int(sseq.ramp_params['next_ramp'][_i])
+        out.append(f"code_{_code} = {_cur:.4f}\n")
+        out.append(
+            f"#\t\tcur:{_cur:10.4f}  start:{_s:10.4f}  "
+            f"stop:{_e:10.4f}  step:{_inc:10.4f}  every:{_ev}  next:{_nx}\n"
+        )
+    out.append("\n")
+
+    # Section 6: sequence start
+    out.append(
+        "if __name__ == '__main__':\n"
+        "    ct = ConnectionTable()\n\n"
+        "    start()\n\n"
+        "    # set all channels to LabVIEW init values\n"
+        "    t = 10e-6\n"
+    )
+    out.extend(_gen_init_cmds("t", "    "))
+    out.append(
+        "\n"
+        "    # pause for line trigger at 1 us, with a timeout of 100 ms\n"
+        "    add_time_marker(t, 'Waiting for line trigger')\n"
+        "    wait('line_trigger', t, timeout=0.1)\n"
+    )
+
+    # Section 7: procedures
+    _ramp_labels = {0: 'JUMP', 1: 'FINE', 2: 'COARSE'}
+    _num_ev = sseq.proc_details['dims'][1]
+
+    for _pi in range(num_procs):
+        _pname = sseq.procedures['name'][_pi]
+        _pt_ms = sseq.procedures['time'][_pi]
+        _enabled = bool(sseq.procedures['enabled'][_pi])
+        _lp = "    " if _enabled else "    # "  # line prefix
+
+        out.append(f"\n{_lp}# procedure {_pi:03d}: {_pname}\n")
+        out.append(f"{_lp}t = {_fmt_proc_t(_pt_ms)}\n")
+        out.append(f"{_lp}add_time_marker(t, '{_pname}')\n")
+
+        # Collect enabled events (already sorted by seq_sort)
+        _evs = []
+        for _b in range(_num_ev):
+            if sseq.proc_details['enabled'][_pi, _b]:
+                _evs.append({
+                    'idx': _b,
+                    't_ms': float(sseq.proc_details['time'][_pi, _b]),
+                    'ch_no': int(sseq.proc_details['channel_no'][_pi, _b]),
+                    'voltage': float(sseq.proc_details['voltage'][_pi, _b]),
+                    'rr': int(sseq.proc_details['ramp_res'][_pi, _b]),
+                })
+
+        # First pass: mark JUMP events that are replaced by a ramp on the same channel
+        _prev_ei = {}   # ch_no -> event-list index of most recent event
+        _replaced = set()
+        for _ei, _ev in enumerate(_evs):
+            _ch = _ev['ch_no']
+            if _ev['rr'] in (1, 2) and _ch in _prev_ei:
+                _pei = _prev_ei[_ch]
+                _pev = _evs[_pei]
+                if _pev['rr'] == 0 and _pev['t_ms'] != _ev['t_ms']:
+                    _replaced.add(_pei)
+            _prev_ei[_ch] = _ei
+
+        # Second pass: emit commands
+        _prev2 = {}  # ch_no -> {'t_ms', 'voltage'}
+        for _ei, _ev in enumerate(_evs):
+            _ch_no = _ev['ch_no']
+            _t_ms  = _ev['t_ms']
+            _volt  = _ev['voltage']
+            _rr    = _ev['rr']
+            _lv_ch = get_channel_by_no(sseq, _ch_no)
+            _lv_name = _lv_ch['name']
+            _pfx = _og_prefix(_lv_name)
+            _t_expr = _fmt_t_offset(_t_ms)
+
+            # Zeeman special logic
+            if _pfx in _ZEEMAN_PREFIXES:
+                _ze[_pfx] = _volt
+                _resolved = var_lookup(sseq.ramp_params, _volt)
+                out.append(
+                    f"{_lp}# {_lv_name} → {_resolved:.6g} "
+                    f"(Zeeman: 1.31={_ze['1.31']:.4g}, 1.32={_ze['1.32']:.4g})\n"
+                )
+                out.extend(_zeeman_cmds(_t_expr, _lp))
+                _prev2[_ch_no] = {'t_ms': _t_ms, 'voltage': _volt}
+                continue
+
+            _attr = _ct_attr(_lv_name)
+
+            if _attr is None:
+                out.append(
+                    f"{_lp}# {_lv_name}: {_fmt_v(_volt)} "
+                    f"{_ramp_labels.get(_rr, '?')} — no new channel\n"
+                )
+                _prev2[_ch_no] = {'t_ms': _t_ms, 'voltage': _volt}
+                continue
+
+            _is_dig = not bool(_lv_ch['is_analog'])
+
+            if _rr == 0:  # JUMP
+                if _is_dig:
+                    _v_resolved = var_lookup(sseq.ramp_params, _volt)
+                    _method = ('go_low' if _v_resolved < 2.5 else 'go_high')
+                    _cmd = f"ct.{_attr}.{_method}({_t_expr})"
+                else:
+                    _cmd = f"ct.{_attr}.constant({_t_expr}, {_fmt_v(_volt)})"
+                if _ei in _replaced:
+                    # find which ramp replaces it, for the comment
+                    _ramp_t = next(
+                        (_fmt_t_offset(_evs[_j]['t_ms']) for _j in range(_ei+1, len(_evs))
+                         if _evs[_j]['ch_no'] == _ch_no and _evs[_j]['rr'] in (1, 2)),
+                        "ramp"
+                    )
+                    out.append(f"{_lp}# {_cmd}  # replaced by ramp at {_ramp_t} in proc {_pi:03d}\n")
+                else:
+                    out.append(f"{_lp}{_cmd}\n")
+
+            else:  # FINE or COARSE
+                _sr = 'FAST_FREQ' if _rr == 1 else 'SLOW_FREQ'
+                _prev = _prev2.get(_ch_no)
+                if _prev and _prev['t_ms'] != _t_ms:
+                    _st_ms = _prev['t_ms']
+                    _init_v = _prev['voltage']
+                    _st_expr = _fmt_t_offset(_st_ms)
+                    out.append(
+                        f"{_lp}ct.{_attr}.ramp("
+                        f"t={_st_expr}, duration={_fmt_dur(_t_ms - _st_ms)}, "
+                        f"initial={_fmt_v(_init_v)}, final={_fmt_v(_volt)}, "
+                        f"samplerate={_sr})\n"
+                    )
+                else:
+                    # No previous command or same-time → treat as constant
+                    _init_v = _prev['voltage'] if _prev else _lv_ch['ival']
+                    out.append(
+                        f"{_lp}ct.{_attr}.constant({_t_expr}, {_fmt_v(_volt)})"
+                        f"  # {_ramp_labels[_rr]} with no prior cmd, treated as constant\n"
+                    )
+
+            _prev2[_ch_no] = {'t_ms': _t_ms, 'voltage': _volt}
+
+    # Compute stop time: latest absolute event time across all enabled procedures + 1 ms
+    _stop_ms = 0.0
+    for _pi in range(num_procs):
+        if not sseq.procedures['enabled'][_pi]:
+            continue
+        _pt_ms = var_lookup(sseq.ramp_params, sseq.procedures['time'][_pi])
+        for _b in range(_num_ev):
+            if sseq.proc_details['enabled'][_pi, _b]:
+                _et_ms = var_lookup(sseq.ramp_params, sseq.proc_details['time'][_pi, _b])
+                _stop_ms = max(_stop_ms, _pt_ms + _et_ms)
+    _stop_ms += 1.0  # 1 ms after last command
+
+    out.append(f"\n    # set all channels back to LabVIEW init values\n    t = {_stop_ms:g}e-3\n")
+    out.extend(_gen_init_cmds("t", "    "))
+    out.append("    stop(t+10e-6)\n")
+
+    content = ''.join(out)
+    with open(out_path, 'w') as _f:
+        _f.write(content)
+    return out_path
+
+
 
 # Test code for the module
 if __name__ == "__main__":

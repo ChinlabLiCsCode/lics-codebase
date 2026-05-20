@@ -1,0 +1,142 @@
+Ind,OG Box,OG Ch,Name,D/A?,System,Plugged into,Default,Fate,New Name,Box,Ch,Full,Comment
+67,Box6: E-77,6.31,B_Precision_Disable,Digital,Bitter Coil,E-126 Logic (Top Left),5,Continued,Bitter_Precision_Disable,b1,do00,b1c00,
+50,Box6: E-77,6.14,N_Cs_2D_MOT_Shutter,Digital,Cs Cooling,E-241 IN2,5,Continued,Cs_2DMOT_Shutter,b1,do01,b1c01,
+55,Box6: E-77,6.19,N_Cs_3D_Sw,Digital,Cs Cooling,E-261 SWITCH,5,Continued,Cs_3DMOT_AO_Sw,b1,do02,b1c02,
+51,Box6: E-77,6.15,N_Cs_3D_MOT_Shutter,Digital,Cs Cooling,E-241 IN1,5,Continued,Cs_3DMOT_Shutter,b1,do03,b1c03,
+7,Box1: E-78,1.6,AndorCCD_Trig,Digital,V Imaging,unplugged,0,Continued,Cs_Andor_Trig,b1,do04,b1c04,
+39,Box6: E-77,6.3,Cs_HF_AO_Sw,Digital,Cs Imaging,E-306 IN2,5,Continued,Cs_HFImg_AO_Sw,b1,do05,b1c05,Used during HF V imaging
+47,Box6: E-77,6.11,N_Cs_HF_Img_Shutter,Digital,Cs Imaging,E-265 P3 (bottom second from right port),0,Continued,Cs_HFImg_Shutter,b1,do06,b1c06,
+43,Box6: E-77,6.7,N_Cs_H_Img_Shutter,Digital,Cs Imaging,E-242 IN1,0,Continued,Cs_HImg_Shutter,b1,do07,b1c07,
+59,Box6: E-77,6.23,N_OP_AO_SW,Digital,Cs ?,E-306 IN1,5,Continued,Cs_HOP_AO_Sw,b1,do08,b1c08,Used in RSC and Dual Imaging V. Check this is really the HOP fiber
+62,Box6: E-77,6.26,N_CsOP_Shut_H,Digital,Cs ?,unplugged,5,Continued,Cs_HOP_Shutter,b1,do09,b1c09,Used in RSC. Check this is really the HOP fiber
+56,Box6: E-77,6.20,Cs_LF_Img_AO_Sw,Digital,Cs Imaging,E-263.1 SWITCH,5,Continued,Cs_LFImg_AO_Sw,b1,do10,b1c10,Used in Cs_H_Imaging
+48,Box6: E-77,6.12,N_Cs_LF_Img_Shutter,Digital,Cs Imaging,E-241 IN4,5,Continued,Cs_LFImg_Shutter,b1,do11,b1c11,
+41,Box6: E-77,6.5,N_Cs_Rep_Shutter,Digital,Cs Cooling,E-242 IN3,5,Continued,Cs_Rep_Shutter,b1,do12,b1c12,
+28,Box1: E-78,1.27,1.27_Real_CS_RSC_AO_SW,Digital,Cs Cooling,E-247 Switch,5,Continued,Cs_RSC_AO_Sw,b1,do13,b1c13,
+30,Box1: E-78,1.29,1.29_Real_CS_RSC_SHU,Digital,Cs Cooling,E-265 P5 (Bottom 4 from left),0,Continued,Cs_RSC_Shutter,b1,do14,b1c14,
+42,Box6: E-77,6.6,N_Cs_V_Img_Shutter,Digital,Cs Imaging,E-242 IN2 ,0,Continued,Cs_VImg_Shutter,b1,do15,b1c15,
+40,Box6: E-77,6.4,N_V_Rep_Shutter,Digital,Cs Imaging,E-242 IN4,5,Continued,Cs_VRep_Shutter,b1,do16,b1c16,Used in Cs_H_Imaging 
+49,Box6: E-77,6.13,N_Cs_Z_Shutter,Digital,Cs Cooling,E-241 IN3 ,5,Continued,Cs_Zeeman_Shutter,b1,do17,b1c17,
+10,Box1: E-78,1.9,DMD_AO_FM,Digital,DMD,E-197 FREQ,0,Continued,DMD_AO_FM,b1,do18,b1c18,
+6,Box1: E-78,1.5,DMD_AO_Sw,Digital,DMD,E-197 SWITCH,5,Continued,DMD_AO_Sw,b1,do19,b1c19,
+63,Box6: E-77,6.27,DMD_Movie_Trig,Digital,DMD,unplugged at end (DMD MOLEX),0,Continued,DMD_Movie_Trig,b1,do20,b1c20,
+61,Box6: E-77,6.25,DMD_Shutter,Digital,DMD,E-308 IN+,0,Continued,DMD_Shutter,b1,do21,b1c21,
+45,Box6: E-77,6.9,Dual_1064nm_SW,Digital,Dipole Traps,E-28 SWITCH,5,Continued,Dual_1064_AO_Sw,b1,do22,b1c22,
+44,Box6: E-77,6.8,Dual_780nm_SW,Digital,Dipole Traps,E-33 SWITCH,5,Continued,Dual_780_AO_Sw,b1,do23,b1c23,
+57,Box6: E-77,6.21,FF_Disable,Digital,Bitter Coil,E-132 A,0,Continued,FF_Disable,b1,do24,b1c24,
+136,,,,Digital,V Imaging,Li Andor Cam,0,New,Li_Andor_Trig,b1,do25,b1c25,
+8,Box1: E-78,1.7,Li_EOM_AO_Sw,Digital,Li Imaging,E-307 IN1,5,Continued,Li_EOM_AO_Sw,b1,do26,b1c26,
+19,Box1: E-78,1.18,Li_EOM_H_Shutter,Digital,Li Imaging,E-309 LOGIC,0,Continued,Li_EOM_H_Shutter,b1,do27,b1c27,
+29,Box1: E-78,1.28,1.28_Li_H_Img_shu,Digital,,E-300 Top left port?,0,Continued,Li_HImg_Shutter,b1,do28,b1c28,
+4,Box1: E-78,1.3,Li_Img_AO_Sw,Digital,Li Imaging,E-307 IN2,5,Continued,Li_Img_AO_Sw,b1,do29,b1c29,
+12,Box1: E-78,1.11,Li_MOT_AO_Sw,Digital,Li Cooling,E-203 SWITCH,5,Continued,Li_MOT_AO_Sw,b1,do30,b1c30,
+15,Box1: E-78,1.14,Li_MOT_Shutter,Digital,Li Cooling,E-265 1,5,Continued,Li_MOT_Shutter,b1,do31,b1c31,
+13,Box1: E-78,1.12,Li_Rep_AO_Sw,Digital,Li Cooling,E-206 AO SW,5,Continued,Li_Rep_AO_Sw,b2,do00,b2c00,Actually HOP??
+14,Box1: E-78,1.13,Li_Rep_Shutter,Digital,Li Cooling,E-301 Li Rep CTR,5,Continued,Li_Rep_Shutter,b2,do01,b2c01,
+16,Box1: E-78,1.15,Li_V_Img_Shutter,Digital,Li Imaging,E-301 2,0,Continued,Li_VImg_Shutter,b2,do02,b2c02,
+17,Box1: E-78,1.16,Li_Zeeman_Shutter,Digital,Li Cooling,E-301 7,5,Continued,Li_Zeeman_Shutter,b2,do03,b2c03,
+21,Box1: E-78,1.20,MW_pulse_SW,Digital,Cs Imaging,E-124 +/- 0.5V MAX,0,Continued,MW_Trig,b2,do04,b2c04,
+65,Box6: E-77,6.29,oTOP_Pos_Lock_Enable,Digital,Dipole Traps,E-37 (Top Left),0,Continued,oTOP_Pos_Lock_Enable,b2,do05,b2c05,
+116,Box5: E-82,5.26,H_Pixelfly_Shutter,Digital,Imaging,E-32 TTL IN,5,Continued,Pixelfly_Shutter,b2,do06,b2c06,Switched to digital
+22,Box1: E-78,1.21,Pixelfly trigger,Digital,Imaging,unplugged at end (Pxie 41g Trigger),0,Continued,Pixelfly_Trig,b2,do07,b2c07,
+31,Box1: E-78,1.30,test_trigger,Digital,Trigger,E-19 Port 6,0,Continued,Scope_Trig,b2,do08,b2c08,
+53,Box6: E-77,6.17,Spec_Analysis_Trig,Digital,Trigger,unplugged at end,0,Continued,Spec_Analyzer_Trig,b2,do09,b2c09,
+118,Box5: E-82,5.28,aerotech_trigger,Analog,Dipole Traps,E-75 TB 202 (2&3),0,Continued,Aerotech_Control,b3,ao00,b3c00,
+112,Box5: E-82,5.22,BFL_AO_SW,Analog,Dipole Traps,E-120 Switch IN MC1,5,Continued,BFL_AO_Sw,b3,ao01,b3c01,
+115,Box5: E-82,5.25,N_BFL_INT_LOCK,Analog,Dipole Traps,E-122  (Bottom Left??),0.1,Continued,BFL_Int_Lock,b3,ao02,b3c02,
+103,Box5: E-82,5.13,Bias_1/2_AH_-x,Analog,Shims,E-87 2 Current Set,1,Continued,Bias_X_minus,b3,ao03,b3c03,"These aren't physical outputs, they need some algebra first."
+102,Box5: E-82,5.12,Bias_1/2_HH_x,Analog,Shims,E-87 1 Current Set,-1,Continued,Bias_X_plus,b3,ao04,b3c04,"These aren't physical outputs, they need some algebra first."
+104,Box5: E-82,5.14,Bias_3/4_AH_-y,Analog,Shims,E-85 IN,0,Continued,Bias_Y_minus,b3,ao05,b3c05,"These aren't physical outputs, they need some algebra first."
+105,Box5: E-82,5.15,Bias_3/4_HH_y,Analog,Shims,E-86 IN,1,Continued,Bias_Y_plus,b3,ao06,b3c06,"These aren't physical outputs, they need some algebra first."
+106,Box5: E-82,5.16,Bias_5/6_AH_z,Analog,Shims,E-87 5 Current Set,-1,Continued,Bias_Z_minus,b3,ao07,b3c07,"These aren't physical outputs, they need some algebra first."
+107,Box5: E-82,5.17,Bias_5/6_HH_-z,Analog,Shims,E-87 6 Current Set,-6,Continued,Bias_Z_plus,b3,ao08,b3c08,"These aren't physical outputs, they need some algebra first."
+75,Box3: E-80,3.5,AH_upper_FF,Analog,Bitter Coil,E-132 D,0,Continued,Bitter_AH_Upper_FF,b3,ao09,b3c09,
+76,Box3: E-80,3.6,HH_upper_FF,Analog,Bitter Coil,E-132 F,0,Continued,Bitter_HH_Upper_FF,b3,ao10,b3c10,
+117,Box5: E-82,5.27,IServo_FB_Switch,Analog,Bitter Coil,E-129 FB Disable,0,Continued,Bitter_IServo_FB_Sw,b3,ao11,b3c11,5V digital channel implemented with analog out. Frank says it should be ok with 3.3V
+108,Box5: E-82,5.18,COIL_BOT_CC,Analog,Bitter Coil,"Into middle lab (pink post-it), E-170 Coil Curr",1,Continued,Bitter_Lower_CC,b3,ao12,b3c12,
+111,Box5: E-82,5.21,COIL_BOT_CV,Analog,Bitter Coil,E-133 IN2,1.5,Continued,Bitter_Lower_CV,b3,ao13,b3c13,
+73,Box3: E-80,3.3,lower_FF,Analog,Bitter Coil,E-132 B,0,Continued,Bitter_Lower_FF,b3,ao14,b3c14,
+113,Box5: E-82,5.23,COIL_TOP_AH,Analog,Bitter Coil,E-131 AH Switch,5,Continued,Bitter_Upper_AH_Sw,b3,ao15,b3c15,Perform check to ensure these are not on at the same time. 5V digital channel implemented with analog out.
+110,Box5: E-82,5.20,COIL_TOP_CC,Analog,Bitter Coil,"Into middle lab (blue post-it), E-169 Back",1,Continued,Bitter_Upper_CC,b3,ao16,b3c16,
+109,Box5: E-82,5.19,COIL_TOP_CV,Analog,Bitter Coil,E-133 IN1,2,Continued,Bitter_Upper_CV,b3,ao17,b3c17,
+114,Box5: E-82,5.24,COIL_TOP_HH,Analog,Bitter Coil,E-131 HH Switch,0,Continued,Bitter_Upper_HH_Sw,b3,ao18,b3c18,Perform check to ensure these are not on at the same time. 5V digital channel implemented with analog out.
+70,Box3: E-80,3.0,N_V_AH,Analog,Bitter Coil,E-126 IN,0.1883,Continued,Bitter_V_Lower,b3,ao19,b3c19,"These aren't physical outputs, they need some algebra first."
+77,Box3: E-80,3.7,N_V_HH,Analog,Bitter Coil,E-134 +,-0.0183,Continued,Bitter_V_Upper,b3,ao20,b3c20,"These aren't physical outputs, they need some algebra first."
+121,Box5: E-82,5.31,Cs_3D_AO_AM,Analog,Cs Cooling,E-261 AMP,2.3,Continued,Cs_3DMOT_AO_AM,b3,ao21,b3c21,
+100,Box5: E-82,5.10,Cs_HF_Img_Freq,Analog,Cs Imaging,Into Optical Table (Vtune),-10,Continued,Cs_HFImg_Freq,b3,ao22,b3c22,
+99,Box5: E-82,5.9,Cs_LF_Img_AO_AM,Analog,Cs Imaging,E-263.1 AMP Imaging AO,10,Defunct,Cs_LFImg_AO_AM,b3,ao23,b3c23,Defuncted because switched to Time base!
+129,Box8: E-76,8.7,N_Cs_MOT_Freq,Analog,Cs Cooling,E-239 PC IN,-7.15,Continued,Cs_MOT_Freq,b3,ao24,b3c24,
+123,Box8: E-76,8.1,CS_Rep_AO_AM,Analog,Cs Cooling,E-264.3 Vcont and E-264.1 AMP,5,Continued,Cs_Rep_AO_AM,b3,ao25,b3c25,
+89,Box4: E-81,4.5,N_Cs_Repump_Freq,Analog,Cs Cooling,E-101 IN,6.51,Continued,Cs_Rep_Freq,b3,ao26,b3c26,
+128,Box8: E-76,8.6,Cs_RSC_AO_AM,Analog,Cs Cooling,E-247 AM,5,Continued,Cs_RSC_AO_AM,b3,ao27,b3c27,
+124,Box8: E-76,8.2,Cs_VHF_AO_AM,Analog,Cs Imaging,E262.1 AMP,5,Continued,Cs_VImg_AO_AM,b3,ao28,b3c28,Used in V imaging
+88,Box4: E-81,4.4,DMD_AO_AM,Analog,DMD,E-197 AMP,3.8,Continued,DMD_AO_AM,b3,ao29,b3c29,
+98,Box5: E-82,5.8,Dual_780nm_Int_Lock,Analog,Dipole Traps,unplugged at end,2.5,Continued,Dual_780_Int_Lock,b3,ao30,b3c30,
+127,Box8: E-76,8.5,Li_EOM_Freq,Analog,Li Imaging,E-277.1 VTune,-4.5,Continued,Li_EOM_Freq,b3,ao31,b3c31,
+91,Box4: E-81,4.7,Li_Img_AO_AM,Analog,Li Imaging,E-205 Amplitude,10,Continued,Li_Img_AO_AM,b4,ao00,b4c00,
+72,Box3: E-80,3.2,Li_Img_Freq,Analog,Li Imaging,E-193 V Tune ,-5.2499,Continued,Li_Img_Freq,b4,ao01,b4c01,
+84,Box4: E-81,4.0,Li_MOT_AO_AM,Analog,Li Cooling,E-203 Amplitude,10,Continued,Li_MOT_AO_AM,b4,ao02,b4c02,
+119,Box5: E-82,5.29,Li_MOT_Freq,Analog,Li Cooling,E-196 5.0 MOT Frequency Input,5.2844,Continued,Li_MOT_Freq,b4,ao03,b4c03,
+90,Box4: E-81,4.6,Li_MRep_AO_FM,Analog,Li Cooling,E-206 AO FM,0.4086,Continued,Li_Rep_AO_FM,b4,ao04,b4c04,
+85,Box4: E-81,4.1,Li_Rep_AO_AM,Analog,Li Cooling,E-206 AO AM,10,Continued,Li_Rep_AO_AM,b4,ao05,b4c05,
+125,Box8: E-76,8.3,oTOP_AO_AM,Analog,Dipole Traps,unplugged,10,Continued,oTOP_AO_AM,b4,ao06,b4c06,Basically just fully on and off
+74,Box3: E-80,3.4,oTOP_fcarrier,Analog,Dipole Traps,unplugged,1.7999,Continued,oTOP_FCarrier,b4,ao07,b4c07,
+122,Box8: E-76,8.0,oTOP_Int_lok,Analog,Dipole Traps,unplugged,0.3,Continued,oTOP_Int_Lock,b4,ao08,b4c08,
+126,Box8: E-76,8.4,oTOP_mod_AM,Analog,Dipole Traps,unplugged,0,Continued,oTOP_Mod_AM,b4,ao09,b4c09,
+137,,,,Analog,Zeeman,,0,New,Zeeman_C1,b4,ao10,b4c10,
+138,,,,Analog,Zeeman,,0,New,Zeeman_C2,b4,ao11,b4c11,
+139,,,,Analog,Zeeman,,0,New,Zeeman_C3,b4,ao12,b4c12,
+140,,,,Analog,Zeeman,,0,New,Zeeman_C4,b4,ao13,b4c13,
+141,,,,Analog,Zeeman,,0,New,Zeeman_C5,b4,ao14,b4c14,
+120,Box5: E-82,5.30,Cs_EOM_Freq,Analog,Cs Imaging,unplugged   ,9,Continued,Cs_EOM_Freq,b4,ao15,b4c15,Originally thought to be defunct but I think it's actually needed.
+71,Box3: E-80,3.1,Dual_1064_Int_Lock,Analog,Dipole Traps,unplugged,3.9999,Continued,Dual_1064_Int_Lock,b4,ao16,b4c16,Somehow lost this channel originally.
+86,Box4: E-81,4.2,Dual_780_AO_AM,Analog,Dipole Traps,unplugged at end,10,Unneeded,,,,,Intensity locked; do these really do anything?
+87,Box4: E-81,4.3,Dual_1064_AO_AM,Analog,Dipole Traps,unplugged at end,10,Unneeded,,,,,Intensity locked; do these really do anything?
+101,Box5: E-82,5.11,BFL_AO_AM,Analog,Dipole Traps,E-120 AM IN,10,Unneeded,,,,,Intensity locked; do these really do anything?
+2,Box1: E-78,1.1,(Fast analog sample clock),Digital,,E-80 3.13,,Unneeded,,,,,Replaced by prawnblaster
+3,Box1: E-78,1.2,(Slow analog sample clock),Digital,,E-81 4.13,,Unneeded,,,,,Replaced by prawnblaster
+5,Box1: E-78,1.4,Cs_3DMOT_AO_Sw,Digital,Cs Cooling,unplugged,5,Defunct,,,,,Replaced already
+9,Box1: E-78,1.8,Cs_2DMOT_Shutter,Digital,Cs Cooling,E-262.1 FREQ,0,Defunct,,,,,Replaced already
+11,Box1: E-78,1.10,Cs_Oneshot_Bypass,Digital,Cs Imaging,E-306 Bypass1,0,Unneeded,,,,,Oneshot unneeded
+18,Box1: E-78,1.17,Cs_H_Img_Shutter,Digital,Cs Imaging,E-263.1 FREQ,0,Defunct,,,,,Replaced already
+20,Box1: E-78,1.19,Cs_ZM_shutter,Digital,Cs Cooling,unplugged,5,Defunct,,,,,Replaced already
+23,Box1: E-78,1.22,MW_INCR_UP,Digital,Cs Imaging,E-71 P3 IMG UP,0,Unneeded,,,,,LAN MW source control now
+24,Box1: E-78,1.23,CS_EOM_Sw,Digital,?,Unplugged,5,Defunct,,,,,"Not called in science sequence, goes by different name in MOT sequence."
+25,Box1: E-78,1.24,Cs_RSC_AO_SW,Digital,Cs Cooling,"Into middle lab (green cable tie), unplugged",5,Defunct,,,,,Replaced already
+26,Box1: E-78,1.25,ZDT_AO_SW,Digital,?,Unplugged,5,Defunct,,,,,ZDT defunct
+27,Box1: E-78,1.26,MW_SWEEP,Digital,?,Unplugged at end (126 MW SWEEP),5,Unneeded,,,,,LAN MW source control
+32,Box1: E-78,1.31,Cs_Li_Zeswitch,Digital,Zeeman,E-98 Li-Cs SWITCH,5,Unneeded,,,,,Analog Zeeman ctrl
+33,Box1: E-78,1.32,ZCurrents,Digital,Zeeman,E-98 TTL Servo Enable,5,Unneeded,,,,,Analog Zeeman ctrl
+34,Box1: E-78,PFI 0,Start Trig Input,Digital,,E-77 6.0,,Unneeded,,,,,
+35,Box1: E-78,PFI 4,Clock Input,Digital,,E-77 PFI4,,Unneeded,,,,,
+36,Box6: E-77,6.0,Start pulse,Digital,?,E-78 PFI 0,5,Unneeded,,,,,Replaced by prawnblaster
+37,Box6: E-77,6.1,Mod_AO_Switch,Digital,?,unplugged,5,Defunct,,,,,What does this mean? Not used in sequence...
+38,Box6: E-77,6.2,XDT_AO_SW,Digital,?,unplugged at end,5,Defunct,,,,,XDT defunct
+46,Box6: E-77,6.10,,Digital,,"Into Middle Lab (Blue cable tie), unplugged",0,Defunct,,,,,
+52,Box6: E-77,6.16,,Digital,,unplugged,0,Defunct,,,,,
+54,Box6: E-77,6.18,,Digital,,Into Middle Lab (Yellow cable tie),0,Defunct,,,,,
+58,Box6: E-77,6.22,,Digital,,unplugged at end,0,Defunct,,,,,
+60,Box6: E-77,6.24,,Digital,,unplugged,0,Defunct,,,,,
+64,Box6: E-77,6.28,,Digital,,unplugged,0,Defunct,,,,,
+66,Box6: E-77,6.30,Li_Oneshot_Bypass,Digital,Li Imaging,E-307 BP1,0,Unneeded,,,,,Oneshot unneeded
+68,Box6: E-77,PFI 0,Start Trig Input,Digital,,E-175 SYNCOUT,,Unneeded,,,,,
+69,Box6: E-77,PFI 4,Clock Input,Digital,,E-78 PFI 4 and E-176 Output,,Unneeded,,,,,
+78,Box3: E-80,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+79,Box3: E-80,PFI?,,Digital,,unplugged ,,Unneeded,,,,,
+80,Box3: E-80,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+81,Box3: E-80,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+82,Box3: E-80,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+83,Box3: E-80,PFI?,,Digital,,E-78 1.1,,Unneeded,,,,,
+92,Box4: E-81,PFI?,,Digital,,unplugged  ,,Unneeded,,,,,
+93,Box4: E-81,PFI?,,Digital,,unplugged  ,,Unneeded,,,,,
+94,Box4: E-81,PFI?,,Digital,,unplugged  ,,Unneeded,,,,,
+95,Box4: E-81,PFI?,,Digital,,unplugged  ,,Unneeded,,,,,
+96,Box4: E-81,PFI?,,Digital,,unplugged  ,,Unneeded,,,,,
+97,Box4: E-81,PFI?,,Digital,,"E-76 8.13
+ E-78 1.2",,Unneeded,,,,,
+130,Box8: E-76,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+131,Box8: E-76,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+132,Box8: E-76,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+133,Box8: E-76,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+134,Box8: E-76,PFI?,,Digital,,unplugged,,Unneeded,,,,,
+135,Box8: E-76,PFI?,,Digital,,E-81 4.13,,Unneeded,,,,,
