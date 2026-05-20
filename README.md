@@ -35,6 +35,11 @@ conda config --env --append channels labscript-suite
 conda install setuptools-conda "pyqt<6" pip desktop-app
 setuptools-conda install-requirements labscript runmanager blacs lyse runviewer labscript-devices labscript-utils
 pip install --no-build-isolation --no-deps -e labscript -e runmanager -e blacs -e lyse -e runviewer -e labscript-devices -e labscript-utils
+```
+
+At this point I had an error on Windows and had to run this: `conda install -c conda-forge pyzmq --force-reinstall`. Continuing on:
+
+```
 labscript-profile-create -n lics-labscript-apparatus -c
 desktop-app install blacs lyse runmanager runviewer
 conda remove conda # optional but highly recommended
@@ -59,7 +64,53 @@ Setting these should take care of it.
 
 ## Handling updates
 
-This repository is going to be updated frequently, as we add new features and fix bugs. To keep your local copy up to date, you'll need to pull from Github. If a change is pushed to Github and you don't have any local changes, then great, just pull the changes from Github. If you DO have local changes, then you'll need to stash them, pull the changes from Github, and then unstash your changes to apply them on top of the updated code. If there's a conflict, you'll need to resolve it manually. For this reason, I recommend pulling from Github frequently, so that you don't have to deal with a ton of changes at once. 
+This repository is going to be updated frequently, as we add new features and fix bugs. To keep your local copy up to date, you'll need to pull from Github. If a change is pushed to Github and you don't have any local changes, then great, just pull the changes from Github. If you DO have local changes, then you'll need to stash them, pull the changes from Github, and then unstash your changes to apply them on top of the updated code. If there's a conflict, you'll need to resolve it manually. For this reason, I recommend pulling from Github frequently, so that you don't have to deal with a ton of changes at once.
+
+### Syncing labscript submodules with upstream
+
+The seven labscript-suite submodules (`blacs`, `labscript`, `labscript-devices`, `labscript-utils`, `lyse`, `runmanager`, `runviewer`) are forks of the official [labscript-suite](https://github.com/labscript-suite) repos hosted under ChinlabLiCsCode. To pull in new upstream changes:
+
+**One-time setup** — add an `upstream` remote inside each submodule (only needed once per machine):
+
+```powershell
+foreach ($repo in @("blacs","labscript","labscript-devices","labscript-utils","lyse","runmanager","runviewer")) {
+  git -C "labscript-suite\$repo" remote add upstream "https://github.com/labscript-suite/$repo.git"
+}
+```
+
+**Fetching and merging upstream changes** — run this whenever you want to sync:
+
+```powershell
+# Fetch all upstreams
+foreach ($repo in @("blacs","labscript","labscript-devices","labscript-utils","lyse","runmanager","runviewer")) {
+  git -C "labscript-suite\$repo" fetch upstream
+}
+
+# Check how far ahead/behind each fork is
+foreach ($repo in @("blacs","labscript","labscript-devices","labscript-utils","lyse","runmanager","runviewer")) {
+  $ahead  = git -C "labscript-suite\$repo" rev-list --count "upstream/master..HEAD"
+  $behind = git -C "labscript-suite\$repo" rev-list --count "HEAD..upstream/master"
+  Write-Host "$repo : ahead=$ahead behind=$behind"
+}
+
+# Merge and push each submodule
+foreach ($repo in @("blacs","labscript","labscript-devices","labscript-utils","lyse","runmanager","runviewer")) {
+  git -C "labscript-suite\$repo" checkout master
+  git -C "labscript-suite\$repo" merge upstream/master --no-edit
+  git -C "labscript-suite\$repo" push origin master
+}
+```
+
+If a repo has local custom commits (ahead > 0), the merge may produce conflicts that need to be resolved manually before pushing.
+
+**Update the submodule pointers** in the parent repo after all submodules are updated, then commit:
+
+```powershell
+git submodule update --remote --no-fetch
+git add labscript-suite/blacs labscript-suite/labscript labscript-suite/labscript-devices labscript-suite/labscript-utils labscript-suite/lyse labscript-suite/runmanager labscript-suite/runviewer
+git commit -m "Update labscript submodules to latest upstream"
+git push
+```
 
 ## API Documentation
 
