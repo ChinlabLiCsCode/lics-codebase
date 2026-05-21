@@ -975,13 +975,14 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
     ct_path = os.path.join(_repo_root, 'lics_labscript_apparatus', 'connection_table.py')
     with open(ct_path) as _f:
         _ct_src = _f.read()
-    _full_to_attr = {}  # e.g. 'b1c00' -> 'Bitter_Precision_Disable__b1c00'
+    _full_to_attr = {}  # e.g. 'b1c00' -> 'b1_c00__Bitter_Precision_Disable'
     _attr_is_dig = {}   # attr name -> True if DigitalOut, False if AnalogOut/VirtualAnalogOut
     for _m in _re.finditer(r'self\.(\w+)\s*=\s*(Digital|Analog)Out\(', _ct_src):
         _attr = _m.group(1)
-        _fm = _re.search(r'(b\d+c\d+)$', _attr)
+        _fm = _re.match(r'^b(\d+)_c(\d+)__', _attr)
         if _fm:
-            _full_to_attr[_fm.group(1)] = _attr
+            _full_code = f"b{_fm.group(1)}c{_fm.group(2)}"  # 'b1c00' for CSV lookup
+            _full_to_attr[_full_code] = _attr
             _attr_is_dig[_attr] = (_m.group(2) == 'Digital')
 
     # ── Virtual-channel overrides (section 8a of conversion note) ──
@@ -1082,7 +1083,7 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
             vals = ['ZEEMAN_C1_LI', 'ZEEMAN_C2_LI', 'ZEEMAN_C3_LI',
                     'ZEEMAN_C4_LI', 'ZEEMAN_C5_LI']
         for _i, _v in enumerate(vals, 1):
-            _attr = f"Zeeman_C{_i}__b4c{9 + _i}"
+            _attr = f"b4_c{9 + _i}__Zeeman_C{_i}"
             lines.append(f"{lp}ct.{_attr}.constant({t_expr}, {_v})\n")
         return lines
 
@@ -1109,7 +1110,7 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
                         _zvals = ['ZEEMAN_C1_LI', 'ZEEMAN_C2_LI', 'ZEEMAN_C3_LI',
                                   'ZEEMAN_C4_LI', 'ZEEMAN_C5_LI']
                     for _j, _v in enumerate(_zvals, 1):
-                        _zattr = f"Zeeman_C{_j}__b4c{9 + _j}"
+                        _zattr = f"b4_c{9 + _j}__Zeeman_C{_j}"
                         lines.append(f"{lp}ct.{_zattr}.constant({t_expr}, {_v})\n")
                     _ze_emitted = True
                 continue

@@ -31,8 +31,8 @@ if __name__ == '__main__':
     t_pulse = t + n_cycles * T_60HZ
 
     add_time_marker(t_pulse, f"Pulse ({n_cycles} cycle(s) after trigger)")
-    ct.Scope_Trig__b2c08.go_high(t=t_pulse)
-    ct.Scope_Trig__b2c08.go_low(t=t_pulse + pulse_width)
+    ct.b2_c08__Scope_Trig.go_high(t=t_pulse)
+    ct.b2_c08__Scope_Trig.go_low(t=t_pulse + pulse_width)
 
 
     stop(t_pulse + pulse_width + 1e-3)
@@ -43,10 +43,10 @@ if __name__ == '__main__':
     # t = 20e-6
     # # add_time_marker(t, "Set Background Values")
     # # ct.set_background(t)
-    # ct.DMD_Movie_Trig__b1c20.go_high(t=t)
-    # ct.DMD_Movie_Trig__b1c20.go_low(t=t+1e-5)
-    # ct.DMD_Movie_Trig__b1c20.go_high(t=t+2e-5)
-    # ct.DMD_Movie_Trig__b1c20.go_low(t=t+3e-5)
+    # ct.b1_c20__DMD_Movie_Trig.go_high(t=t)
+    # ct.b1_c20__DMD_Movie_Trig.go_low(t=t+1e-5)
+    # ct.b1_c20__DMD_Movie_Trig.go_high(t=t+2e-5)
+    # ct.b1_c20__DMD_Movie_Trig.go_low(t=t+3e-5)
     # ct.b3c23.constant(t=t, value=5)
     # ct.b3c23.constant(t=t+0.001, value=0)
 
