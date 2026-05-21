@@ -12,3 +12,5 @@ local_paths.py
 __pycache__/
 *.pyc
 lics-codebase.code-workspace
+.claude/settings.local.json
+labview_sequence/test_write

@@ -727,6 +727,36 @@ def seq_quickreport(date, num, which_channel, out_file=None, **kwargs) -> str:
     return channel_report(seq_read(seq_path), which_channel, out_file, **kwargs)
 
 
+def quick_convert(date, num, out_path=None) -> str:
+    """Read a sequence by date/num and convert it to a labscript Python file.
+
+    Parameters
+    ----------
+    date : sequence of int [year, month, day]
+    num : int
+        Sequence number.
+    out_path : str or None
+        Output file path. If None, uses local_path('lvconvert', ...) from local_paths.py.
+
+    Returns
+    -------
+    str
+        Path of the written labscript file.
+    """
+    import sys as _sys
+    _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _repo_root not in _sys.path:
+        _sys.path.insert(0, _repo_root)
+    from local_paths import local_path
+
+    year, month, day = int(date[0]), int(date[1]), int(date[2])
+    seq_path = local_path('lvseqread', year=year, month=month, day=day, num=num)
+    seq = seq_read(seq_path)
+    if out_path is None:
+        out_path = local_path('lvconvert', year=year, month=month, day=day, num=num)
+    return labview_labscript_convert(seq, out_path)
+
+
 def seq_block_write(in_seq: LabviewSeq, in_proc_no: int, times, time_offsets,
                     channel_nos, voltages, ramp_res) -> LabviewSeq:
     """Write a repeated block of events into a procedure. Matches lv_seq_block_write.m.
@@ -942,15 +972,17 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
     _repo_root = os.path.dirname(_here)
 
     # ── Build Full-code → connection-table attribute name from connection_table.py ──
-    ct_path = os.path.join(_repo_root, 'lics-labscript-apparatus', 'connection_table.py')
+    ct_path = os.path.join(_repo_root, 'lics_labscript_apparatus', 'connection_table.py')
     with open(ct_path) as _f:
         _ct_src = _f.read()
     _full_to_attr = {}  # e.g. 'b1c00' -> 'Bitter_Precision_Disable__b1c00'
-    for _m in _re.finditer(r'self\.(\w+)\s*=\s*(?:Digital|Analog)Out\(', _ct_src):
+    _attr_is_dig = {}   # attr name -> True if DigitalOut, False if AnalogOut/VirtualAnalogOut
+    for _m in _re.finditer(r'self\.(\w+)\s*=\s*(Digital|Analog)Out\(', _ct_src):
         _attr = _m.group(1)
         _fm = _re.search(r'(b\d+c\d+)$', _attr)
         if _fm:
             _full_to_attr[_fm.group(1)] = _attr
+            _attr_is_dig[_attr] = (_m.group(2) == 'Digital')
 
     # ── Virtual-channel overrides (section 8a of conversion note) ──
     # OG-prefix → ct attribute name (no __bXcXX suffix)
@@ -1087,7 +1119,7 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
                 continue
             _seen.add(_attr)
 
-            _is_dig = not bool(_ch['is_analog'])
+            _is_dig = _attr_is_dig.get(_attr, False)
             if _is_dig:
                 _v_resolved = var_lookup(sseq.ramp_params, _ival)
                 _method = 'go_low' if _v_resolved < 2.5 else 'go_high'
@@ -1102,7 +1134,7 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
     # Section 1: Python header
     out.append(
         "from labscript import start, stop, add_time_marker, wait\n"
-        "from labscriptlib.LiCs_ExperimentApparatus.connection_table import ConnectionTable\n"
+        "from lics_labscript_apparatus.connection_table import ConnectionTable\n"
         "\n"
         "SLOW_FREQ = 1e3   # 1 ms per edge\n"
         "FAST_FREQ = 50e3  # 20 us per edge\n"
@@ -1270,7 +1302,7 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
                 _prev2[_ch_no] = {'t_ms': _t_ms, 'voltage': _volt}
                 continue
 
-            _is_dig = not bool(_lv_ch['is_analog'])
+            _is_dig = _attr_is_dig.get(_attr, False)
 
             if _rr == 0:  # JUMP
                 if _is_dig:
@@ -1330,7 +1362,7 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
     out.append("    stop(t+10e-6)\n")
 
     content = ''.join(out)
-    with open(out_path, 'w') as _f:
+    with open(out_path, 'w', encoding='utf-8') as _f:
         _f.write(content)
     return out_path
 
@@ -1340,12 +1372,12 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
 if __name__ == "__main__":
     # Test 1: Read a test file
     script_dir = os.path.dirname(__file__) 
-    rel_path = "testdata/202305190000"
+    rel_path = "202409040423"
     test_file = os.path.join(script_dir, rel_path)
     test_seq = seq_read(test_file)
 
     # Test 2: Write that data to a new file
-    rel_path = "testdata/test_write"
+    rel_path = "test_write"
     test_file = os.path.join(script_dir, rel_path)
     seq_write(test_seq, test_file)
     test_seq2 = seq_read(test_file)
@@ -1353,3 +1385,10 @@ if __name__ == "__main__":
 
     # Test 3: Channel report
     print(channel_report(test_seq2, '3.0'))
+
+    # Test 4: Conversion
+    
+    parent_dir = os.path.dirname(script_dir)
+    target_filename = "lics_labscript_apparatus/conv_20240904s423.py"
+    target_name = os.path.join(parent_dir, target_filename)
+    labview_labscript_convert(test_seq, target_name)

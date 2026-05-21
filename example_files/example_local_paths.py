@@ -31,6 +31,12 @@ _PATHS = {
         f'{year}{month:02d}{day:02d}{num:04d}_dump.txt'
     ),
 
+    # Labscript conversion output path
+    'lvconvert': lambda year, month, day, num: (
+        f'/path/to/seq_converts/{year}{month:02d}{day:02d}/'
+        f'{year}{month:02d}{day:02d}{num:04d}_convert.py'
+    ),
+
     # Horizontal camera image path (mirrors localpath('H') in MATLAB)
     'H': lambda year, month, day, num: (
         f'/Users/your_username/Library/CloudStorage/Box-Box/CHIN_LICS/NAS_Data_Backup/'

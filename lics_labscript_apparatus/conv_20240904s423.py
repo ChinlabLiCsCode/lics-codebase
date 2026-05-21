@@ -160,40 +160,40 @@ ZEEMAN_C5_LI = 1.6
 # -------	----							  ------------	------
 # 000		Cs_MOT_Loading          	11700e-3		1
 # 001		Cs_Molasses_Cooling     	15495e-3		1
-# 002		Cs_H_Imaging            	code_65501 / 1000		0
+# 002		Cs_H_Imaging            	code_65501/1e3		0
 # 003		Cs_RSC1                 	15500e-3		1
 # 004		Aerotech_return         	15600e-3		1
-# 005		Dual_Imaging_H          	code_65501 / 1000		0
-# 006		Dual_Imaging_V          	code_65501 / 1000		1
+# 005		Dual_Imaging_H          	code_65501/1e3		0
+# 006		Dual_Imaging_V          	code_65501/1e3		1
 # 007		FB_Bias_field           	15600e-3		1
 # 008		Cs_Dark                 	15534e-3		1
-# 009		Li_HF_V_Imaging         	code_65501 / 1000		0
+# 009		Li_HF_V_Imaging         	code_65501/1e3		0
 # 010		Cs_Evaporation          	15600e-3		1
 # 011		Spare                   	29600e-3		1
 # 012		Li_Feshbach             	10000e-3		1
 # 013		Dual_Evap               	27700e-3		1
-# 014		Li_H_Imaging            	code_65501 / 1000		0
-# 015		Li_V_Imaging            	code_65501 / 1000		0
+# 014		Li_H_Imaging            	code_65501/1e3		0
+# 015		Li_V_Imaging            	code_65501/1e3		0
 # 016		Cs_Levitation1          	15532e-3		1
 # 017		Li_Evaporation          	10000e-3		1
 # 018		Li_Dark                 	10000e-3		1
-# 019		Cs_V_Imaging            	code_65501 / 1000		0
+# 019		Cs_V_Imaging            	code_65501/1e3		0
 # 020		Li_CMOT                 	10000e-3		1
 # 021		Cs_CMOT                 	15445e-3		1
 # 022		Li_MOT_Loading          	1e-3		1
-# 023		True_TOF                	code_65500 / 1000		1
+# 023		True_TOF                	code_65500/1e3		1
 # 024		Li_Killing              	24600e-3		1
 # 025		Low_Field_BEC_Field     	7519e-3		0
-# 026		FB_Bias_Field_off       	code_65502 / 1000		0
-# 027		FB_Field_Gentle_off     	code_65502 / 1000		1
+# 026		FB_Bias_Field_off       	code_65502/1e3		0
+# 027		FB_Field_Gentle_off     	code_65502/1e3		1
 # 028		Unlevitation            	21600e-3		0
-# 029		Cs_HF_H_Imaging         	code_65501 / 1000		0
-# 030		Cs_HF_V_Imaging         	code_65501 / 1000		0
-# 031		test_trigger            	code_65501 / 1000		0
+# 029		Cs_HF_H_Imaging         	code_65501/1e3		0
+# 030		Cs_HF_V_Imaging         	code_65501/1e3		0
+# 031		test_trigger            	code_65501/1e3		0
 # 032		Cs_molasses_dark        	12500e-3		0
 # 033		Dual_Color_Combine      	24700e-3		1
-# 034		Li_Img_Freq_Ramp_Down   	code_65501 / 1000		1
-# 035		coil_cool_down          	code_65502 / 1000		1
+# 034		Li_Img_Freq_Ramp_Down   	code_65501/1e3		1
+# 035		coil_cool_down          	code_65502/1e3		1
 # 036		MW_Calibration_load     	18800e-3		0
 # 037		MW_Calibration_Molasses 	21850e-3		0
 # 038		MW_Calibration_Trap     	21887e-3		0
@@ -307,7 +307,7 @@ if __name__ == '__main__':
     ct.Bitter_Upper_AH_Sw__b3c15.constant(t, 5)
     ct.Bitter_Upper_HH_Sw__b3c18.constant(t, 0)
     ct.BFL_Int_Lock__b3c02.constant(t, 0.1)
-    ct.Pixelfly_Shutter__b2c06.constant(t, 5)
+    ct.Pixelfly_Shutter__b2c06.go_high(t)
     ct.Bitter_IServo_FB_Sw__b3c11.constant(t, 0)
     ct.Aerotech_Control__b3c00.constant(t, 0)
     ct.Li_MOT_Freq__b4c03.constant(t, 5.28442)
@@ -402,12 +402,12 @@ if __name__ == '__main__':
     ct.Cs_3DMOT_AO_AM__b3c21.ramp(t=t, duration=5e-3, initial=0.700073, final=0.100098, samplerate=FAST_FREQ)
 
     # # procedure 002: Cs_H_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Cs_H_Imaging')
     # ct.Pixelfly_Trig__b2c07.go_high(t - 413e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t - 412.9e-3)
     # # ct.Cs_MOT_Freq__b3c24.constant(t - 50e-3, -7.7301)  # replaced by ramp at t - 5e-3 in proc 002
-    # ct.Pixelfly_Shutter__b2c06.constant(t - 15e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t - 15e-3)
     # ct.Cs_HOP_AO_Sw__b1c08.go_low(t - 13e-3)
     # ct.Cs_VRep_Shutter__b1c16.go_high(t - 12e-3)
     # ct.Cs_HImg_Shutter__b1c07.go_high(t - 10e-3)
@@ -434,11 +434,11 @@ if __name__ == '__main__':
     # # 6.2_XDT_AO_SW: 0 JUMP — no new channel
     # # 1.25_ZDT_AO_SW: 0 JUMP — no new channel
     # ct.oTOP_AO_AM__b4c06.constant(t + 5e-3, 0)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 7e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 7e-3)
     # # 1.25_ZDT_AO_SW: 5 JUMP — no new channel
     # ct.Cs_HOP_AO_Sw__b1c08.go_high(t + 10e-3)
     # # ct.Cs_LFImg_AO_Sw__b1c10.go_high(t + 15e-3)  # replaced by ramp at t + 630e-3 in proc 002
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 625e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t + 625e-3)
     # ct.Cs_HImg_Shutter__b1c07.go_high(t + 630e-3)
     # # 1.25_ZDT_AO_SW: 0 JUMP — no new channel
     # ct.Cs_LFImg_AO_Sw__b1c10.ramp(t=t + 15e-3, duration=615e-3, initial=5, final=0, samplerate=FAST_FREQ)
@@ -447,7 +447,7 @@ if __name__ == '__main__':
     # ct.Cs_HImg_Shutter__b1c07.go_low(t + 640e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t + 640.06e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_low(t + 640.06e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 647e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 647e-3)
     # # 1.25_ZDT_AO_SW: 5 JUMP — no new channel
     # ct.Cs_LFImg_AO_Sw__b1c10.go_high(t + 655e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_high(t + 1750e-3)
@@ -517,13 +517,13 @@ if __name__ == '__main__':
     ct.Dual_780_Int_Lock__b3c30.ramp(t=t + 1700e-3, duration=7400e-3, initial=2.00012, final=1.79993, samplerate=SLOW_FREQ)
 
     # # procedure 005: Dual_Imaging_H
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Dual_Imaging_H')
     # ct.Pixelfly_Trig__b2c07.go_high(t - 500.02e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t - 499.06e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t - 50e-3, 6.00006)
     # ct.Li_EOM_AO_Sw__b1c26.go_high(t - 20e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t - 17e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t - 17e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t - 10e-3)
     # ct.Li_HImg_Shutter__b1c28.go_high(t - 8e-3)
     # ct.Li_EOM_Freq__b3c31.constant(t - 0.4e-3, -4.8999)
@@ -533,7 +533,7 @@ if __name__ == '__main__':
     # ct.Li_Img_AO_Sw__b1c29.go_high(t)
     # ct.Li_HImg_Shutter__b1c28.go_low(t)
     # ct.BFL_AO_Sw__b3c01.constant(t, 0)
-    # ct.Pixelfly_Shutter__b2c06.constant(t, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t)
     # # 5.9_Cs_LF_Img_AO_AM: 8.50006 JUMP — no new channel
     # ct.Li_EOM_H_Shutter__b1c27.go_low(t)
     # ct.Li_EOM_Freq__b3c31.constant(t, 0)
@@ -545,7 +545,7 @@ if __name__ == '__main__':
     # ct.Bias_Y_HH.constant(t + 18e-3, -2.00012)
     # ct.Li_Img_AO_Sw__b1c29.go_high(t + 20e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_low(t + 20e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 20e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t + 20e-3)
     # ct.Cs_HImg_Shutter__b1c07.go_high(t + 20e-3)
     # ct.Li_EOM_AO_Sw__b1c26.go_low(t + 20e-3)
     # ct.Cs_VRep_Shutter__b1c16.go_low(t + 29e-3)
@@ -557,35 +557,35 @@ if __name__ == '__main__':
     # ct.Cs_LFImg_AO_Sw__b1c10.go_low(t + 30.06e-3)
     # ct.Cs_HOP_AO_Sw__b1c08.go_low(t + 30.1e-3)
     # ct.Cs_HOP_AO_Sw__b1c08.go_high(t + 35e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 37e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 37e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 50e-3, 6.00006)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_high(t + 55e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 150e-3, 6.00006)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 182e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t + 182e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 190e-3)
     # ct.Li_HImg_Shutter__b1c28.go_high(t + 192e-3)
     # ct.Pixelfly_Trig__b2c07.go_high(t + 199.98e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_high(t + 200e-3)
     # ct.Li_HImg_Shutter__b1c28.go_low(t + 200e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 200e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 200e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 200.02e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 200.02e-3, 0)
     # ct.Pixelfly_Trig__b2c07.go_low(t + 200.06e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_low(t + 215e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 218e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t + 218e-3)
     # ct.Cs_HImg_Shutter__b1c07.go_high(t + 218e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_high(t + 220e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_high(t + 228e-3)
     # ct.Cs_HImg_Shutter__b1c07.go_low(t + 228e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_low(t + 228.06e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 235e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 235e-3)
     # ct.Cs_LFImg_AO_Sw__b1c10.go_high(t + 255e-3)
     # # 7.7_N_Cs_MOT_Freq: -7.66998 JUMP — no new channel
     # # 5.9_Cs_LF_Img_AO_AM: 10 JUMP — no new channel
     # # 7.7_N_Cs_MOT_Freq: -7.14996 COARSE — no new channel
 
     # procedure 006: Dual_Imaging_V 
-    t = code_65501 / 1000
+    t = code_65501/1e3
     add_time_marker(t, 'Dual_Imaging_V ')
     # ct.Cs_Rep_Freq__b3c26.constant(t - 1000e-3, 6.51001)  # replaced by ramp at t - 50e-3 in proc 006
     # ct.CS_HFImg_Freq__b3c22.constant(t - 1000e-3, -10)  # replaced by ramp at t - 100e-3 in proc 006
@@ -706,7 +706,7 @@ if __name__ == '__main__':
     ct.Cs_HOP_AO_Sw__b1c08.go_high(t + 505e-3)
 
     # # procedure 009: Li_HF_V_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Li_HF_V_Imaging')
     # ct.Li_EOM_H_Shutter__b1c27.go_high(t - 20e-3)
     # ct.Li_EOM_AO_Sw__b1c26.go_high(t - 20e-3)
@@ -844,11 +844,11 @@ if __name__ == '__main__':
     ct.DMD_AO_Sw__b1c19.go_low(t + 2002e-3)
 
     # # procedure 014: Li_H_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Li_H_Imaging')
     # ct.Pixelfly_Trig__b2c07.go_high(t - 400e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t - 399e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t - 12e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t - 12e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t - 10e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t - 10e-3, 2.99988)
     # ct.Li_HImg_Shutter__b1c28.go_high(t - 6e-3)
@@ -867,13 +867,13 @@ if __name__ == '__main__':
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 0.1e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t + 0.1e-3)
     # ct.Li_HImg_Shutter__b1c28.go_low(t + 1e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 1e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 1e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_high(t + 10e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 10e-3, 10)
     # ct.Li_Rep_AO_Sw__b2c00.go_high(t + 20e-3)
     # ct.Li_Rep_AO_AM__b4c05.constant(t + 20e-3, 10)
     # # 2.3_Li_MRep_AO_FM: -1.00006 JUMP — no new channel
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 488e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t + 488e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 490e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 490e-3, 2.99988)
     # ct.Li_HImg_Shutter__b1c28.go_high(t + 494e-3)
@@ -885,13 +885,13 @@ if __name__ == '__main__':
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 500.1e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t + 500.1e-3)
     # ct.Li_HImg_Shutter__b1c28.go_low(t + 501e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 501e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 501e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_high(t + 510e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 510e-3, 10)
     # ct.Li_Rep_AO_Sw__b2c00.go_high(t + 520e-3)
 
     # # procedure 015: Li_V_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Li_V_Imaging')
     # ct.Pixelfly_Trig__b2c07.go_high(t - 400e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t - 399e-3)
@@ -1013,7 +1013,7 @@ if __name__ == '__main__':
     ct.Li_MOT_Freq__b4c03.ramp(t=t + 1e-3, duration=999e-3, initial=5.71991, final=6.09985, samplerate=SLOW_FREQ)
 
     # # procedure 019: Cs_V_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Cs_V_Imaging')
     # ct.Pixelfly_Trig__b2c07.go_high(t - 313e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t - 312.9e-3)
@@ -1195,7 +1195,7 @@ if __name__ == '__main__':
     ct.Li_Img_Freq__b4c01.ramp(t=t, duration=5000e-3, initial=-5.24994, final=code_65507, samplerate=SLOW_FREQ)
 
     # procedure 023: True_TOF
-    t = code_65500 / 1000
+    t = code_65500/1e3
     add_time_marker(t, 'True_TOF')
     ct.BFL_AO_Sw__b3c01.constant(t, 0)
     # 5.11_BFL_AO_AM: 0 JUMP — no new channel
@@ -1244,7 +1244,7 @@ if __name__ == '__main__':
     # # 2.6_V_HH: 0.0460815 FINE — no new channel
 
     # # procedure 026: FB_Bias_Field_off
-    # t = code_65502 / 1000
+    # t = code_65502/1e3
     # add_time_marker(t, 'FB_Bias_Field_off')
     # ct.Bitter_V_HH.constant(t, 0)
     # ct.Bitter_IServo_FB_Sw__b3c11.constant(t, 5)
@@ -1255,7 +1255,7 @@ if __name__ == '__main__':
     # ct.Bitter_Precision_Disable__b1c00.go_high(t)
 
     # procedure 027: FB_Field_Gentle_off
-    t = code_65502 / 1000
+    t = code_65502/1e3
     add_time_marker(t, 'FB_Field_Gentle_off')
     # ct.Bitter_V_AH.constant(t, 3.8501)  # replaced by ramp at t + 6e-3 in proc 027
     # ct.Bitter_V_HH.constant(t, -0.849915)  # replaced by ramp at t + 6e-3 in proc 027
@@ -1293,7 +1293,7 @@ if __name__ == '__main__':
     # # 2.6_V_HH: 0 JUMP — no new channel
 
     # # procedure 029: Cs_HF_H_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Cs_HF_H_Imaging')
     # # ct.CS_HFImg_Freq__b3c22.constant(t - 1000e-3, -10)  # replaced by ramp at t - 20e-3 in proc 029
     # # 7.7_N_Cs_MOT_Freq: -7.60986 JUMP — no new channel
@@ -1302,7 +1302,7 @@ if __name__ == '__main__':
     # ct.Cs_LFImg_Shutter__b1c11.go_low(t - 100e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t - 99.9e-3)
     # ct.Cs_HFImg_Shutter__b1c06.go_high(t - 80e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t - 30e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t - 30e-3)
     # ct.CS_HFImg_Freq__b3c22.ramp(t=t - 1000e-3, duration=980e-3, initial=-10, final=code_65511, samplerate=FAST_FREQ)
     # ct.Cs_HImg_Shutter__b1c07.go_high(t - 10e-3)
     # ct.Cs_HFImg_AO_Sw__b1c05.go_low(t - 10e-3)
@@ -1316,10 +1316,10 @@ if __name__ == '__main__':
     # ct.Cs_HImg_Shutter__b1c07.go_low(t + 0.08e-3)
     # ct.DMD_Movie_Trig__b1c20.go_low(t + 0.08e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t + 0.1e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 7e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 7e-3)
     # ct.Cs_HFImg_AO_Sw__b1c05.go_high(t + 15e-3)
     # ct.DMD_Movie_Trig__b1c20.go_high(t + 15e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 70e-3, 5)
+    # ct.Pixelfly_Shutter__b2c06.go_high(t + 70e-3)
     # ct.Cs_HImg_Shutter__b1c07.go_high(t + 90e-3)
     # ct.Cs_HFImg_AO_Sw__b1c05.go_low(t + 90e-3)
     # ct.DMD_Movie_Trig__b1c20.go_low(t + 90e-3)
@@ -1331,7 +1331,7 @@ if __name__ == '__main__':
     # ct.Cs_HImg_Shutter__b1c07.go_low(t + 100.08e-3)
     # ct.DMD_Movie_Trig__b1c20.go_low(t + 100.08e-3)
     # ct.Pixelfly_Trig__b2c07.go_low(t + 100.1e-3)
-    # ct.Pixelfly_Shutter__b2c06.constant(t + 107e-3, 0)
+    # ct.Pixelfly_Shutter__b2c06.go_low(t + 107e-3)
     # ct.Cs_HFImg_AO_Sw__b1c05.go_high(t + 115e-3)
     # ct.DMD_Movie_Trig__b1c20.go_high(t + 115e-3)
     # # 7.7_N_Cs_MOT_Freq: -2.99988 JUMP — no new channel
@@ -1340,7 +1340,7 @@ if __name__ == '__main__':
     # # 7.7_N_Cs_MOT_Freq: -7.14996 COARSE — no new channel
 
     # # procedure 030: Cs_HF_V_Imaging
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'Cs_HF_V_Imaging')
     # # ct.CS_HFImg_Freq__b3c22.constant(t - 1300e-3, -10)  # replaced by ramp at t - 100e-3 in proc 030
     # # 7.7_N_Cs_MOT_Freq: -7.60986 JUMP — no new channel
@@ -1390,7 +1390,7 @@ if __name__ == '__main__':
     # # 7.7_N_Cs_MOT_Freq: -7.6001 COARSE — no new channel
 
     # # procedure 031: test_trigger
-    # t = code_65501 / 1000
+    # t = code_65501/1e3
     # add_time_marker(t, 'test_trigger')
     # ct.Spec_Analyzer_Trig__b2c09.go_low(t)
     # ct.Spec_Analyzer_Trig__b2c09.go_low(t + 1e-3)
@@ -1419,7 +1419,7 @@ if __name__ == '__main__':
     ct.oTOP_AO_AM__b4c06.constant(t + 3002e-3, 10)
 
     # procedure 034: Li_Img_Freq_Ramp_Down
-    t = code_65501 / 1000
+    t = code_65501/1e3
     add_time_marker(t, 'Li_Img_Freq_Ramp_Down')
     ct.BFL_Int_Lock__b3c02.constant(t + 20e-3, 0)
     # ct.Li_Img_Freq__b4c01.constant(t + 501e-3, code_65508)  # replaced by ramp at t + 2501e-3 in proc 034
@@ -1427,7 +1427,7 @@ if __name__ == '__main__':
     ct.Li_Img_Freq__b4c01.constant(t + 2502e-3, -5.24994)
 
     # procedure 035: coil_cool_down
-    t = code_65502 / 1000
+    t = code_65502/1e3
     add_time_marker(t, 'coil_cool_down')
     ct.Scope_Trig__b2c08.go_low(t + 2000e-3)
 
@@ -1730,7 +1730,7 @@ if __name__ == '__main__':
     ct.Bitter_Upper_AH_Sw__b3c15.constant(t, 5)
     ct.Bitter_Upper_HH_Sw__b3c18.constant(t, 0)
     ct.BFL_Int_Lock__b3c02.constant(t, 0.1)
-    ct.Pixelfly_Shutter__b2c06.constant(t, 5)
+    ct.Pixelfly_Shutter__b2c06.go_high(t)
     ct.Bitter_IServo_FB_Sw__b3c11.constant(t, 0)
     ct.Aerotech_Control__b3c00.constant(t, 0)
     ct.Li_MOT_Freq__b4c03.constant(t, 5.28442)
