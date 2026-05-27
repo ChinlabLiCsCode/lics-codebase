@@ -148,12 +148,12 @@ class ConnectionTable:
         self.Aerotech_Control__b3c00          = AnalogOut(default_value=0,           name='Aerotech_Control__b3c00',          parent_device=NIBox3, connection='ao0')
         self.BFL_AO_Sw__b3c01                 = AnalogOut(default_value=5,           name='BFL_AO_Sw__b3c01',                 parent_device=NIBox3, connection='ao1')
         self.BFL_Int_Lock__b3c02              = AnalogOut(default_value=0.1,         name='BFL_Int_Lock__b3c02',              parent_device=NIBox3, connection='ao2')
-        self.Bias_X_minus__b3c03              = AnalogOut(default_value=0,           name='Bias_X_minus__b3c03',                 parent_device=NIBox3, connection='ao3')
-        self.Bias_X_plus__b3c04               = AnalogOut(default_value=0,           name='Bias_X_plus__b3c04',                 parent_device=NIBox3, connection='ao4')
-        self.Bias_Y_minus__b3c05              = AnalogOut(default_value=0,           name='Bias_Y_minus__b3c05',                 parent_device=NIBox3, connection='ao5')
-        self.Bias_Y_plus__b3c06               = AnalogOut(default_value=0,           name='Bias_Y_plus__b3c06',                 parent_device=NIBox3, connection='ao6')
-        self.Bias_Z_minus__b3c07              = AnalogOut(default_value=0,           name='Bias_Z_minus__b3c07',                 parent_device=NIBox3, connection='ao7')
-        self.Bias_Z_plus__b3c08               = AnalogOut(default_value=0,           name='Bias_Z_plus__b3c08',                 parent_device=NIBox3, connection='ao8')
+        self.Bias_X_plus__b3c03               = AnalogOut(default_value=0,           name='Bias_X_minus__b3c03',                 parent_device=NIBox3, connection='ao3')
+        self.Bias_X_minus__b3c04              = AnalogOut(default_value=0,           name='Bias_X_plus__b3c04',                 parent_device=NIBox3, connection='ao4')
+        self.Bias_Y_plus__b3c05               = AnalogOut(default_value=0,           name='Bias_Y_minus__b3c05',                 parent_device=NIBox3, connection='ao5')
+        self.Bias_Y_minus__b3c06              = AnalogOut(default_value=0,           name='Bias_Y_plus__b3c06',                 parent_device=NIBox3, connection='ao6')
+        self.Bias_Z_plus__b3c07               = AnalogOut(default_value=0,           name='Bias_Z_minus__b3c07',                 parent_device=NIBox3, connection='ao7')
+        self.Bias_Z_minus__b3c08              = AnalogOut(default_value=0,           name='Bias_Z_plus__b3c08',                 parent_device=NIBox3, connection='ao8')
         self.Bitter_AH_Upper_FF__b3c09        = AnalogOut(default_value=0,           name='Bitter_AH_Upper_FF__b3c09',        parent_device=NIBox3, connection='ao9')
         self.Bitter_HH_Upper_FF__b3c10        = AnalogOut(default_value=0,           name='Bitter_HH_Upper_FF__b3c10',        parent_device=NIBox3, connection='ao10')
         self.Bitter_IServo_FB_Sw__b3c11       = AnalogOut(default_value=0,           name='Bitter_IServo_FB_Sw__b3c11',       parent_device=NIBox3, connection='ao11')
@@ -224,29 +224,29 @@ class ConnectionTable:
                                                               self.Bitter_V_Upper__b3c20)
         
         # shim offsets and AH HH matrices are defined here
-        _SHIM_XMINUS_OFFSET = 1
-        _SHIM_XPLUS_OFFSET = -1
-        _SHIM_YMINUS_OFFSET = 0.3
-        _SHIM_YPLUS_OFFSET = -1.8
-        _SHIM_ZMINUS_OFFSET = 0.1
-        _SHIM_ZPLUS_OFFSET = -0.1
-        _SHIMX_CONVERSION = lambda hh, ah: (-0.5*hh + 0.5*ah + _SHIM_XMINUS_OFFSET, # minus
-                                            0.5*hh + 0.5*ah + _SHIM_XPLUS_OFFSET)   # plus
-        _SHIMY_CONVERSION = lambda hh, ah: (-0.5*hh + 0.5*ah + _SHIM_YMINUS_OFFSET, # minus
-                                            0.5*hh + 0.5*ah + _SHIM_YPLUS_OFFSET)   # plus
-        _SHIMZ_CONVERSION = lambda hh, ah: (-0.5*hh + 0.5*ah + _SHIM_ZMINUS_OFFSET, # minus
-                                            0.5*hh + 0.5*ah + _SHIM_ZPLUS_OFFSET)   # plus
+        _SHIM_XPLUS_OFFSET = 1
+        _SHIM_XMINUS_OFFSET = -1
+        _SHIM_YPLUS_OFFSET = 0.3
+        _SHIM_YMINUS_OFFSET = -1.8
+        _SHIM_ZPLUS_OFFSET = 0.1
+        _SHIM_ZMINUS_OFFSET = -0.1
+        _SHIMX_CONVERSION = lambda hh, ah: (-0.5*hh + 0.5*ah + _SHIM_XPLUS_OFFSET, 
+                                            0.5*hh + 0.5*ah + _SHIM_XMINUS_OFFSET)  # note the flip of hh and ah here relative to y and z
+        _SHIMY_CONVERSION = lambda hh, ah: (-0.5*ah + 0.5*hh + _SHIM_YPLUS_OFFSET,
+                                            0.5*ah + 0.5*hh + _SHIM_YMINUS_OFFSET)
+        _SHIMZ_CONVERSION = lambda hh, ah: (-0.5*ah + 0.5*hh + _SHIM_ZPLUS_OFFSET,
+                                            0.5*ah + 0.5*hh + _SHIM_ZMINUS_OFFSET)
 
         # build shim virtual channel groups
         self.Bias_X_HH, self.Bias_X_AH = VirtualAnalogOut(_SHIMX_CONVERSION,
-                                                          self.Bias_X_minus__b3c03,
-                                                          self.Bias_X_plus__b3c04)
+                                                          self.Bias_X_plus__b3c03,
+                                                          self.Bias_X_minus__b3c04)
         self.Bias_Y_HH, self.Bias_Y_AH = VirtualAnalogOut(_SHIMY_CONVERSION,
-                                                          self.Bias_Y_minus__b3c05,
-                                                          self.Bias_Y_plus__b3c06)
+                                                          self.Bias_Y_plus__b3c05,
+                                                          self.Bias_Y_minus__b3c06)
         self.Bias_Z_HH, self.Bias_Z_AH = VirtualAnalogOut(_SHIMZ_CONVERSION,
-                                                          self.Bias_Z_minus__b3c07,
-                                                          self.Bias_Z_plus__b3c08)
+                                                          self.Bias_Z_plus__b3c07,
+                                                          self.Bias_Z_minus__b3c08)
         
 
 

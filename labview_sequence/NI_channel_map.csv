@@ -44,12 +44,12 @@ Ind,OG Box,OG Ch,Name,D/A?,System,Plugged into,Default,Fate,New Name,Box,Ch,Full
 118,Box5: E-82,5.28,aerotech_trigger,Analog,Dipole Traps,E-75 TB 202 (2&3),0,Continued,Aerotech_Control,b3,ao00,b3c00,
 112,Box5: E-82,5.22,BFL_AO_SW,Analog,Dipole Traps,E-120 Switch IN MC1,5,Continued,BFL_AO_Sw,b3,ao01,b3c01,
 115,Box5: E-82,5.25,N_BFL_INT_LOCK,Analog,Dipole Traps,E-122  (Bottom Left??),0.1,Continued,BFL_Int_Lock,b3,ao02,b3c02,
-103,Box5: E-82,5.13,Bias_1/2_AH_-x,Analog,Shims,E-87 2 Current Set,1,Continued,Bias_X_minus,b3,ao03,b3c03,"These aren't physical outputs, they need some algebra first."
-102,Box5: E-82,5.12,Bias_1/2_HH_x,Analog,Shims,E-87 1 Current Set,-1,Continued,Bias_X_plus,b3,ao04,b3c04,"These aren't physical outputs, they need some algebra first."
-104,Box5: E-82,5.14,Bias_3/4_AH_-y,Analog,Shims,E-85 IN,0,Continued,Bias_Y_minus,b3,ao05,b3c05,"These aren't physical outputs, they need some algebra first."
-105,Box5: E-82,5.15,Bias_3/4_HH_y,Analog,Shims,E-86 IN,1,Continued,Bias_Y_plus,b3,ao06,b3c06,"These aren't physical outputs, they need some algebra first."
-106,Box5: E-82,5.16,Bias_5/6_AH_z,Analog,Shims,E-87 5 Current Set,-1,Continued,Bias_Z_minus,b3,ao07,b3c07,"These aren't physical outputs, they need some algebra first."
-107,Box5: E-82,5.17,Bias_5/6_HH_-z,Analog,Shims,E-87 6 Current Set,-6,Continued,Bias_Z_plus,b3,ao08,b3c08,"These aren't physical outputs, they need some algebra first."
+102,Box5: E-82,5.12,Bias_1/2_HH_x,Analog,Shims,E-87 1 Current Set,-1,Continued,Bias_X_plus,b3,ao03,b3c03,"These aren't physical outputs, they need some algebra first."
+103,Box5: E-82,5.13,Bias_1/2_AH_-x,Analog,Shims,E-87 2 Current Set,1,Continued,Bias_X_minus,b3,ao04,b3c04,"These aren't physical outputs, they need some algebra first."
+104,Box5: E-82,5.14,Bias_3/4_AH_-y,Analog,Shims,E-85 IN -> 3 current set,0,Continued,Bias_Y_plus,b3,ao05,b3c05,"These aren't physical outputs, they need some algebra first."
+105,Box5: E-82,5.15,Bias_3/4_HH_y,Analog,Shims,E-86 IN -> 4 current set,1,Continued,Bias_Y_minus,b3,ao06,b3c06,"These aren't physical outputs, they need some algebra first."
+106,Box5: E-82,5.16,Bias_5/6_AH_z,Analog,Shims,E-87 5 Current Set,-1,Continued,Bias_Z_plus,b3,ao07,b3c07,"These aren't physical outputs, they need some algebra first."
+107,Box5: E-82,5.17,Bias_5/6_HH_-z,Analog,Shims,E-87 6 Current Set,-6,Continued,Bias_Z_minus,b3,ao08,b3c08,"These aren't physical outputs, they need some algebra first."
 75,Box3: E-80,3.5,AH_upper_FF,Analog,Bitter Coil,E-132 D,0,Continued,Bitter_AH_Upper_FF,b3,ao09,b3c09,
 76,Box3: E-80,3.6,HH_upper_FF,Analog,Bitter Coil,E-132 F,0,Continued,Bitter_HH_Upper_FF,b3,ao10,b3c10,
 117,Box5: E-82,5.27,IServo_FB_Switch,Analog,Bitter Coil,E-129 FB Disable,0,Continued,Bitter_IServo_FB_Sw,b3,ao11,b3c11,5V digital channel implemented with analog out. Frank says it should be ok with 3.3V
