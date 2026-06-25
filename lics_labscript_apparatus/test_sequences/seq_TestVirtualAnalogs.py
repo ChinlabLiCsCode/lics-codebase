@@ -32,6 +32,8 @@ if __name__ == '__main__':
     ct.Bias_X_AH.constant(t=t+0.020, value=2)
     ct.Bias_X_AH.ramp(t=t+0.025, duration=0.005, initial=2, final=0, samplerate=1e5)
 
+    ct.Bias
+
     # stop sequence at the end
     t = 0.05
     stop(t)
