@@ -1,5 +1,5 @@
 from labscript import start, stop, add_time_marker, wait
-from labscriptlib.LiCs_ExperimentApparatus.connection_table import ConnectionTable
+from lics_labscript_apparatus.connection_table import ConnectionTable
 
 SLOW_FREQ = 1e3  # slow ramp frequency: 1 ms per edge
 FAST_FREQ = 50e3  # fast ramp frequency: 20 us per edge

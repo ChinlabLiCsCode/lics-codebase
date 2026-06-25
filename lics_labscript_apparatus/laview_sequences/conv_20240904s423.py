@@ -40,7 +40,7 @@ ZEEMAN_C5_LI = 0.8
 # 008	2.0_Dual_780nm_Int_Lock 	    2.5000		1	# no new channel
 # 009	2.1_CS_Rep_AO_AM        	    5.0000		1	# no new channel
 # 010	2.2_                    	    0.0000		1	# no new channel
-# 011	2.3_Li_MRep_AO_FM       	    0.4086		1	# no new channel
+# 011	2.3_Li_Rep_AO_FM       	    0.4086		1	# no new channel
 # 012	2.4_                    	    0.0000		1	# no new channel
 # 013	2.5_                    	    0.0000		1	# no new channel
 # 014	2.6_V_HH                	   -0.0183		1	# no new channel
@@ -121,7 +121,7 @@ ZEEMAN_C5_LI = 0.8
 # 089	4.3_Dual_1064_AO_AM     	   10.0000		1	# no new channel
 # 090	4.4_DMD_AO_AM           	    3.8000		1	ct.DMD_AO_AM__b3c29
 # 091	4.5_N_Cs_Repump_Freq    	    6.5100		1	ct.Cs_Rep_Freq__b3c26
-# 092	4.6_Li_MRep_AO_FM       	    0.4086		1	ct.Li_MRep_AO_FM__b4c04
+# 092	4.6_Li_Rep_AO_FM       	    0.4086		1	ct.Li_Rep_AO_FM__b4c04
 # 093	4.7_Li_Img_AO_AM        	   10.0000		1	ct.Li_Img_AO_AM__b4c00
 # 094	5.8_Dual_780nm_Int_Lock 	    2.5000		1	ct.Dual_780_Int_Lock__b3c30
 # 095	5.9_Cs_LF_Img_AO_AM     	   10.0000		1	# no new channel
@@ -289,7 +289,7 @@ if __name__ == '__main__':
     ct.Li_Rep_AO_AM__b4c05.constant(t, 10)
     ct.DMD_AO_AM__b3c29.constant(t, 3.8)
     ct.Cs_Rep_Freq__b3c26.constant(t, 6.51)
-    ct.Li_MRep_AO_FM__b4c04.constant(t, 0.40863)
+    ct.Li_Rep_AO_FM__b4c04.constant(t, 0.40863)
     ct.Li_Img_AO_AM__b4c00.constant(t, 10)
     ct.Dual_780_Int_Lock__b3c30.constant(t, 2.5)
     ct.CS_HFImg_Freq__b3c22.constant(t, -10)
@@ -872,7 +872,7 @@ if __name__ == '__main__':
     # ct.Li_Img_AO_AM__b4c00.constant(t + 10e-3, 10)
     # ct.Li_Rep_AO_Sw__b2c00.go_high(t + 20e-3)
     # ct.Li_Rep_AO_AM__b4c05.constant(t + 20e-3, 10)
-    # # 2.3_Li_MRep_AO_FM: -1.00006 JUMP — no new channel
+    # # 2.3_Li_Rep_AO_FM: -1.00006 JUMP — no new channel
     # ct.Pixelfly_Shutter__b2c06.go_high(t + 488e-3)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 490e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 490e-3, 2.99988)
@@ -916,7 +916,7 @@ if __name__ == '__main__':
     # ct.Li_Img_AO_Sw__b1c29.go_high(t + 10e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 10e-3, 10)
     # ct.Li_Rep_AO_Sw__b2c00.go_high(t + 20e-3)
-    # # 2.3_Li_MRep_AO_FM: -1.00006 JUMP — no new channel
+    # # 2.3_Li_Rep_AO_FM: -1.00006 JUMP — no new channel
     # ct.Li_Rep_AO_AM__b4c05.constant(t + 20e-3, 10)
     # ct.Li_Img_AO_Sw__b1c29.go_low(t + 490e-3)
     # ct.Li_Img_AO_AM__b4c00.constant(t + 490e-3, 1.00006)
@@ -1068,7 +1068,7 @@ if __name__ == '__main__':
     # ct.Bitter_V_HH.constant(t - 50e-3, -0.00946045)  # replaced by ramp at t - 5e-3 in proc 020
     # ct.Bitter_V_AH.constant(t - 50e-3, 0.347595)  # replaced by ramp at t - 5e-3 in proc 020
     # ct.Li_MOT_Freq__b4c03.constant(t - 18e-3, 5.34485)  # replaced by ramp at t in proc 020
-    # ct.Li_MRep_AO_FM__b4c04.constant(t - 18e-3, 0.400085)  # replaced by ramp at t in proc 020
+    # ct.Li_Rep_AO_FM__b4c04.constant(t - 18e-3, 0.400085)  # replaced by ramp at t in proc 020
     # ct.Li_Rep_AO_AM__b4c05.constant(t - 13.5e-3, 5)  # replaced by ramp at t - 3e-3 in proc 020
     # ct.Li_MOT_AO_AM__b4c02.constant(t - 13.5e-3, 1.90002)  # replaced by ramp at t - 3e-3 in proc 020
     ct.Bias_X_HH.ramp(t=t - 50e-3, duration=45e-3, initial=5, final=2.5, samplerate=FAST_FREQ)
@@ -1086,7 +1086,7 @@ if __name__ == '__main__':
     ct.Li_Rep_AO_AM__b4c05.constant(t - 0.02e-3, 0)
     ct.BFL_Int_Lock__b3c02.ramp(t=t - 80e-3, duration=80e-3, initial=2.99988, final=2.99988, samplerate=FAST_FREQ)
     ct.Li_MOT_AO_AM__b4c02.ramp(t=t - 3e-3, duration=3e-3, initial=1.90002, final=0, samplerate=FAST_FREQ)
-    ct.Li_MRep_AO_FM__b4c04.ramp(t=t - 18e-3, duration=18e-3, initial=0.400085, final=0.480042, samplerate=FAST_FREQ)
+    ct.Li_Rep_AO_FM__b4c04.ramp(t=t - 18e-3, duration=18e-3, initial=0.400085, final=0.480042, samplerate=FAST_FREQ)
     ct.Li_MOT_Freq__b4c03.ramp(t=t - 18e-3, duration=18e-3, initial=5.34485, final=5.71991, samplerate=FAST_FREQ)
 
     # procedure 021: Cs_CMOT
@@ -1712,7 +1712,7 @@ if __name__ == '__main__':
     ct.Li_Rep_AO_AM__b4c05.constant(t, 10)
     ct.DMD_AO_AM__b3c29.constant(t, 3.8)
     ct.Cs_Rep_Freq__b3c26.constant(t, 6.51)
-    ct.Li_MRep_AO_FM__b4c04.constant(t, 0.40863)
+    ct.Li_Rep_AO_FM__b4c04.constant(t, 0.40863)
     ct.Li_Img_AO_AM__b4c00.constant(t, 10)
     ct.Dual_780_Int_Lock__b3c30.constant(t, 2.5)
     ct.CS_HFImg_Freq__b3c22.constant(t, -10)
