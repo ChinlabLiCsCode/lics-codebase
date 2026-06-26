@@ -278,7 +278,7 @@ class ConnectionTable:
                 vch.constant(t=t, value=vch.default_value)
         
 if __name__ == '__main__':
-    load_globals(r"D:\LiCs_Exp_Data\Experiments\lics_labscript_apparatus\globals_20260624.h5")
+    load_globals(r"C:\Users\lics\lics-codebase\lics_labscript_apparatus\globals\globals_20260624.h5")
     ct = ConnectionTable()
 
     start()
