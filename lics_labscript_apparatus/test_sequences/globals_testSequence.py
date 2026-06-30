@@ -7,7 +7,9 @@ if __name__ == '__main__':
     print("started")
     start()
     t = 0
-    ct.set_background(t=0)
     add_time_marker(t, "Start", verbose=True)
-    t = 3e-4
-    stop(t)
+    ct.set_background(t=1e-3)
+    ct.set_background(t=2e-3)
+    ct.set_background(t=3e-3)
+    ct.set_background(t=4e-3)
+    stop(5e-3)
