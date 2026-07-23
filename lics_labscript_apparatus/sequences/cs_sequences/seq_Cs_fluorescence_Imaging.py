@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from labscript import start, stop, add_time_marker, wait
 from lics_labscript_apparatus.connection_table import ConnectionTable
-from lics_labscript_apparatus.sequences.seq_CsMOT import load_cs_mot
+from lics_labscript_apparatus.test_sequences.testseq_CsMOT import load_cs_mot
 
 def fluorescence_image_test(t):
     # take background image (no MOT beams)
