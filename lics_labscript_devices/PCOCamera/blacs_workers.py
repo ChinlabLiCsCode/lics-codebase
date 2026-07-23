@@ -90,6 +90,17 @@ class PCO_Camera:
     def configure_acquisition(self, continuous=True, bufferCount=5):
         self._img_index = 0
         self._continuous = continuous
+        # Stop any active hardware recording and reset the recorder DLL state
+        # before arming. After a crash the Python recorder handle is gone but
+        # the DLL and camera firmware may still think recording is active.
+        try:
+            self.cam.sdk.set_recording_state('off')
+        except Exception:
+            pass
+        try:
+            self.cam.rec.reset_lib()
+        except Exception:
+            pass
         if continuous:
             self.cam.record(number_of_images=bufferCount, mode='ring buffer')
         else:

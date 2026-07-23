@@ -226,22 +226,16 @@ class PCOCameraTab(IMAQdxCameraTab):
     def _update_photon_count(self, _=None):
         if self.image.image is None:
             return
-        roi_data = self._photon_roi.getArrayRegion(
-            self.image.image, self.image.imageItem
-        )
-        if roi_data is None or roi_data.size == 0:
-            self._photon_count_label.setText("—")
-            self._photon_roi_size_label.setText("—")
-            self._photon_roi_coords_label.setText("—")
-            return
-        total = float(np.sum(roi_data))
-        nx, ny = roi_data.shape[:2]
         pos = self._photon_roi.pos()
         size = self._photon_roi.size()
-        x0 = int(round(pos.x()))
-        y0 = int(round(pos.y()))
-        x1 = x0 + int(round(size.x()))
-        y1 = y0 + int(round(size.y()))
+        # image is stored as (W, H) due to swapaxes, so axis 0 = x, axis 1 = y
+        img = self.image.image
+        x0 = max(0, int(round(pos.x())))
+        y0 = max(0, int(round(pos.y())))
+        x1 = min(img.shape[0], x0 + max(1, int(round(size.x()))))
+        y1 = min(img.shape[1], y0 + max(1, int(round(size.y()))))
+        roi_data = img[x0:x1, y0:y1]
+        total = float(np.sum(roi_data))
         self._photon_count_label.setText(f"{total:,.0f}")
-        self._photon_roi_size_label.setText(f"{nx} × {ny}")
+        self._photon_roi_size_label.setText(f"{x1-x0} × {y1-y0}")
         self._photon_roi_coords_label.setText(f"x:[{x0}, {x1}]  y:[{y0}, {y1}]")
