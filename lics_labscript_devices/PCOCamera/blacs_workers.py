@@ -90,9 +90,18 @@ class PCO_Camera:
     def configure_acquisition(self, continuous=True, bufferCount=5):
         self._img_index = 0
         self._continuous = continuous
-        # Stop any active hardware recording and reset the recorder DLL state
-        # before arming. After a crash the Python recorder handle is gone but
-        # the DLL and camera firmware may still think recording is active.
+        # Stop any active recording before re-arming.  Three levels of cleanup:
+        # 1. cam.stop() → PCO_RecorderStopRecord: works when the recorder handle
+        #    is still live (intra-session tab crash where stop_acquisition was
+        #    never called).  No-op when the handle is null.
+        # 2. set_recording_state('off'): stops the firmware directly, covers the
+        #    cross-session case where a new pco.Camera was opened after a full
+        #    BLACS restart but the hardware was still recording.
+        # 3. reset_lib() → PCO_RecorderResetLib: clears residual DLL state.
+        try:
+            self.cam.stop()
+        except Exception:
+            pass
         try:
             self.cam.sdk.set_recording_state('off')
         except Exception:
@@ -102,6 +111,11 @@ class PCO_Camera:
         except Exception:
             pass
         if continuous:
+            # Force auto sequence (free-running) mode so live view always
+            # works regardless of what trigger mode the firmware was left in
+            # (e.g. after a crash mid-shot in external exposure control mode).
+            self.cam.sdk.set_trigger_mode('auto sequence')
+            self.cam.configureHWIO_1_exposureTrigger(on=False, edgePolarity='rising edge')
             self.cam.record(number_of_images=bufferCount, mode='ring buffer')
         else:
             self.cam.record(number_of_images=bufferCount, mode='sequence non blocking')
