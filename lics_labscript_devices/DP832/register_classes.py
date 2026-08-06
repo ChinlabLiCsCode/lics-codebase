@@ -9,5 +9,5 @@ import labscript_devices
 
 labscript_devices.register_classes(
     'DP832',
-    BLACS_tab='LiCs_devices.DP832.blacs_tabs.DP832Tab',
+    BLACS_tab='lics_labscript_devices.DP832.blacs_tabs.DP832Tab',
     runviewer_parser='')

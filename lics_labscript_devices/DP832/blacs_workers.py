@@ -8,7 +8,7 @@
 
 import numpy as np
 
-from LiCs_devices.VISA.blacs_workers import VISAWorker
+from lics_labscript_devices.VISA.blacs_workers import VISAWorker
 from labscript import LabscriptError 
 from labscript_utils import dedent
 

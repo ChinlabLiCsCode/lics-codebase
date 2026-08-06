@@ -6,7 +6,7 @@
 # made to enable compatibility with the rigol DP832 power supply    #
 #####################################################################
 
-from LiCs_devices.VISA.blacs_tabs import VISATab 
+from lics_labscript_devices.VISA.blacs_tabs import VISATab
 
 # note, when adding a new model, put the labscript_device inheritor class
 # into Models.py and the BLACS classes into a file named for the device
@@ -26,7 +26,7 @@ class DP832Tab(VISATab):
                           
     
     def __init__(self,*args,**kwargs):
-        self.device_worker_class = 'LiCs_devices.DP832.blacs_workers.DP832Worker'
+        self.device_worker_class = 'lics_labscript_devices.DP832.blacs_workers.DP832Worker'
         VISATab.__init__(self,*args,**kwargs)
     
     def initialise_GUI(self):
@@ -48,16 +48,19 @@ class DP832Tab(VISATab):
                     'base_unit':base_units,
                     'min':base_min,
                     'max':base_max,
-                    'step':1,
+                    'step':0.1,
                     'decimals':5
             }
        
-        # Create the output objects    
-        self.create_analog_outputs(AO_prop)        
+        # Create the output objects
+        self.create_analog_outputs(AO_prop)
         # Create widgets for output objects
         dds_widgets,ao_widgets,do_widgets = self.auto_create_widgets()
         # and auto place the widgets in the UI
         self.auto_place_widgets(("DC Outputs",ao_widgets))
+        # Force step size — overrides any value saved in the BLACS database
+        for output in self._AO.values():
+            output.set_step_size(0.1, output._base_unit)
         
         # call VISATab.initialise to create STB widget
         VISATab.initialise_GUI(self)
