@@ -1,6 +1,6 @@
 from labscript import start, stop, add_time_marker, wait
 from lics_labscript_apparatus.connection_table import ConnectionTable
-from lics_labscript_apparatus.sequences.cs_subsequences import Cs_MOT_Loading, Cs_CMOT, Cs_Molasses_Cooling, Cs_H_Imaging
+from lics_labscript_apparatus.sequences.cs_subsequences import *
 
 if __name__ == '__main__':
     ct = ConnectionTable()
@@ -9,27 +9,41 @@ if __name__ == '__main__':
 
     t = 10e-6
 
+    t = ct.digital_jiggle(t)
     ct.set_background(t)
 
-    t = 20e-6
+    # pause for line trigger at 1ms
+    t = 0.001
+    add_time_marker(t, "Waiting for line trigger")
+    wait('line_trigger', t, timeout=0.1)
 
-    ct.set_background(t)
+    #turn off the MOT first
+    ct.Cs_Rep_Shutter__b1c12.go_low(t+0.01)
 
-    t = 30e-6
-
-    ct.set_background(t)
-
+    # Cs_MOT_Loading
     t = 0.1
-
     add_time_marker(t, 'Cs_MOT_Loading')
-    t = Cs_MOT_Loading(t+0.1, ct)
+    t = Cs_MOT_Loading(t, ct)
 
-    #close the repump shutter to get the background image
-    ct.Cs_Rep_Shutter__b1c12.go_low(t+5)
+    # wait 3 seconds for MOT to load
+    t+=3 
 
-    #reopen the repump shutter
-    ct.Cs_Rep_Shutter__b1c12.go_high(t+5.1)
+    # Cs_CMOT
+    add_time_marker(t, 'Cs_CMOT')
+    t = Cs_CMOT(t, ct)
 
-    ct.set_background(t+5.2)
+    # Cs_Molasses
+    add_time_marker(t, 'Cs_Molasses')
+    t = Cs_Molasses(t, ct)
 
-    stop(t+5.3)
+    # Cs_LF_H_Img
+    add_time_marker(t, 'Cs_LF_H_Imaging')
+    t = Cs_LF_H_Imaging(t, ct)
+
+    # set background values back
+    t += 0.001
+    ct.set_background(t)
+
+    # end sequence
+    t += 0.001
+    stop(t)
