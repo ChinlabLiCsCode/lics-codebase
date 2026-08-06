@@ -32,6 +32,10 @@ class ConnectionTable:
 
 
     def __init__(self):
+
+        self.FINE = 5e4
+        self.COARSE = 1e3
+
         #Pseudoclock
         prawnblaster = PrawnBlaster(name='prawnblaster', com_port='COM3', 
                                     num_pseudoclocks=4, pico_board="pico2",
@@ -84,14 +88,14 @@ class ConnectionTable:
 
         # Box1 digital outputs
         self.Bitter_Precision_Disable__b1c00  = DigitalOut(default_value=1,          name='Bitter_Precision_Disable__b1c00',  parent_device=NIBox1, connection='port0/line0')
-        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=0,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
-        self.Cs_3DMOT_AO_Sw__b1c02            = DigitalOut(default_value=0,          name='Cs_3DMOT_AO_Sw__b1c02',            parent_device=NIBox1, connection='port0/line2')
-        self.Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=0,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
+        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=1,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
+        self.Cs_3DMOT_AO_Sw__b1c02            = DigitalOut(default_value=1,          name='Cs_3DMOT_AO_Sw__b1c02',            parent_device=NIBox1, connection='port0/line2')
+        self.Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=1,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
         self.Cs_Andor_Trig__b1c04             = DigitalOut(default_value=0,          name='Cs_Andor_Trig__b1c04',             parent_device=NIBox1, connection='port0/line4')
         self.Cs_HFImg_AO_Sw__b1c05            = DigitalOut(default_value=1,          name='Cs_HFImg_AO_Sw__b1c05',            parent_device=NIBox1, connection='port0/line5')
         self.Cs_HFImg_Shutter__b1c06          = DigitalOut(default_value=0,          name='Cs_HFImg_Shutter__b1c06',          parent_device=NIBox1, connection='port0/line6')
         self.Cs_HImg_Shutter__b1c07           = DigitalOut(default_value=0,          name='Cs_HImg_Shutter__b1c07',           parent_device=NIBox1, connection='port0/line7')
-        self.Cs_HOP_AO_Sw__b1c08              = DigitalOut(default_value=1,          name='Cs_HOP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
+        self.Cs_OP_AO_Sw__b1c08              = DigitalOut(default_value=1,           name='Cs_OP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
         self.Cs_HOP_Shutter__b1c09            = DigitalOut(default_value=0,          name='Cs_HOP_Shutter__b1c09',            parent_device=NIBox1, connection='port1/line1')
         self.Cs_LFImg_AO_Sw__b1c10            = DigitalOut(default_value=1,          name='Cs_LFImg_AO_Sw__b1c10',            parent_device=NIBox1, connection='port1/line2', inverted=True)
         self.Cs_LFImg_Shutter__b1c11          = DigitalOut(default_value=0,          name='Cs_LFImg_Shutter__b1c11',          parent_device=NIBox1, connection='port1/line3')
@@ -99,8 +103,8 @@ class ConnectionTable:
         self.Cs_RSC_AO_Sw__b1c13              = DigitalOut(default_value=1,          name='Cs_RSC_AO_Sw__b1c13',              parent_device=NIBox1, connection='port1/line5')
         self.Cs_RSC_Shutter__b1c14            = DigitalOut(default_value=0,          name='Cs_RSC_Shutter__b1c14',            parent_device=NIBox1, connection='port1/line6')
         self.Cs_VImg_Shutter__b1c15           = DigitalOut(default_value=0,          name='Cs_VImg_Shutter__b1c15',           parent_device=NIBox1, connection='port1/line7')
-        self.Cs_VRep_Shutter__b1c16           = DigitalOut(default_value=0,          name='Cs_VRep_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
-        self.Cs_Zeeman_Shutter__b1c17         = DigitalOut(default_value=0,          name='Cs_Zeeman_Shutter__b1c17',         parent_device=NIBox1, connection='port2/line1')
+        self.Cs_VOP_Shutter__b1c16           = DigitalOut(default_value=0,           name='Cs_VOP_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
+        self.Cs_Zeeman_Shutter__b1c17         = DigitalOut(default_value=1,          name='Cs_Zeeman_Shutter__b1c17',         parent_device=NIBox1, connection='port2/line1')
         self.DMD_AO_FM__b1c18                 = DigitalOut(default_value=0,          name='DMD_AO_FM__b1c18',                 parent_device=NIBox1, connection='port2/line2')
         self.DMD_AO_Sw__b1c19                 = DigitalOut(default_value=1,          name='DMD_AO_Sw__b1c19',                 parent_device=NIBox1, connection='port2/line3')
         self.DMD_Movie_Trig__b1c20            = DigitalOut(default_value=0,          name='DMD_Movie_Trig__b1c20',            parent_device=NIBox1, connection='port2/line4')
@@ -123,7 +127,7 @@ class ConnectionTable:
         self.Li_Zeeman_Shutter__b2c03         = DigitalOut(default_value=0,          name='Li_Zeeman_Shutter__b2c03',         parent_device=NIBox2, connection='port0/line3')
         self.MW_Trig__b2c04                   = DigitalOut(default_value=0,          name='MW_Trig__b2c04',                   parent_device=NIBox2, connection='port0/line4')
         self.oTOP_Pos_Lock_Enable__b2c05      = DigitalOut(default_value=0,          name='oTOP_Pos_Lock_Enable__b2c05',      parent_device=NIBox2, connection='port0/line5')
-        self.Pixelfly_Shutter__b2c06          = DigitalOut(default_value=1,          name='Pixelfly_Shutter__b2c06',          parent_device=NIBox2, connection='port0/line6')
+        self.Pixelfly_Shutter__b2c06          = DigitalOut(default_value=0,          name='Pixelfly_Shutter__b2c06',          parent_device=NIBox2, connection='port0/line6')
         # Pixelfly_Trig__b2c07 removed — PCOCamera owns port0/line7 directly via its auto-Trigger
         self.Scope_Trig__b2c08                = DigitalOut(default_value=0,          name='Scope_Trig__b2c08',                parent_device=NIBox2, connection='port1/line0')
         self.Spec_Analyzer_Trig__b2c09        = DigitalOut(default_value=0,          name='Spec_Analyzer_Trig__b2c09',        parent_device=NIBox2, connection='port1/line1')
@@ -178,7 +182,7 @@ class ConnectionTable:
         self.CS_HFImg_Freq__b3c22             = AnalogOut(default_value=Cs_HFImg_Freq_background,         name='CS_HFImg_Freq__b3c22',             parent_device=NIBox3, connection='ao22')
         self.b3c23                            = AnalogOut(default_value=0,           name='b3c23',                            parent_device=NIBox3, connection='ao23')
         self.Cs_MOT_Freq__b3c24               = AnalogOut(default_value=Cs_MOT_Freq_background,       name='Cs_MOT_Freq__b3c24',               parent_device=NIBox3, connection='ao24')
-        self.Cs_Rep_AO_AM__b3c25              = AnalogOut(default_value=Cs_Rep_AO_AM_background,           name='Cs_Rep_AO_AM__b3c25',              parent_device=NIBox3, connection='ao25')
+        self.Cs_OP_AO_AM__b3c25              = AnalogOut(default_value=Cs_OP_AO_AM_background,           name='Cs_OP_AO_AM__b3c25',              parent_device=NIBox3, connection='ao25')
         self.Cs_Rep_Freq__b3c26               = AnalogOut(default_value=Cs_Rep_Freq_background,        name='Cs_Rep_Freq__b3c26',               parent_device=NIBox3, connection='ao26')
         self.Cs_RSC_AO_AM__b3c27              = AnalogOut(default_value=Cs_RSC_AO_AM_background,           name='Cs_RSC_AO_AM__b3c27',              parent_device=NIBox3, connection='ao27')
         self.Cs_VImg_AO_AM__b3c28             = AnalogOut(default_value=Cs_VImg_AO_AM_background,           name='Cs_VImg_AO_AM__b3c28',             parent_device=NIBox3, connection='ao28')
@@ -294,7 +298,12 @@ class ConnectionTable:
 
 
     def set_background(self, t):
-        virtual_physical = {ch for group in compiler.virtual_analog_groups for ch in group.physical_channels}
+        """Set all digital and analog outputs to their default values at time t. This is 
+        called at the beginning (and end?) of a shot to ensure that all outputs are in a 
+        known state.
+        """
+        virtual_physical = {ch for group in compiler.virtual_analog_groups 
+                            for ch in group.physical_channels}
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
             if isinstance(attr, DigitalOut):
@@ -308,6 +317,24 @@ class ConnectionTable:
         # for group in compiler.virtual_analog_groups:
         #     for vch in group.virtual_channels:
         #         vch.constant(t=t, value=vch.default_value)
+
+    def digital_jiggle(self, t):
+        """This method exists to give four separate timing commands to both digital cards 
+        such that the NI cards won't get unhappy about too few samples. It's just a dumb 
+        bug workaround. Call it before set_background() at the beginning of a shot. It uses 
+        the channels b2c31 and Li_MOT_AO_Sw__b1c30, and it takes a total of 4e-6s to execute.
+        """
+        self.b2c31.go_high(t=t)
+        self.b2c31.go_low(t=t+1e-6)
+        self.b2c31.go_high(t=t+2e-6)
+        self.b2c31.go_low(t=t+3e-6)
+
+        self.Li_MOT_AO_Sw__b1c30.go_high(t=t)
+        self.Li_MOT_AO_Sw__b1c30.go_low(t=t+1e-6)
+        self.Li_MOT_AO_Sw__b1c30.go_high(t=t+2e-6)
+        self.Li_MOT_AO_Sw__b1c30.go_low(t=t+3e-6)
+
+        return t+4e-6
         
 if __name__ == '__main__':
     # load_globals(r"C:\Users\lics\lics-codebase\lics_labscript_apparatus\globals\globals_20260624.h5")
