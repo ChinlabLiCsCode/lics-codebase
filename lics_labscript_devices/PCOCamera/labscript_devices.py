@@ -1,3 +1,4 @@
+from labscript import set_passed_properties
 from labscript_devices.IMAQdxCamera.labscript_devices import IMAQdxCamera
 
 
@@ -8,6 +9,13 @@ class PCOCamera(IMAQdxCamera):
     decimal integer matching the camera's serial number (printed on the label and
     readable from the PCO Camware software).
 
+    shutter_mode controls the sCMOS readout mode. Valid values:
+        'rolling shutter'  (default) — each row starts exposing in sequence
+        'global shutter'   — all rows expose simultaneously (no rolling artifact)
+        'global reset'     — all rows reset together but read out rolling
+
+    Changing shutter_mode triggers a camera reboot (~3 s) on first use.
+
     Typical connection table usage::
 
         PCOCamera(
@@ -17,6 +25,7 @@ class PCOCamera(IMAQdxCamera):
             serial_number=12345,           # decimal serial number from camera label
             orientation='vertical',
             trigger_duration=1e-3,         # 1 ms trigger pulse
+            shutter_mode='global shutter', # optional, default 'rolling shutter'
             camera_attributes={
                 'trigger_mode': 'external exposure start & software trigger',
                 'exposure_time': 0.050,    # seconds
@@ -31,3 +40,10 @@ class PCOCamera(IMAQdxCamera):
     """
 
     description = 'PCO Camera'
+
+    @set_passed_properties(
+        property_names={"connection_table_properties": ["shutter_mode"]}
+    )
+    def __init__(self, *args, shutter_mode='rolling shutter', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.shutter_mode = shutter_mode

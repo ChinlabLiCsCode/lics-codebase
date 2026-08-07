@@ -19,14 +19,34 @@ class PCO_Camera:
 
     ATTRIBUTE_NAMES = ['trigger_mode', 'exposure_time', 'roi', 'binning']
 
-    def __init__(self, serial_number):
+    def __init__(self, serial_number, shutter_mode='rolling shutter'):
         import pco
-        # pco.Camera(serial=...) opens the camera that matches the given serial number
+        self._serial_number = serial_number
         self.cam = pco.Camera(serial=serial_number)
         self._abort_acquisition = False
         self.exception_on_failed_shot = True
         self._img_index = 0
         self._continuous = False
+
+        if shutter_mode is not None:
+            try:
+                current_mode = self.cam.sdk.get_shutter_mode().get('shutter_mode')
+            except Exception:
+                current_mode = None
+            if current_mode != shutter_mode:
+                print(
+                    f"PCO_Camera: changing shutter mode '{current_mode}' → '{shutter_mode}'"
+                    " (camera will reboot, ~3 s)..."
+                )
+                try:
+                    self.cam.sdk.set_shutter_mode(shutter_mode)
+                except Exception as e:
+                    print(f"PCO_Camera: warning — could not set shutter mode: {e}")
+                else:
+                    print("PCO_Camera: waiting for camera reboot...")
+                    time.sleep(3)
+                    self.cam = pco.Camera(serial=serial_number)
+                    print("PCO_Camera: camera ready after shutter mode change.")
 
     # --- Attribute interface (called by IMAQdxCameraWorker) ---
 
@@ -182,6 +202,12 @@ class PCOCameraWorker(IMAQdxCameraWorker):
     """BLACS worker for PCO cameras. Uses PCO_Camera as the hardware interface."""
 
     interface_class = PCO_Camera
+
+    def get_camera(self):
+        if self.mock:
+            from labscript_devices.IMAQdxCamera.blacs_workers import MockCamera
+            return MockCamera()
+        return self.interface_class(self.serial_number, shutter_mode=self.shutter_mode)
 
     def set_manual_attribute(self, name, value):
         """Set a camera attribute from the BLACS tab during manual mode.
