@@ -285,6 +285,7 @@ class ConnectionTable:
             parent_device = NIBox2,
             connection='port0/line7',
             serial_number=14404725,
+            shutter_mode='global shutter',
             camera_attributes={
                 "trigger_mode": 'external exposure control',
                 'exposure_time': 0.050,
@@ -308,9 +309,9 @@ class ConnectionTable:
             attr = getattr(self, attr_name)
             if isinstance(attr, DigitalOut):
                 if attr.default_value == 0:
-                    attr.go_low(t=t)
+                    attr.disable(t=t)
                 else:
-                    attr.go_high(t=t)
+                    attr.enable(t=t)
             if isinstance(attr, AnalogOut): # and attr not in virtual_physical:
                 attr.constant(t=t, value=attr.default_value)
                 print(f"Setting {attr.name} to default value {attr.default_value} at time {t}")
@@ -324,15 +325,15 @@ class ConnectionTable:
         bug workaround. Call it before set_background() at the beginning of a shot. It uses 
         the channels b2c31 and Li_MOT_AO_Sw__b1c30, and it takes a total of 4e-6s to execute.
         """
-        self.b2c31.go_high(t=t)
-        self.b2c31.go_low(t=t+1e-6)
-        self.b2c31.go_high(t=t+2e-6)
-        self.b2c31.go_low(t=t+3e-6)
+        self.b2c31.enable(t=t)
+        self.b2c31.disable(t=t+1e-6)
+        self.b2c31.enable(t=t+2e-6)
+        self.b2c31.disable(t=t+3e-6)
 
-        self.Li_MOT_AO_Sw__b1c30.go_high(t=t)
-        self.Li_MOT_AO_Sw__b1c30.go_low(t=t+1e-6)
-        self.Li_MOT_AO_Sw__b1c30.go_high(t=t+2e-6)
-        self.Li_MOT_AO_Sw__b1c30.go_low(t=t+3e-6)
+        self.Li_MOT_AO_Sw__b1c30.enable(t=t)
+        self.Li_MOT_AO_Sw__b1c30.disable(t=t+1e-6)
+        self.Li_MOT_AO_Sw__b1c30.enable(t=t+2e-6)
+        self.Li_MOT_AO_Sw__b1c30.disable(t=t+3e-6)
 
         return t+4e-6
         
