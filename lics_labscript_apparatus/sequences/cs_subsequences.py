@@ -20,16 +20,16 @@ def Cs_MOT_Loading(t, ct):
     ct.Cs_3DMOT_AO_AM__b3c21.constant(t, Cs_3DMOT_AO_AM_CsMOT)
     
     # close Li shutters
-    ct.Li_Rep_Shutter__b2c01.go_low(t)
-    ct.Li_MOT_Shutter__b1c31.go_low(t)
-    ct.Li_Zeeman_Shutter__b2c03.go_low(t)
+    ct.Li_Rep_Shutter__b2c01.disable(t)
+    ct.Li_MOT_Shutter__b1c31.disable(t)
+    ct.Li_Zeeman_Shutter__b2c03.disable(t)
 
     # open the Cs shutters
-    ct.Cs_Zeeman_Shutter__b1c17.go_high(t)
-    ct.Cs_2DMOT_Shutter__b1c01.go_high(t)
-    ct.Cs_3DMOT_AO_Sw__b1c02.go_high(t)
-    ct.Cs_3DMOT_Shutter__b1c03.go_high(t)
-    ct.Cs_Rep_Shutter__b1c12.go_high(t)
+    ct.Cs_Zeeman_Shutter__b1c17.enable(t)
+    ct.Cs_2DMOT_Shutter__b1c01.enable(t)
+    ct.Cs_3DMOT_AO_Sw__b1c02.enable(t)
+    ct.Cs_3DMOT_Shutter__b1c03.enable(t)
+    ct.Cs_Rep_Shutter__b1c12.enable(t)
 
     # bias field control
     ct.Bias_X_HH.constant(t, Bias_X_HH_CsMOT)
@@ -88,8 +88,8 @@ def Cs_CMOT(t, ct):
     ct.Cs_Rep_Freq__b3c26.ramp(t+0.040, 0.009, Cs_Rep_Freq_CsMOT, Cs_Rep_Freq_CsCMOT, ct.FINE)
 
     # turn off Zeeman slower and 2D MOT
-    ct.Cs_Zeeman_Shutter__b1c17.go_low(t-0.010)
-    ct.Cs_2DMOT_Shutter__b1c01.go_low(t-0.010)
+    ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.010)
+    ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.010)
 
     # ramp bias fields 
     ct.Bias_X_HH.ramp(t-0.010, 0.058, Bias_X_HH_CsMOT, Bias_X_HH_CsCMOT, ct.FINE)
@@ -100,8 +100,8 @@ def Cs_CMOT(t, ct):
     ct.Bias_Z_AH.ramp(t-0.010, 0.058, Bias_Z_AH_CsMOT, Bias_Z_AH_CsCMOT, ct.FINE)
 
     #imaging shutter control
-    ct.Cs_VOP_Shutter__b1c16.go_low(t)
-    ct.Cs_HOP_Shutter__b1c09.go_low(t)
+    ct.Cs_VOP_Shutter__b1c16.disable(t)
+    ct.Cs_HOP_Shutter__b1c09.disable(t)
 
     #bitter coil control
     ct.Bitter_V_HH.ramp(t, 0.040, Bitter_V_HH_CsMOT, Bitter_V_HH_CsCMOT1, ct.FINE)
@@ -144,8 +144,8 @@ def Cs_Molasses(t, ct):
     # ct.Bias_Z_minus__b3c08.constant(t, -0.400085)
 
     # turn MOT light off after molasses
-    ct.Cs_3DMOT_AO_Sw__b1c02.go_low(t+0.005)
-    ct.Cs_3DMOT_Shutter__b1c03.go_low(t+0.005) # this was actually -7ms but I brought it up
+    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t+0.005)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t+0.005) # this was actually -7ms but I brought it up
 
     # reset MOT laser frequency after molasses
     ct.Cs_MOT_Freq__b3c24.ramp(t+0.008, 0.001, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_CsLFHImg, ct.FINE)
@@ -164,71 +164,94 @@ def Cs_LF_H_Imaging(t, ct):
     """
 
     # collect initial background image with the shutter closed 
-    ct.pco_panda.expose(t-0.2, name="absorption", frametype="dark", trigger_duration=0.0005)
+    ct.Pixelfly_Shutter__b2c06.disable(t-0.220)
+    ct.pco_panda.expose(t-0.200, name="absorption", frametype="dark", trigger_duration=0.025)
 
-    # ATOM IMAGE at t=0.000
+    # make sure MOT light is off
+    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t-0.010)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.020)
+    ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.020)
+    ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.020)
+    ct.Cs_HFImg_Shutter__b1c06.disable(t-0.020)
+    ct.Cs_RSC_Shutter__b1c14.disable(t-0.020)
 
-    # open the shutter well before the atoms image 
-    ct.Pixelfly_Shutter__b2c06.go_high(t-0.015)
 
-    # prepare shutters and AOMS for atoms image
-    ct.Cs_OP_AO_Sw__b1c08.go_low(t-0.013)
-    ct.Cs_VOP_Shutter__b1c16.go_high(t-0.012)
+    # make sure MOT and REP freqs are right
+    ct.Cs_MOT_Freq__b3c24.constant(t-0.005, Cs_MOT_Freq_CsLFHImg)
+    ct.Cs_Rep_Freq__b3c26.constant(t-0.005, Cs_Rep_Freq_CsLFHImg)
 
-    ct.Cs_LFImg_AO_Sw__b1c10.go_low(t-0.013)
-    ct.Cs_HImg_Shutter__b1c07.go_high(t-0.012)
-    ct.Cs_LFImg_Shutter__b1c11.go_high(t-0.012)
-    
     # set bias fields appropriately for imaging
     # 
     #
 
 
-    # pulse the OP AOM right before/during the imaging pulse
+    # ATOM IMAGE at t=0.000
+
+    # acquire image
+    ct.pco_panda.expose(t-0.025, name='absorption', frametype='atoms', trigger_duration=0.030)
+
+    # pixelfly shutter
+    ct.Pixelfly_Shutter__b2c06.enable(t-0.010)
+    ct.Pixelfly_Shutter__b2c06.disable(t-0.002)
+
+    # imaging beam
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t-0.013)
+    ct.Cs_HImg_Shutter__b1c07.enable(t-0.012)
+    ct.Cs_LFImg_Shutter__b1c11.enable(t-0.012)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+Img_Pulse_Length_CsLFHImg) # 100 us imaging pulse
+    # ct.Scope_Trig__b2c08.enable(t)
+    # ct.Scope_Trig__b2c08.disable(t+Img_Pulse_Length_CsLFHImg)
+    ct.Cs_HImg_Shutter__b1c07.disable(t)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.030)
+
+    # V OP beam
+    ct.Cs_OP_AO_Sw__b1c08.disable(t-0.013)
+    ct.Cs_VOP_Shutter__b1c16.enable(t-0.012)
     ct.Cs_OP_AO_AM__b3c25.constant(t-0.001, 3)
-    ct.Cs_OP_AO_Sw__b1c08.go_high(t-0.001)
-    ct.Cs_OP_AO_Sw__b1c08.go_low(t+0.0001)
+    ct.Cs_OP_AO_Sw__b1c08.enable(t-0.001)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.0001)
+    ct.Cs_VOP_Shutter__b1c16.disable(t-0.001)
+    ct.Cs_OP_AO_Sw__b1c08.enable(t+0.010)
     
-    # start atom image aquisition
-    ct.pco_panda.expose(t-0.003, name='absorption', frametype='atoms', trigger_duration=0.0005)
-
-    # pulse the imaging light
-    ct.Cs_LFImg_AO_Sw__b1c10.go_high(t)
-    ct.Cs_LFImg_AO_Sw__b1c10.go_low(t+0.0001) # 100 us imaging pulse
-    
-
-    # close shutters and restore AOMs after image
-    ct.Cs_VOP_Shutter__b1c16.go_low(t-0.001)
-    ct.Cs_OP_AO_Sw__b1c08.go_high(t+0.010)
-
-    ct.Cs_HImg_Shutter__b1c07.go_low(t)
-    ct.Cs_LFImg_AO_Sw__b1c10.go_high(t+0.015)
-
-    ct.Pixelfly_Shutter__b2c06.go_low(t+0.007)
 
     # turn off dipole traps after image
     # ct.oTOP_Mod_AM__b4c09.constant(t+5e-3, 0)
     # ct.oTOP_AO_AM__b4c06.constant(t+5e-3, 0)
 
     # LIGHT IMAGE at t=0.200
-    ct.Pixelfly_Shutter__b2c06.go_high(t+0.185)
 
-    # open shutter to prepare for image
-    ct.Cs_LFImg_AO_Sw__b1c10.go_low(t+0.187)
-    ct.Cs_HImg_Shutter__b1c07.go_high(t+0.188)
-    
     # aquire image
-    ct.pco_panda.expose(t+0.196, name='absorption', frametype='light', trigger_duration=0.0005)
+    ct.pco_panda.expose(t+0.175, name='absorption', frametype='light', trigger_duration=0.030)
 
-    # pulse imaging light
-    ct.Cs_LFImg_AO_Sw__b1c10.go_high(t+0.200)
-    ct.Cs_LFImg_AO_Sw__b1c10.go_low(t+0.2001) # 100 us imaging pulse
+    # pixelfly shutter 
+    ct.Pixelfly_Shutter__b2c06.enable(t+0.190)
+    ct.Pixelfly_Shutter__b2c06.disable(t+0.198)
 
-    # close shutters and restore AOMs after image
-    ct.Cs_HImg_Shutter__b1c07.go_low(t+0.200)
-    ct.Cs_LFImg_AO_Sw__b1c10.go_high(t+0.215)
+    # imaging beam
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.187)
+    ct.Cs_HImg_Shutter__b1c07.enable(t+0.188)
+    ct.Cs_LFImg_Shutter__b1c11.enable(t+0.188)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.200)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.200+Img_Pulse_Length_CsLFHImg) # 100 us imaging pulse
+    # ct.Scope_Trig__b2c08.enable(t+0.200)
+    # ct.Scope_Trig__b2c08.disable(t+0.200+Img_Pulse_Length_CsLFHImg)
+    ct.Cs_HImg_Shutter__b1c07.disable(t+0.200)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.230)
 
-    ct.Pixelfly_Shutter__b2c06.go_low(t+0.207)
+    # V OP beam
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.187)
+    ct.Cs_VOP_Shutter__b1c16.enable(t+0.188)
+    ct.Cs_OP_AO_AM__b3c25.constant(t+0.199, 3)
+    ct.Cs_OP_AO_Sw__b1c08.enable(t+0.199)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.2001)
+    ct.Cs_VOP_Shutter__b1c16.disable(t+0.198)
+    ct.Cs_OP_AO_Sw__b1c08.enable(t+0.210)
+    
+    
+
+
+    
 
     
 
