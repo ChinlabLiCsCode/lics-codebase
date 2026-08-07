@@ -28,13 +28,13 @@ if __name__ == '__main__':
     # wait 3 seconds for MOT to load
     t+=3 
 
-    # Cs_CMOT
-    add_time_marker(t, 'Cs_CMOT')
-    t = Cs_CMOT(t, ct)
+    # # Cs_CMOT
+    # add_time_marker(t, 'Cs_CMOT')
+    # t = Cs_CMOT(t, ct)
 
-    # Cs_Molasses
-    add_time_marker(t, 'Cs_Molasses')
-    t = Cs_Molasses(t, ct)
+    # # Cs_Molasses
+    # add_time_marker(t, 'Cs_Molasses')
+    # t = Cs_Molasses(t, ct)
 
     # Cs_LF_H_Img
     add_time_marker(t, 'Cs_LF_H_Imaging')
