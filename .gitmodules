@@ -22,3 +22,6 @@
 [submodule "M-LOOP"]
 	path = M-LOOP
 	url = https://github.com/michaelhush/M-LOOP.git
+[submodule "analysislib/analysislib-mloop"]
+	path = analysislib/analysislib-mloop
+	url = https://github.com/rpanderson/analysislib-mloop.git
