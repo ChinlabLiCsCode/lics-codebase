@@ -3,6 +3,7 @@ import time
 import os
 import struct
 from dataclasses import dataclass, field
+import local_paths
 
 @dataclass
 class LabviewSeq:
@@ -667,7 +668,7 @@ def seq_dump(in_seq: LabviewSeq, in_target: str = None, *, sort: bool = True,
     return in_target
 
 
-def seq_quickdump(date, num, out_path=None, **dump_kwargs) -> str:
+def quick_dump(date, num, out_path=None, **dump_kwargs) -> str:
     """Read a sequence by date/num and write a text dump. Matches lv_seq_quickdump.m.
 
     Parameters
@@ -1367,7 +1368,6 @@ def labview_labscript_convert(in_seq: LabviewSeq, out_path: str) -> str:
     return out_path
 
 
-
 # Test code for the module
 if __name__ == "__main__":
     # Test 1: Read a test file
@@ -1387,8 +1387,17 @@ if __name__ == "__main__":
     print(channel_report(test_seq2, '3.0'))
 
     # Test 4: Conversion
-    
     parent_dir = os.path.dirname(script_dir)
     target_filename = "lics_labscript_apparatus/conv_20240904s423.py"
     target_name = os.path.join(parent_dir, target_filename)
     labview_labscript_convert(test_seq, target_name)
+
+    # Test 5: Localpaths 
+    test_file = local_paths.local_path(path_type='lvseqread', year=2024,
+                                       month=7, day=17, num=425)
+    test_seq = seq_read(test_file)
+    target_filename = "lics_labscript_apparatus/conv_20240717s425.py"
+    target_name = os.path.join(parent_dir, target_filename)
+    labview_labscript_convert(test_seq, target_name)
+    
+
