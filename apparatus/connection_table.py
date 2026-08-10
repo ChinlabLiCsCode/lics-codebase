@@ -4,7 +4,7 @@ from labscript import load_globals
 from labscript import start, stop, add_time_marker, DigitalOut, AnalogOut, VirtualAnalogOut, StaticAnalogOut
 
 if TYPE_CHECKING:
-    from lics_labscript_apparatus._globals_stubs import *
+    from apparatus._globals_stubs import *
 
 from labscript.labscript import compiler
 from labscript.remote import RemoteBLACS
@@ -72,15 +72,15 @@ class ConnectionTable:
    
 
         # power supplies
-        Cs_2DMOT_X_Power_supply = DP832(name='Cs_2DMOT_X__Power_supply', VISA_name="USB0::0x1AB1::0x0E11::DP8C281M00153::INSTR", limited='current')
-        Cs_2DMOT_Y_Power_supply = DP832(name='Cs_2DMOT_Y__Power_supply', VISA_name="USB0::0x1AB1::0x0E11::DP8C281M00094::INSTR", limited='current')
+        Cs_2DMOT_X_PS = DP832(name='Cs_2DMOT_X_PS', VISA_name="USB0::0x1AB1::0x0E11::DP8C281M00153::INSTR", limited='current')
+        Cs_2DMOT_Y_PS = DP832(name='Cs_2DMOT_Y_PS', VISA_name="USB0::0x1AB1::0x0E11::DP8C281M00094::INSTR", limited='current')
 
         #power supply outpputs
-        self.Cs_2DMOT_X_plus = StaticAnalogOut("Cs_2DMOT_X_plus", Cs_2DMOT_X_Power_supply, 'channel 1')
-        self.Cs_2DMOT_X_minus = StaticAnalogOut("Cs_2DMOT_X_minus", Cs_2DMOT_X_Power_supply, 'channel 2')
+        self.Cs_2DMOT_X_plus = StaticAnalogOut("Cs_2DMOT_X_plus", Cs_2DMOT_X_PS, 'channel 1')
+        self.Cs_2DMOT_X_minus = StaticAnalogOut("Cs_2DMOT_X_minus", Cs_2DMOT_X_PS, 'channel 2')
 
-        self.Cs_2DMOT_Y_plus = StaticAnalogOut("Cs_2DMOT_Y_plus", Cs_2DMOT_Y_Power_supply, 'channel 1')
-        self.Cs_2DMOT_Y_minus = StaticAnalogOut("Cs_2DMOT_Y_minus", Cs_2DMOT_Y_Power_supply, 'channel 2')
+        self.Cs_2DMOT_Y_plus = StaticAnalogOut("Cs_2DMOT_Y_plus", Cs_2DMOT_Y_PS, 'channel 1')
+        self.Cs_2DMOT_Y_minus = StaticAnalogOut("Cs_2DMOT_Y_minus", Cs_2DMOT_Y_PS, 'channel 2')
 
 
         
