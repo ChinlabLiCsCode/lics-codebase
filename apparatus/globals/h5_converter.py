@@ -165,7 +165,7 @@ def generate_stubs(h5_path, output_path=None):
 
     lines = [
         "# AUTO-GENERATED — do not edit manually.",
-        f"# Regenerate with: python h5_converter.py generate-stubs {h5_path}",
+        f"# Regenerate with: python apparatus/globals/h5_converter.py generate-stubs {h5_path}",
         "",
     ]
     for name in sorted(raw):
