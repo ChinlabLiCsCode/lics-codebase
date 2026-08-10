@@ -1,5 +1,5 @@
 # AUTO-GENERATED — do not edit manually.
-# Regenerate with: python h5_converter.py generate-stubs globals_20260806.h5
+# Regenerate with: python apparatus/globals/h5_converter.py generate-stubs apparatus/globals/globals_20260806.h5
 
 Bias_X_AH_CsCMOT: int = 0
 Bias_X_AH_CsMOT: int = 0
@@ -26,6 +26,10 @@ Bitter_V_AH_CsMOT: float = 0.188293
 Bitter_V_HH_CsCMOT1: float = -0.0009
 Bitter_V_HH_CsCMOT2: float = 0.0101
 Bitter_V_HH_CsMOT: float = -0.0183
+Cs_2DMOT_X_minus_CsMOT: int = 0
+Cs_2DMOT_X_plus_CsMOT: int = 0
+Cs_2DMOT_Y_minus_CsMOT: int = 0
+Cs_2DMOT_Y_plus_CsMOT: int = 0
 Cs_3DMOT_AO_AM_CsCMOT1: float = 0.5
 Cs_3DMOT_AO_AM_CsCMOT2: float = 0.3
 Cs_3DMOT_AO_AM_CsMOT: float = 2.3
@@ -34,10 +38,14 @@ Cs_MOT_Freq_CsCMOT: float = -6.8
 Cs_MOT_Freq_CsLFHImg: float = -7.6535
 Cs_MOT_Freq_CsMOT: float = -7.21
 Cs_MOT_Freq_Molasses: float = -5.8
+Cs_MOT_Load_Time: int = 2
 Cs_Rep_Freq_CsCMOT: float = 5.36
+Cs_Rep_Freq_CsLFHImg: float = 6.4
 Cs_Rep_Freq_CsMOT: float = 6.51
 Cs_Rep_Freq_Molasses: float = 6.4
 Cs_VImg_AO_AM_CsMOT: float = 0.4
+Img_Pulse_Length_CsLFHImg: float = 5e-05
+TOF_Time: float = 0.01
 Zeeman_C1_CsMOT: int = 0
 Zeeman_C2_CsMOT: float = 0.45
 Zeeman_C3_CsMOT: float = 0.2
