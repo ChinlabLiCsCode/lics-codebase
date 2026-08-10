@@ -19,3 +19,6 @@
 [submodule "labscript-suite/runmanager"]
 	path = labscript-suite/runmanager
 	url = git@github.com:ChinlabLiCsCode/runmanager.git
+[submodule "M-LOOP"]
+	path = M-LOOP
+	url = https://github.com/michaelhush/M-LOOP.git
