@@ -1,10 +1,10 @@
 from labscript import start, stop, add_time_marker, wait
-from lics_labscript_apparatus.connection_table import ConnectionTable
+from apparatus.connection_table import ConnectionTable
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from lics_labscript_apparatus._globals_stubs import *
+    from _globals_stubs import *
 
-def Cs_MOT_Loading(t, ct):
+def Cs_MOT_Loading(t, ct: ConnectionTable):
     """Function for setting all values to load Cs MOT. 
     Starts: t=0
     Ends: t=0.005
@@ -46,6 +46,12 @@ def Cs_MOT_Loading(t, ct):
     ct.Zeeman_C4__b4c13.constant(t, Zeeman_C4_CsMOT)
     ct.Zeeman_C5__b4c14.constant(t, Zeeman_C5_CsMOT)
 
+    # 2D MOT coil control
+    ct.Cs_2DMOT_X_minus.constant(Cs_2DMOT_X_minus_CsMOT)
+    ct.Cs_2DMOT_X_plus.constant(Cs_2DMOT_X_plus_CsMOT)
+    ct.Cs_2DMOT_Y_minus.constant(Cs_2DMOT_Y_minus_CsMOT)
+    ct.Cs_2DMOT_Y_plus.constant(Cs_2DMOT_Y_plus_CsMOT)
+
     # bitter coil control
     ct.Bitter_Lower_FF__b3c14.constant(t, 0)
     ct.Bitter_HH_Upper_FF__b3c10.constant(t, 0)
@@ -66,7 +72,7 @@ def Cs_MOT_Loading(t, ct):
 
     return t+0.005
 
-def Cs_CMOT(t, ct):
+def Cs_CMOT(t, ct: ConnectionTable):
     """Function for compressing the Cs MOT. 
     Starts: t=-0.030
     Ends: t=0.049
@@ -114,7 +120,7 @@ def Cs_CMOT(t, ct):
 
     return t+0.050
 
-def Cs_Molasses(t, ct):
+def Cs_Molasses(t, ct: ConnectionTable):
     """Function for doing Cs optical molasses cooling. Includes Cs_Molasses_Cooling 
     and Cs_Molasses_Dark from the old sequence. 
     Starts: t-0.002
@@ -152,7 +158,25 @@ def Cs_Molasses(t, ct):
 
     return t+0.005
 
-def Cs_LF_H_Imaging(t, ct):
+def TOF(t, ct: ConnectionTable):
+    """Function to turn off all shutters and AOMs related to the MOT, dipole traps, etc."""
+
+    # these can happen even earlier because they aren't important
+    ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.020)
+    ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.020)
+
+    # make sure Cs MOT light is off
+    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.010)
+
+    # make sure RSC light is off
+    ct.Cs_RSC_AO_Sw__b1c13.disable(t)
+    ct.Cs_RSC_Shutter__b1c14.disable(t)
+
+    return t
+
+
+def Cs_LF_H_Imaging(t, ct: ConnectionTable):
     """Function for doing cesium horizontal imaging at low field, i.e. after MOT.
     Starts: t=-0.2 (background image with shutter closed) 
     Ends: t+0.300
@@ -165,20 +189,24 @@ def Cs_LF_H_Imaging(t, ct):
 
     # collect initial background image with the shutter closed 
     ct.Pixelfly_Shutter__b2c06.disable(t-0.220)
-    ct.pco_panda.expose(t-0.200, name="absorption", frametype="dark", trigger_duration=0.025)
-
-    # make sure MOT light is off
-    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t-0.010)
-    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.020)
-    ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.020)
-    ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.020)
-    ct.Cs_HFImg_Shutter__b1c06.disable(t-0.020)
-    ct.Cs_RSC_Shutter__b1c14.disable(t-0.020)
+    ct.pco_panda.expose(t-0.200, name="absorption", frametype="dark", trigger_duration=0.030)
 
 
     # make sure MOT and REP freqs are right
     ct.Cs_MOT_Freq__b3c24.constant(t-0.005, Cs_MOT_Freq_CsLFHImg)
     ct.Cs_Rep_Freq__b3c26.constant(t-0.005, Cs_Rep_Freq_CsLFHImg)
+
+    # make sure REP shutter is closed
+    ct.Cs_Rep_Shutter__b1c12.disable(t-0.015)
+
+    #make sure all the other light is off
+    # make sure MOT light is off
+    # ct.Cs_3DMOT_AO_Sw__b1c02.disable(t-0.010)
+    # ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.020)
+    # ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.020)
+    # ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.020)
+    # ct.Cs_HFImg_Shutter__b1c06.disable(t-0.020)
+    # ct.Cs_RSC_Shutter__b1c14.disable(t-0.020)
 
     # set bias fields appropriately for imaging
     # 

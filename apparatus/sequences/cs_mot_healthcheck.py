@@ -1,6 +1,6 @@
 from labscript import start, stop, add_time_marker, wait
-from lics_labscript_apparatus.connection_table import ConnectionTable
-from lics_labscript_apparatus.sequences.cs_subsequences import *
+from apparatus.connection_table import ConnectionTable
+from apparatus.sequences.cs_subsequences import *
 
 if __name__ == '__main__':
     ct = ConnectionTable()
@@ -25,8 +25,9 @@ if __name__ == '__main__':
     add_time_marker(t, 'Cs_MOT_Loading')
     t = Cs_MOT_Loading(t, ct)
 
-    # wait 3 seconds for MOT to load
-    t+=3 
+    # wait for MOT to load
+    t += Cs_MOT_Load_Time
+    add_time_marker(t, 'Cs_MOT_Loading_End')
 
     # # Cs_CMOT
     # add_time_marker(t, 'Cs_CMOT')
@@ -35,6 +36,13 @@ if __name__ == '__main__':
     # # Cs_Molasses
     # add_time_marker(t, 'Cs_Molasses')
     # t = Cs_Molasses(t, ct)
+
+    # TOF - kill all trapping beams
+    add_time_marker(t, 'TOF')
+    t = TOF(t, ct)
+
+    # wait TOF time
+    t += TOF_Time
 
     # Cs_LF_H_Img
     add_time_marker(t, 'Cs_LF_H_Imaging')
