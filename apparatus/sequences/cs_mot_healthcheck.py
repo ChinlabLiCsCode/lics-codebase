@@ -40,6 +40,9 @@ if __name__ == '__main__':
     # TOF - kill all trapping beams
     add_time_marker(t, 'TOF')
     t = TOF(t, ct)
+    # set bitter coil V to zero
+    ct.Bitter_V_AH.constant(t, 0)
+    ct.Bitter_V_HH.constant(t, 0)
 
     # wait TOF time
     t += TOF_Time

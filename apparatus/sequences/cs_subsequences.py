@@ -228,8 +228,8 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable):
     ct.Cs_LFImg_Shutter__b1c11.enable(t-0.012)
     ct.Cs_LFImg_AO_Sw__b1c10.enable(t)
     ct.Cs_LFImg_AO_Sw__b1c10.disable(t+Img_Pulse_Length_CsLFHImg) # 100 us imaging pulse
-    # ct.Scope_Trig__b2c08.enable(t)
-    # ct.Scope_Trig__b2c08.disable(t+Img_Pulse_Length_CsLFHImg)
+    ct.Scope_Trig__b2c08.enable(t)
+    ct.Scope_Trig__b2c08.disable(t+Img_Pulse_Length_CsLFHImg)
     ct.Cs_HImg_Shutter__b1c07.disable(t)
     ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.030)
 
