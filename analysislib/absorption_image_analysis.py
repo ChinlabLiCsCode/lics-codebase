@@ -44,7 +44,7 @@ rho = log_image / sigma0 * (conv)**2
 N = rho.sum()
 
 #plot data
-fig, axes = plt.subplots(2,2, figsize=(10,10))
+fig = 
 extent=[0, 2048*conv, 0, 2048*conv] # handles image magnification from lens
 
 im1 = axes[0,0].imshow(dark_image, extent=extent)
@@ -142,7 +142,7 @@ axe.set_ylabel(r"Density (atoms/$\mu m$)")
 axe.set_title("Integrated X and Y densities")
 
 run.save_result("Sigma x (microns)", sigma_x)
-run.save_result("sigma y (microns)", sigma_y)
+run.save_result("Sigma y (microns)", sigma_y)
 run.save_result("N_x", N_x)
 run.save_result("N_y", N_y)
 
