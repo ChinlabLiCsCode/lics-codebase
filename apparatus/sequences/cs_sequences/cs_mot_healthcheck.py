@@ -1,6 +1,6 @@
 from labscript import start, stop, add_time_marker, wait
 from apparatus.connection_table import ConnectionTable
-from apparatus.sequences.cs_subsequences import *
+from apparatus.sequences.cs_sequences.cs_subsequences import *
 
 if __name__ == '__main__':
     ct = ConnectionTable()
