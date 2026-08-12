@@ -427,7 +427,7 @@ def tof_gravity(fit_results, pos_key, tof_key='TOF_Time'):
     return -2 * a_um_per_s2 * 1e-6    # m/s²
 
 
-_G_TRUE = 9.80665  # m/s², standard gravity
+_G_TRUE = 9.8027  # m/s², local gravitational acceleration in Chicago
 
 
 def calibrate_from_gravity(fit_results, pos_key, magnification, pixel_size=6.5,

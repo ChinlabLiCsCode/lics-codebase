@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 
 #constants
 pixel_size = 6.5 #microns
-magnification = 1.2818  # calibrated 2026-08-11 from TOF gravity measurement
+magnification = 1.2823  # calibrated 2026-08-11 from TOF gravity measurement (g=9.8027 m/s² in Chicago)
 conv = pixel_size/magnification # pixel to image size conversion (um/pix)
 lambda_852 = 852.34727582e-9 # cs d2 transition wavelength in nm
 
