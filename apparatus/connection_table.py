@@ -88,7 +88,7 @@ class ConnectionTable:
 
         # Box1 digital outputs
         self.Bitter_Precision_Disable__b1c00  = DigitalOut(default_value=1,          name='Bitter_Precision_Disable__b1c00',  parent_device=NIBox1, connection='port0/line0')
-        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=1,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
+        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=0,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
         self.Cs_3DMOT_AO_Sw__b1c02            = DigitalOut(default_value=1,          name='Cs_3DMOT_AO_Sw__b1c02',            parent_device=NIBox1, connection='port0/line2')
         self.Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=1,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
         self.Cs_Andor_Trig__b1c04             = DigitalOut(default_value=0,          name='Cs_Andor_Trig__b1c04',             parent_device=NIBox1, connection='port0/line4')
@@ -276,8 +276,8 @@ class ConnectionTable:
             manual_mode_exposure_time_ms=10.0,
             throughput_limit_mbps=200.0,
             save_mode='counts',
-            #roi=None
-            roi=(640, 459, 304, 300)  # (x, y, w, h) in pixels
+            roi=None
+            #roi=(640, 459, 304, 300)  # (x, y, w, h) in pixels
         )
 
         self.pco_panda = PCOCamera(
