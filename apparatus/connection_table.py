@@ -88,7 +88,7 @@ class ConnectionTable:
 
         # Box1 digital outputs
         self.Bitter_Precision_Disable__b1c00  = DigitalOut(default_value=1,          name='Bitter_Precision_Disable__b1c00',  parent_device=NIBox1, connection='port0/line0')
-        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=0,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
+        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=1,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
         self.Cs_3DMOT_AO_Sw__b1c02            = DigitalOut(default_value=1,          name='Cs_3DMOT_AO_Sw__b1c02',            parent_device=NIBox1, connection='port0/line2')
         self.Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=1,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
         self.Cs_Andor_Trig__b1c04             = DigitalOut(default_value=0,          name='Cs_Andor_Trig__b1c04',             parent_device=NIBox1, connection='port0/line4')
@@ -241,8 +241,8 @@ class ConnectionTable:
         _SHIM_YMINUS_OFFSET = 0 # old value: -1.8
         _SHIM_ZPLUS_OFFSET = 0 # old value: 0.1
         _SHIM_ZMINUS_OFFSET = 0 # old value: -0.1
-        _SHIMX_CONVERSION = lambda hh, ah: (-0.5*hh + 0.5*ah + _SHIM_XPLUS_OFFSET, 
-                                            0.5*hh + 0.5*ah + _SHIM_XMINUS_OFFSET)  # note the flip of hh and ah here relative to y and z
+        _SHIMX_CONVERSION = lambda hh, ah: (-0.5*ah + 0.5*hh + _SHIM_XPLUS_OFFSET, 
+                                            0.5*ah + 0.5*hh + _SHIM_XMINUS_OFFSET)  # note the flip of hh and ah here relative to y and z
         _SHIMY_CONVERSION = lambda hh, ah: (-0.5*ah + 0.5*hh + _SHIM_YPLUS_OFFSET,
                                             0.5*ah + 0.5*hh + _SHIM_YMINUS_OFFSET)
         _SHIMZ_CONVERSION = lambda hh, ah: (-0.5*ah + 0.5*hh + _SHIM_ZPLUS_OFFSET,
