@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from _globals_stubs import *
 
-def Cs_MOT_Loading(t, ct: ConnectionTable):
+def Cs_MOT_Loading(t, ct: ConnectionTable, set_statics=True):
     """Function for setting all values to load Cs MOT. 
     Starts: t=0
     Ends: t=0.005
@@ -46,11 +46,12 @@ def Cs_MOT_Loading(t, ct: ConnectionTable):
     ct.Zeeman_C4__b4c13.constant(t, Zeeman_C4_CsMOT)
     ct.Zeeman_C5__b4c14.constant(t, Zeeman_C5_CsMOT)
 
-    # 2D MOT coil control
-    ct.Cs_2DMOT_X_minus.constant(Cs_2DMOT_X_minus_CsMOT)
-    ct.Cs_2DMOT_X_plus.constant(Cs_2DMOT_X_plus_CsMOT)
-    ct.Cs_2DMOT_Y_minus.constant(Cs_2DMOT_Y_minus_CsMOT)
-    ct.Cs_2DMOT_Y_plus.constant(Cs_2DMOT_Y_plus_CsMOT)
+    # 2D MOT coil control (static outputs — can only be set once per shot)
+    if set_statics:
+        ct.Cs_2DMOT_X_minus.constant(Cs_2DMOT_X_minus_CsMOT)
+        ct.Cs_2DMOT_X_plus.constant(Cs_2DMOT_X_plus_CsMOT)
+        ct.Cs_2DMOT_Y_minus.constant(Cs_2DMOT_Y_minus_CsMOT)
+        ct.Cs_2DMOT_Y_plus.constant(Cs_2DMOT_Y_plus_CsMOT)
 
     # bitter coil control
     ct.Bitter_Lower_FF__b3c14.constant(t, 0)
@@ -176,7 +177,7 @@ def TOF(t, ct: ConnectionTable):
     return t
 
 
-def Cs_LF_H_Imaging(t, ct: ConnectionTable):
+def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     """Function for doing cesium horizontal imaging at low field, i.e. after MOT.
     Starts: t=-0.2 (background image with shutter closed) 
     Ends: t+0.300
@@ -186,10 +187,10 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable):
     It's really designed to follow up the Cs_Molasses_Cooling function, which will 
     have turned the coil off.
     """
-
+    name = f'absorption{image_num}'
     # collect initial background image with the shutter closed 
     ct.Pixelfly_Shutter__b2c06.disable(t-0.220)
-    ct.pco_panda.expose(t-0.200, name="absorption", frametype="dark", trigger_duration=0.030)
+    ct.pco_panda.expose(t-0.200, name=name, frametype="dark", trigger_duration=0.030)
 
 
     # make sure MOT and REP freqs are right
@@ -216,7 +217,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable):
     # ATOM IMAGE at t=0.000
 
     # acquire image
-    ct.pco_panda.expose(t-0.025, name='absorption', frametype='atoms', trigger_duration=0.030)
+    ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=0.030)
 
     # pixelfly shutter
     ct.Pixelfly_Shutter__b2c06.enable(t-0.010)
@@ -250,7 +251,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable):
     # LIGHT IMAGE at t=0.200
 
     # aquire image
-    ct.pco_panda.expose(t+0.175, name='absorption', frametype='light', trigger_duration=0.030)
+    ct.pco_panda.expose(t+0.175, name=name, frametype='light', trigger_duration=0.030)
 
     # pixelfly shutter 
     ct.Pixelfly_Shutter__b2c06.enable(t+0.190)
@@ -275,13 +276,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable):
     ct.Cs_OP_AO_Sw__b1c08.disable(t+0.2001)
     ct.Cs_VOP_Shutter__b1c16.disable(t+0.198)
     ct.Cs_OP_AO_Sw__b1c08.enable(t+0.210)
-    
-    
 
-
-    
-
-    
 
     return t+0.300
 
