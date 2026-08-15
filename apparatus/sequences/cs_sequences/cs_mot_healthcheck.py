@@ -18,7 +18,7 @@ if __name__ == '__main__':
     wait('line_trigger', t, timeout=0.1)
 
     #turn off the MOT first
-    ct.Cs_Rep_Shutter__b1c12.go_low(t+0.01)
+    ct.Cs_Rep_Shutter__b1c12.disable(t+0.01)
 
     # Cs_MOT_Loading
     t = 0.1
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     # Cs_LF_H_Img
     add_time_marker(t, 'Cs_LF_H_Imaging')
-    t = Cs_LF_H_Imaging(t, ct)
+    t = Cs_LF_H_Imaging(t, ct, image_num=1)
 
     # set background values back
     t += 0.001
