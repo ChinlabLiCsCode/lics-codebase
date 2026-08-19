@@ -258,12 +258,19 @@ def plot_scan(df, result_keys, scan_keys=None, fits=None, title=None, show=True)
         else:
             yv_err = None
 
+        i_max = int(np.argmax(yv_mean))
+        x_max, y_max = float(unique_x[i_max]), float(yv_mean[i_max])
+        data_max = {'x': x_max, 'y': y_max}
+
         ax.errorbar(unique_x, yv_mean, yerr=yv_err,
                     fmt='o', capsize=4, linewidth=1.5, label='data')
+        ax.plot(x_max, y_max, '*', color='gold', markersize=12, zorder=6,
+                markeredgecolor='k', markeredgewidth=0.5, label=f'max: ({x_max:.4g}, {y_max:.4g})')
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
         fit_type = fit_types[i]
+        result_key = (col_label(rkey), col_label(skey))
         if fit_type is not None and len(unique_x) >= 2:
             try:
                 xf, yf, flabel, marker, coeffs = _do_fit(fit_type, unique_x, yv_mean, yv_err)
@@ -271,11 +278,15 @@ def plot_scan(df, result_keys, scan_keys=None, fits=None, title=None, show=True)
                 if marker is not None and unique_x.min() <= marker[0] <= unique_x.max():
                     ax.axvline(marker[0], color='r', linestyle='--', linewidth=0.8, alpha=0.5)
                     ax.plot(marker[0], marker[1], 'rv', markersize=9, zorder=5)
-                ax.legend(fontsize=8)
-                fit_results[(col_label(rkey), col_label(skey))] = coeffs
+                coeffs['data_max'] = data_max
+                fit_results[result_key] = coeffs
             except Exception as e:
                 ax.text(0.05, 0.95, f'fit failed: {e}', transform=ax.transAxes,
                         fontsize=7, va='top', color='red')
+                fit_results[result_key] = {'data_max': data_max}
+        else:
+            fit_results[result_key] = {'data_max': data_max}
+        ax.legend(fontsize=8)
 
     for ax in list(flat_axes)[len(pairs):]:
         ax.set_visible(False)
