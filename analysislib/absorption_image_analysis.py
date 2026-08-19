@@ -159,7 +159,8 @@ def plot_results(title):
     ax_cb      = fig.add_subplot(gs_bot[0, 2])
     ax_x_prof  = fig.add_subplot(gs_bot[1, 1], sharex=ax_density)
 
-    im4 = ax_density.imshow(rho/conv**2, vmin=0, vmax=rho.max()/conv**2, extent=extent, origin='lower')
+    vmax_density = float(np.percentile(rho[rho > 0], 99.5)) / conv**2
+    im4 = ax_density.imshow(rho/conv**2, vmin=0, vmax=vmax_density, extent=extent, origin='lower')
     ax_density.set_title(rf"2D Density (atoms/$\mu m^2$), N={N:.1e}")
     fig.colorbar(im4, cax=ax_cb)
     ax_cb.set_ylabel(r'Density (atoms/$\mu m^2$)')
