@@ -26,7 +26,10 @@ def Cs_MOT_Loading(t, ct: ConnectionTable, set_statics=True):
 
     # open the Cs shutters
     ct.Cs_Zeeman_Shutter__b1c17.enable(t)
-    ct.Cs_2DMOT_Shutter__b1c01.enable(t)
+    if Enable_2DMOT:
+        ct.Cs_2DMOT_Shutter__b1c01.enable(t)
+    else:
+        ct.Cs_2DMOT_Shutter__b1c01.disable(t)
     ct.Cs_3DMOT_AO_Sw__b1c02.enable(t)
     ct.Cs_3DMOT_Shutter__b1c03.enable(t)
     ct.Cs_Rep_Shutter__b1c12.enable(t)
@@ -97,6 +100,11 @@ def Cs_CMOT(t, ct: ConnectionTable):
     # turn off Zeeman slower and 2D MOT
     ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.010)
     ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.010)
+    ct.Zeeman_C1__b4c10.constant(t-0.010, 0)
+    ct.Zeeman_C2__b4c11.constant(t-0.010, 0)
+    ct.Zeeman_C3__b4c12.constant(t-0.010, 0)
+    ct.Zeeman_C4__b4c13.constant(t-0.010, 0)
+    ct.Zeeman_C5__b4c14.constant(t-0.010, 0)
 
     # ramp bias fields 
     ct.Bias_X_HH.ramp(t-0.010, 0.058, Bias_X_HH_CsMOT, Bias_X_HH_CsCMOT, ct.FINE)
@@ -168,7 +176,8 @@ def TOF(t, ct: ConnectionTable):
 
     # make sure Cs MOT light is off
     ct.Cs_3DMOT_AO_Sw__b1c02.disable(t)
-    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.010)
+    ct.Cs_3DMOT_AO_AM__b3c21.constant(t, 0)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.014)
 
     # make sure RSC light is off
     ct.Cs_RSC_AO_Sw__b1c13.disable(t)
@@ -189,25 +198,16 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     """
     name = f'absorption{image_num}'
     # collect initial background image with the shutter closed 
-    ct.Pixelfly_Shutter__b2c06.disable(t-0.220)
-    ct.pco_panda.expose(t-0.200, name=name, frametype="dark", trigger_duration=0.030)
+    ct.Pixelfly_Shutter__b2c06.disable(t-0.225)
+    ct.pco_panda.expose(t-0.225, name=name, frametype="dark", trigger_duration=0.030)
 
 
     # make sure MOT and REP freqs are right
-    ct.Cs_MOT_Freq__b3c24.constant(t-0.005, Cs_MOT_Freq_CsLFHImg)
-    ct.Cs_Rep_Freq__b3c26.constant(t-0.005, Cs_Rep_Freq_CsLFHImg)
+    ct.Cs_MOT_Freq__b3c24.constant(t-0.001, Cs_MOT_Freq_CsLFHImg)
+    ct.Cs_Rep_Freq__b3c26.constant(t-0.001, Cs_Rep_Freq_CsLFHImg)
 
     # make sure REP shutter is closed
     ct.Cs_Rep_Shutter__b1c12.disable(t-0.015)
-
-    #make sure all the other light is off
-    # make sure MOT light is off
-    # ct.Cs_3DMOT_AO_Sw__b1c02.disable(t-0.010)
-    # ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.020)
-    # ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.020)
-    # ct.Cs_2DMOT_Shutter__b1c01.disable(t-0.020)
-    # ct.Cs_HFImg_Shutter__b1c06.disable(t-0.020)
-    # ct.Cs_RSC_Shutter__b1c14.disable(t-0.020)
 
     # set bias fields appropriately for imaging
     # 
@@ -220,8 +220,8 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=0.030)
 
     # pixelfly shutter
-    ct.Pixelfly_Shutter__b2c06.enable(t-0.010)
-    ct.Pixelfly_Shutter__b2c06.disable(t-0.002)
+    ct.Pixelfly_Shutter__b2c06.enable(t-0.006)
+    ct.Pixelfly_Shutter__b2c06.disable(t-0.001)
 
     # imaging beam
     ct.Cs_LFImg_AO_Sw__b1c10.disable(t-0.013)
@@ -239,7 +239,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.Cs_VOP_Shutter__b1c16.enable(t-0.012)
     ct.Cs_OP_AO_AM__b3c25.constant(t-0.001, 3)
     ct.Cs_OP_AO_Sw__b1c08.enable(t-0.001)
-    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.0001)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+Img_Pulse_Length_CsLFHImg)
     ct.Cs_VOP_Shutter__b1c16.disable(t-0.001)
     ct.Cs_OP_AO_Sw__b1c08.enable(t+0.010)
     
@@ -254,8 +254,8 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.pco_panda.expose(t+0.175, name=name, frametype='light', trigger_duration=0.030)
 
     # pixelfly shutter 
-    ct.Pixelfly_Shutter__b2c06.enable(t+0.190)
-    ct.Pixelfly_Shutter__b2c06.disable(t+0.198)
+    ct.Pixelfly_Shutter__b2c06.enable(t+0.194)
+    ct.Pixelfly_Shutter__b2c06.disable(t+0.199)
 
     # imaging beam
     ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.187)
@@ -273,7 +273,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.Cs_VOP_Shutter__b1c16.enable(t+0.188)
     ct.Cs_OP_AO_AM__b3c25.constant(t+0.199, 3)
     ct.Cs_OP_AO_Sw__b1c08.enable(t+0.199)
-    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.2001)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.200+Img_Pulse_Length_CsLFHImg)
     ct.Cs_VOP_Shutter__b1c16.disable(t+0.198)
     ct.Cs_OP_AO_Sw__b1c08.enable(t+0.210)
 
