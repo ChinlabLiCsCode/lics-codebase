@@ -28,13 +28,13 @@ if __name__ == '__main__':
 
     # wait for MOT to load
     t += Cs_MOT_Load_Time
-    add_time_marker(t, 'Cs_MOT_Loading_End')
+    add_time_marker(t, 'First Cs_MOT_Loading_End')
 
     #wait ramp time even though there's no ramp
     t+=Coil_Ramp_Time
 
     # TOF - kill all trapping beams
-    add_time_marker(t, 'TOF')
+    add_time_marker(t, 'TOF 1')
     t = TOF(t, ct)
     # set bitter coil V to zero
     ct.Bitter_V_AH.constant(t, 0)
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     t += TOF_Time
 
     # Cs_LF_H_Img
-    add_time_marker(t, 'Cs_LF_H_Imaging')
+    add_time_marker(t, 'Cs_LF_H_Imaging 1')
     t = Cs_LF_H_Imaging(t, ct, image_num=1)
 
 
@@ -54,6 +54,10 @@ if __name__ == '__main__':
     add_time_marker(t, 'Second Cs_MOT_Loading')
     t = Cs_MOT_Loading(t, ct, set_statics=False)
 
+    # wait for MOT to load
+    t += Cs_MOT_Load_Time
+    add_time_marker(t, 'Second Cs_MOT_Loading_End')
+
     #ramp the field down
     add_time_marker(t, "Ramp the bitter coil fields to 0")
     ct.Bitter_V_AH.ramp(t, Coil_Ramp_Time, Bitter_V_AH_CsMOT, 0.01, ct.COARSE)
@@ -62,8 +66,8 @@ if __name__ == '__main__':
     t+=Coil_Ramp_Time
 
     # TOF - kill all trapping beams
-    add_time_marker(t, 'TOF')
-    t = TOF(t, ct)
+    add_time_marker(t, 'TOF 2')
+    t = TOF(t, ct)   
     # set bitter coil V to zero
     ct.Bitter_V_AH.constant(t, 0)
     ct.Bitter_V_HH.constant(t, 0)
@@ -72,7 +76,7 @@ if __name__ == '__main__':
     t += TOF_Time
 
     # Cs_LF_H_Img
-    add_time_marker(t, 'Cs_LF_H_Imaging')
+    add_time_marker(t, 'Cs_LF_H_Imaging 2')
     t = Cs_LF_H_Imaging(t, ct, image_num=2)
 
     #####################################################end sequence###########################
