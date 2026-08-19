@@ -62,19 +62,26 @@ def fit_fun(x, line_density):
 
     x0_guess = x[np.argmax(line_density)]
 
-    p0 = [A_guess - B_guess, x0_guess, 2000, B_guess]
+    p0 = np.array([A_guess - B_guess, x0_guess, 2000, B_guess])
 
-    popt, pcov = curve_fit(
-        gaussian_dist,
-        x,
-        line_density,
-        p0=p0,
-        bounds=([0, x.min(), 1, -np.inf],
-                               [np.inf, x.max(), np.ptp(x), np.inf])
-        )
+    try:
+        popt, pcov = curve_fit(
+            gaussian_dist,
+            x,
+            line_density,
+            p0=p0,
+            bounds=([0, x.min(), 1, -np.inf],
+                                [np.inf, x.max(), np.ptp(x), np.inf])
+            )
 
-    perr = np.sqrt(np.diag(pcov))
-    popt[2] = abs(popt[2])
+        perr = np.sqrt(np.diag(pcov))
+        popt[2] = abs(popt[2])
+    except Exception as e:
+        print("Failed to fit")
+        print(e)
+
+        perr = np.full(p0.shape, 0.1)
+        popt = np.full(p0.shape, 0.1)
 
     return popt, perr
 
