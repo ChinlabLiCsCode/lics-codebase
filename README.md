@@ -37,7 +37,13 @@ setuptools-conda install-requirements labscript runmanager blacs lyse runviewer 
 pip install --no-build-isolation --no-deps -e labscript -e runmanager -e blacs -e lyse -e runviewer -e labscript-devices -e labscript-utils
 ```
 
-At this point I had an error on Windows and had to run this: `pip install pyzmq --force-reinstall`. Continuing on:
+At this point I had a zmq error on Windows. I originally fixed it with `pip install pyzmq --force-reinstall`, but don't do that: on a second machine it left the environment broken, and anything that imports lyse (including the daily notebooks) failed with "zeromq not supported". The pip wheel ships its own copy of libzmq, which then disagrees with the conda packages built against conda's. Install them from conda-forge instead:
+
+```
+conda install -c conda-forge --override-channels pyzmq zeromq libsodium
+```
+
+Continuing on:
 
 ```
 labscript-profile-create -n apparatus -c
