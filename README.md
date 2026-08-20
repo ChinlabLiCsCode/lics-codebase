@@ -119,6 +119,3 @@ git add labscript-suite/blacs labscript-suite/labscript labscript-suite/labscrip
 git commit -m "Update labscript submodules to latest upstream"
 git push
 ```
-
-## API Documentation
-
