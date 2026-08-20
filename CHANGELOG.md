@@ -13,6 +13,48 @@ Skipped (no callers outside themselves / empty / not needed):
 
 ---
 
+## [2026-08-20] — imaging pipeline (df_view_image → df_image_analysis)
+
+### Added
+- `analysislib/imaging/` — Python port of `MATLAB/imaging`, working on labscript
+  shot files instead of .mat files (see `analysislib/imaging/README.md`)
+  - `params.py` (from `build_params.m`): `ImagingParams` dataclass plus presets
+    `CS_H_FULL`, `CS_H_MOT`, `CS_H_IS`.  `view`/`mask` are half-open
+    `(row_start, row_stop, col_start, col_stop)` tuples; `mask` is the atom box
+    in view coordinates.  Replaces `load_params.m`: presets live in git rather
+    than in dated .mat files
+  - `defringe.py` (from `defringeset_create.m`, `defringe.m`): `DefringeSet`
+    with `.from_stack()`, `.apply()`, `.save()`/`.load()`.  Adds a guard against
+    numerically-zero eigenvalues that MATLAB's `eig` did not need, plus
+    `LightFrameCache` (rolling reference frames) and `build_defringe_set()`
+  - `process.py` (from `load_img.m`, `nd_calc.m`, and the processing half of
+    `proc_imgs.m`): `load_shot_images`, `od_calc`, `nd_calc`, `process_shot`.
+    The per-shot dark frame plays the role of MATLAB's `bginfo='self'`
+  - `fitting.py` (from `scan_fit1Dflex.m`): `fit_image` with `'gauss'`, `'dbl'`
+    and `'tf'` traces.  Start values come from the moments of the trace rather
+    than MATLAB's fixed span/10, which converges much faster on wide clouds;
+    optional constant baseline via `fit_offset`
+  - `plotting.py` (from `df_view_image`): raw frames, the synthetic light frame,
+    and the density image with its profiles, fits and atom box.  Axes and fitted
+    centres are in full-frame microns
+- `analysislib/df_image_analysis.py` — lyse single-shot routine using the above.
+  Defringes against the last `n_reference` shots by default (`defringe='auto'`,
+  cached in `lyse.routine_storage`); `'self'`, `'none'` or a saved set also work.
+  Saves `N_int`, `N_view`, `N_x`, `N_y`, `sigma_x (um)`, `sigma_y (um)`,
+  `x0_x (um)`, `x0_y (um)`, `OD_peak`, `n_defringe`
+  - Result names overlap `absorption_image_analysis.py` deliberately, so
+    multishot plots can switch between the two routines.  That routine is
+    unchanged and still available
+
+### Not ported
+- `proc_scan.m` / `scan_figupdate.m` (the live_scan half): lyse's dataframe and
+  `multishot_scan_plotter.py` already cover scanning over shots
+- `bginfo` cases 1 and 3 (`'none'`, a separate background shot): the PCO Panda
+  takes a dark frame in every shot, so only the `'self'` case applies here
+
+---
+
+
 ## [2026-05-15] — seq_block_write
 
 ### Added
