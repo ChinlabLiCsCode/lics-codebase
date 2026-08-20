@@ -10,7 +10,7 @@ from labscript_utils.setup_logging import LOG_PATH
 # Path to the config file. None uses the default mloop_config.toml in this directory.
 # Change this to point to a named config to switch optimisations without renaming files.
 # Example: CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs', 'mloop_config_bias_z.toml')
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs', 'mloop_config_bias_currents.toml')
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs', 'mloop_config_zeeman_slower.toml')
 
 try:
     from labscript_utils import check_version
