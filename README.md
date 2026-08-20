@@ -23,7 +23,7 @@ I then recommend cloning repositories for specific projects into a common folder
 ### Python / labscript-suite
 To use the new python and labscript-suite code, you'll need to set up a conda environment with the required configurations. From [the labscript suite](https://labscriptsuite.org/en/latest/installation/setting-up-an-environment/#anaconda-python), you want to first set up a bare conda environment with Python 3. They use 3.11 and I had some conflicts with 3.14 so just using 3.11. Run:
 
-`conda create -n labscript python=3.13`
+`conda create -n labscript python=3.11`
 
 The [next steps in the guide](https://labscriptsuite.org/en/latest/installation/developer-anaconda/) are to clone the seven core labscript-suite repos. This should already have been taken care of when you used `--recurse-submodules` in cloning the repo, but if it wasn't you can run `git submodule update --init --recursive` to pull in the submodules from Github.
 
@@ -40,7 +40,7 @@ pip install --no-build-isolation --no-deps -e labscript -e runmanager -e blacs -
 At this point I had an error on Windows and had to run this: `pip install pyzmq --force-reinstall`. Continuing on:
 
 ```
-labscript-profile-create -n lics-labscript-apparatus -c
+labscript-profile-create -n apparatus -c
 desktop-app install blacs lyse runmanager runviewer
 conda remove conda # optional but highly recommended
 ```
@@ -48,15 +48,15 @@ conda remove conda # optional but highly recommended
 The `labscript-profile-create` will set up a template user library in ~/labscript-suite, which is actually outside where you store the codebase on your machine. That's fine. Go into the labconfig/your_computer.ini file, and change the relevant paths to point to the locations you actually want them to point to:
 
 ```
-apparatus_name = lics-labscript-apparatus   # should be this without needing to modify
+apparatus_name = apparatus   # matches the apparatus/ directory in this repo
 shared_drive = ___  # point to the real shared drive on the experiment computer, or to the shared Box folder if on a separate analyzing computer.
-experiment_shot_storage = %(shared_drive)s/Experiments/%(apparatus_name)s
+experiment_shot_storage = %(shared_drive)s/Experiments
 userlib = ___/lics-codebase   # root for user code: point to lics-codebase.
 pythonlib = %(userlib)s   # for helper python functions. redundant in our case.
-labscriptlib = ___/lics-codebase/lics-labscript-apparatus   # for apparatus and sequence files
-analysislib = ___/lics-codebase/lics-labscript-analysis   # for standard analysis code
+labscriptlib = %(userlib)s/apparatus   # for apparatus and sequence files
+analysislib = %(userlib)s/analysislib   # for standard analysis code
 app_saved_configs = %(labscript_suite)s/app_saved_configs/%(apparatus_name)s # don't change this one
-user_devices = ___/lics-codebase/lics-labscript-devices   # for our custom devices
+user_devices = lics_labscript_devices   # for our custom devices: a module name under userlib, not a path
 ```
 
 Setting these should take care of it. 
