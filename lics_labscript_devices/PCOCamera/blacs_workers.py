@@ -1,7 +1,30 @@
 import sys
 import time
 
+import numpy as np
+import labscript_utils.h5_lock
+import h5py
+
 from labscript_devices.IMAQdxCamera.blacs_workers import IMAQdxCameraWorker
+
+
+def compute_absorption_od(dark, light, atoms):
+    """Compute the optical density (OD) image from dark/light/atoms frames.
+
+    Same core calculation as abs_calc() in
+    analysislib/absorption_image_analysis.py, minus the pixel-to-micron
+    density/atom-number conversion (not meaningful for a quick-look display).
+    """
+    atoms_minus_dark = atoms.astype(float) - dark.astype(float)
+    light_minus_dark = light.astype(float) - dark.astype(float)
+    ratio = np.divide(
+        atoms_minus_dark,
+        light_minus_dark,
+        out=np.full(atoms_minus_dark.shape, 1.0),
+        where=light_minus_dark != 0,
+    )
+    ratio[ratio <= 0] = 1
+    return -np.log(ratio)
 
 
 class PCO_Camera:
@@ -208,6 +231,47 @@ class PCOCameraWorker(IMAQdxCameraWorker):
             from labscript_devices.IMAQdxCamera.blacs_workers import MockCamera
             return MockCamera()
         return self.interface_class(self.serial_number, shutter_mode=self.shutter_mode)
+
+    def transition_to_manual(self):
+        # Base class clears self.h5_filepath before returning, so capture it first.
+        h5_filepath = self.h5_filepath
+        result = super().transition_to_manual()
+        if getattr(self, 'display_mode', 'live') == 'absorption' and h5_filepath is not None:
+            try:
+                self._send_last_absorption_image(h5_filepath)
+            except Exception as e:
+                print(f"PCOCameraWorker: failed to compute absorption image: {e}", file=sys.stderr)
+        return result
+
+    def _send_last_absorption_image(self, h5_filepath):
+        """Read back the most recently acquired exposure's dark/light/atoms frames
+        from the shot file, compute the OD image, and send it to the BLACS tab in
+        place of the raw camera frames that transition_to_manual() already sent."""
+        image_path = 'images/' + (self.orientation or self.device_name)
+        with h5py.File(h5_filepath, 'r') as f:
+            exposures = f['devices'][self.device_name]['EXPOSURES'][:]
+            if not len(exposures):
+                return
+            exposures.sort(order='t')
+            name = exposures[-1]['name']
+            if isinstance(name, bytes):
+                name = name.decode('utf-8')
+            group = f.get(image_path)
+            if group is None or name not in group:
+                return
+            frame_group = group[name]
+            if not all(ft in frame_group for ft in ('dark', 'light', 'atoms')):
+                return
+
+            def last_frame(dset):
+                data = dset[()]
+                return data[-1] if data.ndim == 3 else data
+
+            dark = last_frame(frame_group['dark'])
+            light = last_frame(frame_group['light'])
+            atoms = last_frame(frame_group['atoms'])
+        od = compute_absorption_od(dark, light, atoms)
+        self._send_image_to_parent(od)
 
     def set_manual_attribute(self, name, value):
         """Set a camera attribute from the BLACS tab during manual mode.

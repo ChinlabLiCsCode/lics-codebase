@@ -70,9 +70,11 @@ class PCOCameraTab(IMAQdxCameraTab):
         # start at the values the camera will actually be using.
         roi_w_init, roi_y0_init, roi_h_init = 2048, 1, 2048
         exposure_ms_init = 50.0
+        display_mode = 'live'
         try:
             table = self.settings['connection_table']
             ct_props = table.find_by_name(self.device_name).properties
+            display_mode = ct_props.get('display_mode', 'live')
             with h5py.File(table.filepath, 'r') as f:
                 dev_props = labscript_utils.properties.get(f, self.device_name, 'device_properties')
             attrs = {**dev_props.get('camera_attributes', {}),
@@ -95,6 +97,12 @@ class PCOCameraTab(IMAQdxCameraTab):
         row = QtWidgets.QHBoxLayout()
         row.setContentsMargins(4, 4, 4, 4)
         controls.setLayout(row)
+
+        mode_text = "Absorption (last-shot OD)" if display_mode == 'absorption' else "Live"
+        mode_label = QtWidgets.QLabel(f"Display mode: {mode_text}")
+        mode_label.setStyleSheet("font-weight: bold;")
+        row.addWidget(mode_label)
+        row.addSpacing(16)
 
         row.addWidget(QtWidgets.QLabel("ROI:"))
 
