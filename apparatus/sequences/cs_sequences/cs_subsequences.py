@@ -199,7 +199,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     name = f'absorption{image_num}'
     # collect initial background image with the shutter closed 
     ct.Pixelfly_Shutter__b2c06.disable(t-0.225)
-    ct.pco_panda.expose(t-0.225, name=name, frametype="dark", trigger_duration=exposure_duration)
+    ct.pco_panda.expose(t-0.225, name=name, frametype="dark", trigger_duration=pco_exposure_duration)
 
 
     # make sure MOT and REP freqs are right
@@ -217,26 +217,26 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     # ATOM IMAGE at t=0.000
 
     # acquire image
-    ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=exposure_duration)
+    ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter
     ct.Pixelfly_Shutter__b2c06.enable(t-0.006)
     ct.Pixelfly_Shutter__b2c06.disable(t-0.001)
 
     # imaging beam
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t-0.013)
-    ct.Cs_HImg_Shutter__b1c07.enable(t-0.012)
-    ct.Cs_LFImg_Shutter__b1c11.enable(t-0.012)
-    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.001)
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+Img_Pulse_Length_CsLFHImg+0.001) # 100 us imaging pulse
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t-0.015)
+    ct.Cs_HImg_Shutter__b1c07.enable(t-0.014)
+    ct.Cs_LFImg_Shutter__b1c11.enable(t-0.014)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+Img_Pulse_Length_CsLFHImg) 
     ct.Scope_Trig__b2c08.enable(t)
     ct.Scope_Trig__b2c08.disable(t+Img_Pulse_Length_CsLFHImg)
     ct.Cs_HImg_Shutter__b1c07.disable(t)
     ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.030)
 
     # V OP beam
-    ct.Cs_OP_AO_Sw__b1c08.disable(t-0.013)
-    ct.Cs_VOP_Shutter__b1c16.enable(t-0.012)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t-0.015)
+    ct.Cs_VOP_Shutter__b1c16.enable(t-0.014)
     ct.Cs_OP_AO_AM__b3c25.constant(t-0.001, 3)
     ct.Cs_OP_AO_Sw__b1c08.enable(t-0.001)
     ct.Cs_OP_AO_Sw__b1c08.disable(t+Img_Pulse_Length_CsLFHImg)
@@ -251,26 +251,26 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     # LIGHT IMAGE at t=0.200
 
     # aquire image
-    ct.pco_panda.expose(t+0.175, name=name, frametype='light', trigger_duration=exposure_duration)
+    ct.pco_panda.expose(t+0.175, name=name, frametype='light', trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter 
     ct.Pixelfly_Shutter__b2c06.enable(t+0.194)
     ct.Pixelfly_Shutter__b2c06.disable(t+0.199)
 
     # imaging beam
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.187)
-    ct.Cs_HImg_Shutter__b1c07.enable(t+0.188)
-    ct.Cs_LFImg_Shutter__b1c11.enable(t+0.188)
-    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.200+0.001)
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.200+Img_Pulse_Length_CsLFHImg+0.001) # 100 us imaging pulse
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.185)
+    ct.Cs_HImg_Shutter__b1c07.enable(t+0.186)
+    ct.Cs_LFImg_Shutter__b1c11.enable(t+0.186)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.200)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.200+Img_Pulse_Length_CsLFHImg) 
     # ct.Scope_Trig__b2c08.enable(t+0.200)
     # ct.Scope_Trig__b2c08.disable(t+0.200+Img_Pulse_Length_CsLFHImg)
     ct.Cs_HImg_Shutter__b1c07.disable(t+0.200)
     ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.230)
 
     # V OP beam
-    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.187)
-    ct.Cs_VOP_Shutter__b1c16.enable(t+0.188)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.185)
+    ct.Cs_VOP_Shutter__b1c16.enable(t+0.186)
     ct.Cs_OP_AO_AM__b3c25.constant(t+0.199, 3)
     ct.Cs_OP_AO_Sw__b1c08.enable(t+0.199)
     ct.Cs_OP_AO_Sw__b1c08.disable(t+0.200+Img_Pulse_Length_CsLFHImg)
