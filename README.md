@@ -62,6 +62,14 @@ user_devices = ___/lics-codebase/lics-labscript-devices   # for our custom devic
 Setting these should take care of it. 
 
 
+## Analysis code
+
+Standard analysis code lives in `analysislib`, which is what lyse points at. Two parts of it are worth calling out:
+
+- `analysislib/imaging` is the absorption imaging pipeline: it loads a shot's frames, builds a synthetic light frame by masked-PCA defringing against other shots, and turns the result into a column density with fits and a plot. It is a port of the MATLAB code in `MATLAB/imaging`. See `analysislib/imaging/README.md` for the region conventions and for how to choose the defringe reference. The lyse single-shot routine that drives it is `analysislib/df_image_analysis.py`.
+
+- `analysislib/analysislib-mloop` is our fork of [rpanderson/analysislib-mloop](https://github.com/rpanderson/analysislib-mloop), used to run M-LOOP optimisations against the experiment. It was a git submodule until August 2026, when it was folded into this repo as ordinary files. **Commit changes to it here** — the old `chinlablicsexp/analysislib-mloop` repo is no longer wired up, and anything pushed there will not reach this codebase. Note that this is separate from the `M-LOOP` submodule at the repository root, which is the upstream optimisation package itself and is still a submodule.
+
 ## Handling updates
 
 This repository is going to be updated frequently, as we add new features and fix bugs. To keep your local copy up to date, you'll need to pull from Github. If a change is pushed to Github and you don't have any local changes, then great, just pull the changes from Github. If you DO have local changes, then you'll need to stash them, pull the changes from Github, and then unstash your changes to apply them on top of the updated code. If there's a conflict, you'll need to resolve it manually. For this reason, I recommend pulling from Github frequently, so that you don't have to deal with a ton of changes at once.
