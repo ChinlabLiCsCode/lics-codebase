@@ -12,6 +12,10 @@ conv = pixel_size/magnification # pixel to image size conversion (um/pix)
 lambda_852 = 852.34727582e-9 # cs d2 transition wavelength in nm
 span = np.linspace(0, 2048*conv, 2048) #array of pixels
 
+#fit options
+FIT_OFFSET = True           # fit a constant background term B in the Gaussian
+INCLUDE_OFFSET_IN_N = False # include the B*span contribution in N_x and N_y
+
 #get run data
 run = lyse.Run(lyse.path)
 shot_path = lyse.path
@@ -53,26 +57,43 @@ def abs_calc(dark_image, light_image, atoms_image):
 ###########################################################cloud size calculation################################################
 
 # fitting functions
-def gaussian_dist(x, A, x0:float, sigma:float, B:float):
+def gaussian_dist(x, A, x0:float, sigma:float, B:float=0.0):
     return A * np.exp(-(x - x0)**2/ (2 * sigma**2)) + B
 
-def fit_fun(x, line_density):
+def gaussian_dist_nooffset(x, A, x0:float, sigma:float):
+    return gaussian_dist(x, A, x0, sigma, 0.0)
+
+def fit_fun(x, line_density, fit_offset=FIT_OFFSET):
+    """Fit a 1D Gaussian to line_density.
+
+    Always returns popt/perr of length 4, ordered (A, x0, sigma, B). When
+    fit_offset is False the constant term is not a free parameter and is
+    reported as B = 0 with zero uncertainty.
+    """
     A_guess = line_density.max()
     B_guess = np.median(line_density)
 
     x0_guess = x[np.argmax(line_density)]
 
-    p0 = np.array([A_guess - B_guess, x0_guess, 2000, B_guess])
+    if fit_offset:
+        model = gaussian_dist
+        p0 = np.array([A_guess - B_guess, x0_guess, 2000, B_guess])
+        bounds = ([0, x.min(), 1, -np.inf],
+                  [np.inf, x.max(), np.ptp(x), np.inf])
+    else:
+        model = gaussian_dist_nooffset
+        p0 = np.array([A_guess, x0_guess, 2000])
+        bounds = ([0, x.min(), 1],
+                  [np.inf, x.max(), np.ptp(x)])
 
     try:
         popt, pcov = curve_fit(
-            gaussian_dist,
+            model,
             x,
             line_density,
             p0=p0,
-            bounds=([0, x.min(), 1, -np.inf],
-                                [np.inf, x.max(), np.ptp(x), np.inf])
-            )
+            bounds=bounds
+        )
 
         perr = np.sqrt(np.diag(pcov))
         popt[2] = abs(popt[2])
@@ -83,13 +104,19 @@ def fit_fun(x, line_density):
         perr = np.full(p0.shape, 0.1)
         popt = np.full(p0.shape, 0.1)
 
+    if not fit_offset:
+        # pad with B = 0 so callers always see the same parameter ordering
+        popt = np.append(popt, 0.0)
+        perr = np.append(perr, 0.0)
+
     return popt, perr
 
 #extract fit
-def fit_extract(x_int, y_int):
+def fit_extract(x_int, y_int, fit_offset=FIT_OFFSET,
+                include_offset_in_N=INCLUDE_OFFSET_IN_N):
 
-    popt_x, perr_x = fit_fun(span, x_int/conv)
-    popt_y, perr_y = fit_fun(span, y_int/conv)
+    popt_x, perr_x = fit_fun(span, x_int/conv, fit_offset=fit_offset)
+    popt_y, perr_y = fit_fun(span, y_int/conv, fit_offset=fit_offset)
 
     A_x, x0_x, sigma_x, B_x = popt_x
     Ax_err, x0x_err, sigmax_err, Bx_err = perr_x
@@ -97,14 +124,18 @@ def fit_extract(x_int, y_int):
     A_y, x0_y, sigma_y, B_y = popt_y
     Ay_err, x0y_err, sigmay_err, By_err = perr_y
 
-    #get the atom number along x and y
+    #the curves to plot: the full fit, offset included if it was fitted
     x_dist = gaussian_dist(span, A_x, x0_x, sigma_x, B_x)
     y_dist = gaussian_dist(span, A_y, x0_y, sigma_y, B_y)
 
-    N_x = x_dist.sum()*conv
-    N_y = y_dist.sum()*conv
+    #get the atom number along x and y, with or without the constant term
+    B_x_N = B_x if include_offset_in_N else 0.0
+    B_y_N = B_y if include_offset_in_N else 0.0
 
-    return x_dist, N_x, x0_x, sigma_x, y_dist, N_y, x0_y, sigma_y
+    N_x = gaussian_dist(span, A_x, x0_x, sigma_x, B_x_N).sum()*conv
+    N_y = gaussian_dist(span, A_y, x0_y, sigma_y, B_y_N).sum()*conv
+
+    return x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y
 
 
 ####################################################################plotting code#############################
@@ -196,7 +227,7 @@ x_int = rho.sum(axis=0)
 y_int = rho.sum(axis=1)
 
 #fit results
-x_dist, N_x, x0_x, sigma_x, y_dist, N_y, x0_y, sigma_y = fit_extract(x_int, y_int)
+x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(x_int, y_int)
 
 plot_results("")
 
@@ -207,5 +238,7 @@ run.save_result("sigma_x (um)", sigma_x)
 run.save_result("sigma_y (um)", sigma_y)
 run.save_result("x0_x (um)", x0_x)
 run.save_result("x0_y (um)", x0_y)
+run.save_result("B_x", B_x)
+run.save_result("B_y", B_y)
 run.save_result("N_x", N_x)
 run.save_result("N_y", N_y)
