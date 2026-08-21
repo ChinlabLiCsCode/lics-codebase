@@ -101,7 +101,7 @@ class ConnectionTable:
         self.Cs_LFImg_Shutter__b1c11          = DigitalOut(default_value=0,          name='Cs_LFImg_Shutter__b1c11',          parent_device=NIBox1, connection='port1/line3')
         self.Cs_Rep_Shutter__b1c12            = DigitalOut(default_value=1,          name='Cs_Rep_Shutter__b1c12',            parent_device=NIBox1, connection='port1/line4')
         self.Cs_RSC_AO_Sw__b1c13              = DigitalOut(default_value=1,          name='Cs_RSC_AO_Sw__b1c13',              parent_device=NIBox1, connection='port1/line5')
-        self.Cs_RSC_Shutter__b1c14            = DigitalOut(default_value=0,          name='Cs_RSC_Shutter__b1c14',            parent_device=NIBox1, connection='port1/line6')
+        self.Cs_RSC_Shutter__b1c14            = DigitalOut(default_value=1,          name='Cs_RSC_Shutter__b1c14',            parent_device=NIBox1, connection='port1/line6')
         self.Cs_VImg_Shutter__b1c15           = DigitalOut(default_value=0,          name='Cs_VImg_Shutter__b1c15',           parent_device=NIBox1, connection='port1/line7')
         self.Cs_VOP_Shutter__b1c16           = DigitalOut(default_value=0,           name='Cs_VOP_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
         self.Cs_Zeeman_Shutter__b1c17         = DigitalOut(default_value=1,          name='Cs_Zeeman_Shutter__b1c17',         parent_device=NIBox1, connection='port2/line1')
