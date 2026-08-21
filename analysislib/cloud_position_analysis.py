@@ -13,6 +13,10 @@ conv = pixel_size/magnification # pixel to image size conversion (um/pix)
 lambda_852 = 852.34727582e-9 # cs d2 transition wavelength in nm
 span = np.linspace(0, 2048*conv, 2048) #array of pixels
 
+#fit options
+FIT_OFFSET = True           # fit a constant background term B in the Gaussian
+INCLUDE_OFFSET_IN_N = False # include the B*span contribution in N_x and N_y
+
 #get run data
 run = lyse.Run(lyse.path)
 shot_path = lyse.path
@@ -57,36 +61,66 @@ def abs_calc(dark_image, light_image, atoms_image):
 ###########################################################cloud size calculation################################################
 
 # fitting functions
-def gaussian_dist(x, A, x0:float, sigma:float, B:float):
+def gaussian_dist(x, A, x0:float, sigma:float, B:float=0.0):
     return A * np.exp(-(x - x0)**2/ (2 * sigma**2)) + B
 
-def fit_fun(x, line_density):
+def gaussian_dist_nooffset(x, A, x0:float, sigma:float):
+    return gaussian_dist(x, A, x0, sigma, 0.0)
+
+def fit_fun(x, line_density, fit_offset=FIT_OFFSET):
+    """Fit a 1D Gaussian to line_density.
+
+    Always returns popt/perr of length 4, ordered (A, x0, sigma, B). When
+    fit_offset is False the constant term is not a free parameter and is
+    reported as B = 0 with zero uncertainty.
+    """
     A_guess = line_density.max()
     B_guess = np.median(line_density)
 
     x0_guess = x[np.argmax(line_density)]
 
-    p0 = [A_guess - B_guess, x0_guess, 2000, B_guess]
+    if fit_offset:
+        model = gaussian_dist
+        p0 = np.array([A_guess - B_guess, x0_guess, 2000, B_guess])
+        bounds = ([0, x.min(), 1, -np.inf],
+                  [np.inf, x.max(), np.ptp(x), np.inf])
+    else:
+        model = gaussian_dist_nooffset
+        p0 = np.array([A_guess, x0_guess, 2000])
+        bounds = ([0, x.min(), 1],
+                  [np.inf, x.max(), np.ptp(x)])
 
-    popt, pcov = curve_fit(
-        gaussian_dist,
-        x,
-        line_density,
-        p0=p0,
-        bounds=([0, x.min(), 1, -np.inf],
-                               [np.inf, x.max(), np.ptp(x), np.inf])
+    try:
+        popt, pcov = curve_fit(
+            model,
+            x,
+            line_density,
+            p0=p0,
+            bounds=bounds
         )
 
-    perr = np.sqrt(np.diag(pcov))
-    popt[2] = abs(popt[2])
+        perr = np.sqrt(np.diag(pcov))
+        popt[2] = abs(popt[2])
+    except Exception as e:
+        print("Failed to fit")
+        print(e)
+
+        perr = np.full(p0.shape, 0.1)
+        popt = np.full(p0.shape, 0.1)
+
+    if not fit_offset:
+        # pad with B = 0 so callers always see the same parameter ordering
+        popt = np.append(popt, 0.0)
+        perr = np.append(perr, 0.0)
 
     return popt, perr
 
 #extract fit
-def fit_extract(x_int, y_int):
+def fit_extract(x_int, y_int, fit_offset=FIT_OFFSET,
+                include_offset_in_N=INCLUDE_OFFSET_IN_N):
 
-    popt_x, perr_x = fit_fun(span, x_int/conv)
-    popt_y, perr_y = fit_fun(span, y_int/conv)
+    popt_x, perr_x = fit_fun(span, x_int/conv, fit_offset=fit_offset)
+    popt_y, perr_y = fit_fun(span, y_int/conv, fit_offset=fit_offset)
 
     A_x, x0_x, sigma_x, B_x = popt_x
     Ax_err, x0x_err, sigmax_err, Bx_err = perr_x
@@ -94,14 +128,18 @@ def fit_extract(x_int, y_int):
     A_y, x0_y, sigma_y, B_y = popt_y
     Ay_err, x0y_err, sigmay_err, By_err = perr_y
 
-    #get the atom number along x and y
+    #the curves to plot: the full fit, offset included if it was fitted
     x_dist = gaussian_dist(span, A_x, x0_x, sigma_x, B_x)
     y_dist = gaussian_dist(span, A_y, x0_y, sigma_y, B_y)
 
-    N_x = x_dist.sum()*conv
-    N_y = y_dist.sum()*conv
+    #get the atom number along x and y, with or without the constant term
+    B_x_N = B_x if include_offset_in_N else 0.0
+    B_y_N = B_y if include_offset_in_N else 0.0
 
-    return x_dist, N_x, x0_x, sigma_x, y_dist, N_y, x0_y, sigma_y
+    N_x = gaussian_dist(span, A_x, x0_x, sigma_x, B_x_N).sum()*conv
+    N_y = gaussian_dist(span, A_y, x0_y, sigma_y, B_y_N).sum()*conv
+
+    return x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y
 
 
 
@@ -159,7 +197,8 @@ def plot_results(params, title):
     ax_cb      = fig.add_subplot(gs_bot[0, 2])
     ax_x_prof  = fig.add_subplot(gs_bot[1, 1], sharex=ax_density)
 
-    im4 = ax_density.imshow(rho/conv**2, vmin=0, vmax=rho.max()/conv**2, extent=extent, origin='lower')
+    vmax_density = float(np.percentile(rho[rho > 0], 99.5)) / conv**2
+    im4 = ax_density.imshow(rho/conv**2, vmin=0, vmax=vmax_density, extent=extent, origin='lower')
     ax_density.set_title(rf"2D Density (atoms/$\mu m^2$), N={N:.1e}")
     fig.colorbar(im4, cax=ax_cb)
     ax_cb.set_ylabel(r'Density (atoms/$\mu m^2$)')
@@ -181,6 +220,20 @@ def plot_results(params, title):
     fig.suptitle(run_name+title)
     plt.show()
 
+####################################################################displacement readout######
+def plot_displacement(displacement):
+    """Show the cloud displacement on its own, large enough to read at a glance."""
+    text = '--' if not np.isfinite(displacement) else rf'{displacement:.1f} $\mu$m'
+
+    fig = plt.figure(constrained_layout=True, figsize=(6, 2.5))
+    ax_big = fig.add_subplot(111)
+    ax_big.axis('off')
+    ax_big.text(0.5, 0.6, text, ha='center', va='center',
+                fontsize=128, fontweight='bold', transform=ax_big.transAxes)
+    ax_big.text(0.5, 0.1, 'cloud displacement', ha='center', va='center',
+                fontsize=26, color='gray', transform=ax_big.transAxes)
+    plt.show()
+
 ###########################get all parameters for the first image############################
 #log_image, 2d density and atom number
 log_image_no_ramp, rho_no_ramp, N_no_ramp = abs_calc(
@@ -193,7 +246,7 @@ x_int_no_ramp = rho_no_ramp.sum(axis=0)
 y_int_no_ramp = rho_no_ramp.sum(axis=1)
 
 #fit results
-x_dist_no_ramp, N_x_no_ramp, x0_x_no_ramp, sigma_x_no_ramp, y_dist_no_ramp, N_y_no_ramp, x0_y_no_ramp, sigma_y_no_ramp = fit_extract(
+x_dist_no_ramp, N_x_no_ramp, x0_x_no_ramp, sigma_x_no_ramp, B_x_no_ramp, y_dist_no_ramp, N_y_no_ramp, x0_y_no_ramp, sigma_y_no_ramp, B_y_no_ramp = fit_extract(
     x_int_no_ramp,
     y_int_no_ramp)
 
@@ -209,7 +262,7 @@ x_int_ramp = rho_ramp.sum(axis=0)
 y_int_ramp = rho_ramp.sum(axis=1)
 
 #fit results
-x_dist_ramp, N_x_ramp, x0_x_ramp, sigma_x_ramp, y_dist_ramp, N_y_ramp, x0_y_ramp, sigma_y_ramp = fit_extract(
+x_dist_ramp, N_x_ramp, x0_x_ramp, sigma_x_ramp, B_x_ramp, y_dist_ramp, N_y_ramp, x0_y_ramp, sigma_y_ramp, B_y_ramp = fit_extract(
     x_int_ramp,
     y_int_ramp)
 
@@ -243,6 +296,7 @@ params_ramp = (
 
 plot_results(params_no_ramp, title=": No Ramp")
 plot_results(params_ramp, title=": With Ramp")
+plot_displacement(cloud_displacement)
 
 ################################save results########################################################
 run.save_result("N_int_no_ramp", N_no_ramp)

@@ -139,6 +139,15 @@ def fit_extract(x_int, y_int, fit_offset=FIT_OFFSET,
 
 
 ####################################################################plotting code#############################
+def big_number(value):
+    """Format an atom number as mantissa x 10^exponent, for the large readout."""
+    if not np.isfinite(value) or value <= 0:
+        return '--'
+    exponent = int(np.floor(np.log10(value)))
+    mantissa = value / 10**exponent
+    return rf'${mantissa:.2f}\times10^{{{exponent}}}$'
+
+
 def plot_results(title):
     extent = [0, 2048*conv, 0, 2048*conv]  # rescale extent into microns
 
@@ -216,6 +225,16 @@ def plot_results(title):
     # ax_y_prof.legend(fontsize=8)
 
     fig.suptitle(run_name+title)
+
+    # Displaying the N_y value larger
+    fig_2 = plt.figure(constrained_layout=True, figsize=(6, 2.5))
+    ax_big = fig_2.add_subplot(111)
+    ax_big.axis('off')
+    ax_big.text(0.5, 0.6, big_number(N_y), ha='center', va='center',
+                fontsize=128, fontweight='bold', transform=ax_big.transAxes)
+    ax_big.text(0.5, 0.1, 'atoms ($N_y$)', ha='center', va='center',
+                fontsize=26, color='gray', transform=ax_big.transAxes)
+
     plt.show()
 
 ###############################################get all parameters and plot results############################
