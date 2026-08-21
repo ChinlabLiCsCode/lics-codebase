@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import clear_output, display, HTML
 from scipy.optimize import curve_fit
+from scipy.special import erf
 from labscript_utils.labconfig import LabConfig
 from lyse.dataframe_utilities import get_dataframe_from_shots, get_series_from_shot
 
@@ -53,7 +54,7 @@ def find_scanned_globals(df):
     return scanned
 
 
-_FIT_TYPES = ('mean', 'linear', 'quadratic', 'gaussian', 'exponential', 'ballistic')
+_FIT_TYPES = ('mean', 'linear', 'quadratic', 'cubic', 'poly4', 'poly5', 'gaussian', 'skew_gaussian', 'exponential', 'ballistic')
 
 
 def _resolve_fits(fits, pairs):
@@ -152,6 +153,68 @@ def _do_fit(fit_type, x, y, yerr=None):
         tau = 1.0 / rate if rate != 0 else np.inf
         return (x_fine, exp_func(x_fine - x[0], *popt), f'τ={tau:.4g}',
                 None, {'type': 'exponential', 'A': A, 'rate': rate, 'tau': tau, 'B': B})
+
+    if fit_type == 'cubic':
+        if len(x) < 4:
+            raise ValueError('need ≥4 points for cubic fit')
+        w = np.sqrt(1 / sigma**2) if sigma is not None else None
+        a, b, c, d = np.polyfit(x, y, 3, w=w)
+        # local extrema from derivative 3a·x² + 2b·x + c = 0
+        marker = None
+        disc = (2 * b)**2 - 4 * (3 * a) * c
+        if disc >= 0 and a != 0:
+            roots = [(-2 * b + s * np.sqrt(disc)) / (6 * a) for s in (1, -1)]
+            # keep roots in data range where 2nd derivative < 0 (local max)
+            maxima = [r for r in roots if x.min() <= r <= x.max()
+                      and 6 * a * r + 2 * b < 0]
+            if maxima:
+                xm = max(maxima, key=lambda r: np.polyval([a, b, c, d], r))
+                marker = (xm, float(np.polyval([a, b, c, d], xm)))
+        return (x_fine, np.polyval([a, b, c, d], x_fine),
+                f'cubic, a={a:.3g}',
+                marker,
+                {'type': 'cubic', 'a': a, 'b': b, 'c': c, 'd': d})
+
+    if fit_type in ('poly4', 'poly5'):
+        deg = 4 if fit_type == 'poly4' else 5
+        if len(x) < deg + 1:
+            raise ValueError(f'need ≥{deg + 1} points for {fit_type} fit')
+        w = np.sqrt(1 / sigma**2) if sigma is not None else None
+        coeffs_poly = np.polyfit(x, y, deg, w=w)
+        y_fine = np.polyval(coeffs_poly, x_fine)
+        i_max = int(np.argmax(y_fine))
+        marker = (float(x_fine[i_max]), float(y_fine[i_max]))
+        coeff_keys = ['a', 'b', 'c', 'd', 'e', 'f'][:deg + 1]
+        return (x_fine, y_fine,
+                f'{fit_type}, max≈{x_fine[i_max]:.4g}',
+                marker,
+                {'type': fit_type, **dict(zip(coeff_keys, coeffs_poly))})
+
+    if fit_type == 'skew_gaussian':
+        if len(x) < 5:
+            raise ValueError('need ≥5 points for skew_gaussian fit')
+        def skew_gauss(x, A, x0, sig, alpha, B):
+            z = (x - x0) / sig
+            return A * np.exp(-z**2 / 2) * (1 + erf(alpha * z / np.sqrt(2))) + B
+        A0 = (y.max() - y.min()) / 2
+        x0_0 = x[np.argmax(y)]
+        sig0 = max((x.max() - x.min()) / 4, 1e-10)
+        span = x.max() - x.min()
+        popt, _ = curve_fit(skew_gauss, x, y,
+                            p0=[A0, x0_0, sig0, 0.0, y.min()],
+                            sigma=sigma, maxfev=20000,
+                            bounds=([0, x.min() - span, 0, -np.inf, -np.inf],
+                                    [np.inf, x.max() + span, np.inf, np.inf, np.inf]))
+        A, x0, sig, alpha, B = popt
+        delta = alpha / np.sqrt(1 + alpha**2)
+        x_mode = x0 + sig * delta * np.sqrt(2 / np.pi)
+        y_mode = float(skew_gauss(np.array([x_mode]), *popt)[0])
+        marker = (x_mode, y_mode) if x.min() <= x_mode <= x.max() else None
+        return (x_fine, skew_gauss(x_fine, *popt),
+                f'skew-gauss mode≈{x_mode:.4g}, σ={sig:.4g}, α={alpha:.3g}',
+                marker,
+                {'type': 'skew_gaussian', 'A': A, 'x0': x0, 'sigma': sig,
+                 'alpha': alpha, 'B': B, 'mode': x_mode})
 
     if fit_type == 'ballistic':
         # σ²(t) = σ₀² + v_rms²·t²  — linear fit in (t², σ²) space
