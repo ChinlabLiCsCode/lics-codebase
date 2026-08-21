@@ -137,7 +137,7 @@ def Cs_Molasses(t, ct: ConnectionTable):
     Returns: t+0.005
     """
     #adjust the MOT and repump frequencies
-    ct.Cs_MOT_Freq__b3c24.ramp(t-0.002, 0.006, Cs_MOT_Freq_CsCMOT, Cs_MOT_Freq_Molasses, ct.FINE)
+    ct.Cs_MOT_Freq__b3c24.ramp(t-0.002, 0.002, Cs_MOT_Freq_CsCMOT, Cs_MOT_Freq_Molasses, ct.FINE)
     ct.Cs_Rep_Freq__b3c26.ramp(t-0.001, 0.002, Cs_Rep_Freq_CsCMOT, Cs_Rep_Freq_Molasses, ct.FINE)
 
     #adjust the MOT and optical pump aom amplitudes
@@ -145,27 +145,31 @@ def Cs_Molasses(t, ct: ConnectionTable):
     ct.Cs_OP_AO_AM__b3c25.constant(t, 5)
 
     #bitter coil control
-    # ct.Bitter_Lower_FF__b3c14.constant(t, 0)
-    # ct.Bitter_IServo_FB_Sw__b3c11.constant(t, 5)
-    # ct.Bitter_Upper_AH_Sw__b3c15.constant(t, 0)
-    # ct.Bitter_AH_Upper_FF__b3c09.constant(t, 0)
+    ct.Bitter_Lower_FF__b3c14.constant(t, 0)
+    ct.Bitter_AH_Upper_FF__b3c09.constant(t, 0)
+    ct.Bitter_IServo_FB_Sw__b3c11.constant(t, 5)
+    ct.Bitter_Upper_AH_Sw__b3c15.constant(t, 0)
 
-    #bias coil control
-    # ct.Bias_X_plus__b3c03.constant(t, 0.499878)
-    # ct.Bias_X_minus__b3c04.constant(t, -1.00061)
-    # ct.Bias_Y_plus__b3c05.constant(t, 2.864075)
-    # ct.Bias_Y_minus__b3c06.constant(t, -1.499939)
-    # ct.Bias_Z_plus__b3c07.constant(t, -1.00061)
-    # ct.Bias_Z_minus__b3c08.constant(t, -0.400085)
+    ct.Scope_Trig__b2c08.enable(t)
+    ct.Scope_Trig__b2c08.disable(t+0.001)
+    
+
+    # bias fields 
+    ct.Bias_X_HH.constant(t, Bias_X_HH_Molasses)
+    ct.Bias_X_AH.constant(t, Bias_X_AH_Molasses)
+    ct.Bias_Y_HH.constant(t, Bias_Y_HH_Molasses)
+    ct.Bias_Y_AH.constant(t, Bias_Y_AH_Molasses)
+    ct.Bias_Z_HH.constant(t, Bias_Z_HH_Molasses)
+    ct.Bias_Z_AH.constant(t, Bias_Z_AH_Molasses)
 
     # turn MOT light off after molasses
-    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t+0.005)
-    ct.Cs_3DMOT_Shutter__b1c03.disable(t+0.005) # this was actually -7ms but I brought it up
+    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t+Cs_Molasses_Time)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t+Cs_Molasses_Time-0.014) 
 
-    # reset MOT laser frequency after molasses
-    ct.Cs_MOT_Freq__b3c24.ramp(t+0.008, 0.001, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_CsLFHImg, ct.FINE)
+    # # reset MOT laser frequency after molasses
+    # ct.Cs_MOT_Freq__b3c24.ramp(t+0.008, 0.001, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_CsLFHImg, ct.FINE)
 
-    return t+0.005
+    return t+Cs_Molasses_Time
 
 def TOF(t, ct: ConnectionTable):
     """Function to turn off all shutters and AOMs related to the MOT, dipole traps, etc."""
