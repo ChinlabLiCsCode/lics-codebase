@@ -13,6 +13,97 @@ Skipped (no callers outside themselves / empty / not needed):
 
 ---
 
+## [2026-08-22] — imaging: notebook portal and defringe diagnostics
+
+### Added
+- `analysislib/imaging/portal.py` — callable access to the pipeline, addressed
+  the way `helperfuncs.live_plot_scan` addresses a scan.  `df_image_analysis.py`
+  runs against `lyse.path` at import time and so cannot be called; this is its
+  callable half
+  - `view_shot(year, month, day, sequence, number, shot=0, ...)` → `ShotView`
+    (result, fit, params, figures, `.results()`).  `shot` takes an index, a
+    negative index, or a filename fragment
+  - `view_scan(...)` → DataFrame of the same numbers the lyse routine saves
+  - `reference_indices` / `defringe_set_for`: build the basis out of a shot's
+    neighbours in the run.  `reference='previous'` reproduces what lyse's
+    rolling cache sees live, `'nearest'` straddles the shot (better offline),
+    `'all'` takes the folder
+  - Shot storage resolves from labconfig's `experiment_shot_storage`, shared
+    with `helperfuncs._sequence_folder`; the per-call `storage=` argument is for
+    reading a tree that is not this machine's
+  - Light frames are memoised across calls, so `view_scan` over a run does not
+    reload the same reference frames once per shot
+- `analysislib/imaging/debug.py` — the `debug=True` diagnostics, following
+  Niu et al. (`Niu.pdf`)
+  - `plot_basis` (Niu Fig. 3): eigenvalue spectrum with the photon-shot-noise
+    plateau marked, and the components themselves, at a size where fringes are
+    distinguishable from salt and pepper
+  - `plot_defringe`: A, L and A′, the OD with and without defringing, and the
+    OD histogram outside the atom box.  Compares the ring just outside the box
+    against the border of the view and warns when the ring sits higher, meaning
+    atoms are spilling out of `mask` and the defringe fit is reproducing the
+    cloud.  The two-region comparison is what keeps a uniform probe-energy
+    pedestal from being mistaken for leaking atoms
+  - `plot_component_scan` / `plot_reference_scan` (Niu Fig. 2b): residual noise
+    on a *held-out* light frame against each knob, plus the shot's fitted `N`
+    against component count.  Both report the cheapest setting within 1 % of
+    the best rather than the raw argmin, since the curves are flat-bottomed
+  - `check_fringes` / `plot_fringe_check` — *did the defringing actually
+    remove fringes?*  Finds the fringe wavevector in the raw light frame, then
+    measures what survives into `-log(A/L)` and `-log(A/A')` over the largest
+    atom-free window, as an rms amplitude in OD (Parseval over the band) and as
+    anisotropy against the same frequency rotated 90 degrees, which cancels the
+    isotropic shot noise so that 1.0 means no fringe left.  Says so when the
+    PCA fit is leaving more fringe than a plain `A/L` would
+  - `od_noise`, `scan_components`, `scan_references` are usable on their own
+  - `debug=True` prints the shots making up the defringe basis first — folder
+    index, filename (shared prefix printed once), the shot under analysis
+    marked, and the held-out probe the noise scans use.  Also
+    `portal.print_reference_set(view)` and `ShotView.reference_names`
+- `helperfuncs.view_shot` / `helperfuncs.view_scan` — thin re-exports, so a
+  daily notebook that already has `import analysislib.helperfuncs as hf` reaches
+  the imaging pipeline without a second import.  The imaging package is imported
+  lazily
+- `tests/imaging/test_defringe.py` — 27 tests on synthetic light frames (beam +
+  drifting fringes + Poisson noise): basis orthonormality under the mask
+  weighting, truncation, persistence, plateau detection against a known number
+  of fringe patterns, knob selection, reference-shot selection, and the lyse
+  rolling cache
+
+- `defringe='scale'` (`imaging.IntensityScale`) — `A' = c*L`, this shot's own
+  light frame times `exp(median(log(A/L)))` over the unmasked pixels, which is
+  the scale that makes the optical density read zero where there are no atoms.
+  No PCA, so it cannot damage the fringes, and it removes the probe-energy
+  pedestal between the two exposures: on run 0057 that pedestal is +0.06 OD and
+  inflates `N` by ~13% under `'none'`
+
+### Changed
+- `DefringeSet` keeps the full eigenvalue spectrum and the kept eigenvalues, so
+  the discarded modes can be plotted alongside the kept ones
+  - `.apply(image, n_components=..., return_coefficients=...)`: truncating the
+    basis is a row slice, which is what makes the component scan cheap
+  - `.coefficients()`, `.component(j)`, `.mask_weights`
+  - `.noise_floor` / `.n_above_noise`: independent shot noise in `n` reference
+    frames gives `n-1` modes of equal variance, so it appears as a flat plateau
+    at the bottom of the spectrum.  The suggested `pca_number` is everything
+    above the largest gap, skipping the beam-profile component that dominates
+    the uncentred PCA of `defringeset_create.m`
+- `ImagingParams.subtract_mean` (default `False`): Niu subtracts the mean
+  reference frame before the decomposition; `False` keeps
+  `defringeset_create.m`'s behaviour of appending a constant frame instead
+- `ShotResult.coefficients` holds the fit coefficients `x_j` of Niu's step 2
+- `imaging/process.py` imports `labscript_utils.h5_lock` before `h5py`, as lyse
+  does.  Without it, importing `analysislib.imaging` before
+  `analysislib.helperfuncs` made the later `import lyse` fail
+- `helperfuncs._sequence_folder` takes an optional `storage` override and shares
+  its path resolution with the portal
+- `analysislib/imaging/README.md` documents the portal, the diagnostics, and how
+  to read each figure.  The three reference papers (`Niu.pdf`, `Reinaudi.pdf`,
+  `Veyron.pdf`) are in the folder; `alpha` is documented as the
+  `α = a0 + a1·b + a2·b²` of Reinaudi extended by Veyron's density dependence
+
+---
+
 ## [2026-08-20] — imaging pipeline (df_view_image → df_image_analysis)
 
 ### Added

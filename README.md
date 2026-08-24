@@ -72,7 +72,18 @@ Setting these should take care of it.
 
 Standard analysis code lives in `analysislib`, which is what lyse points at. Two parts of it are worth calling out:
 
-- `analysislib/imaging` is the absorption imaging pipeline: it loads a shot's frames, builds a synthetic light frame by masked-PCA defringing against other shots, and turns the result into a column density with fits and a plot. It is a port of the MATLAB code in `MATLAB/imaging`. See `analysislib/imaging/README.md` for the region conventions and for how to choose the defringe reference. The lyse single-shot routine that drives it is `analysislib/df_image_analysis.py`.
+- `analysislib/imaging` is the absorption imaging pipeline: it loads a shot's frames, builds a synthetic light frame by masked-PCA defringing against other shots, and turns the result into a column density with fits and a plot. It is a port of the MATLAB code in `MATLAB/imaging`. The lyse single-shot routine that drives it is `analysislib/df_image_analysis.py`.
+
+  From a notebook, reach it through `helperfuncs`, addressed the same way `live_plot_scan` addresses a scan:
+
+  ```python
+  import analysislib.helperfuncs as hf
+
+  view = hf.view_shot(2026, 8, 21, 'cs_molasses_healthcheck', 57, shot=12)
+  df   = hf.view_scan(2026, 8, 21, 'cs_molasses_healthcheck', 57)
+  ```
+
+  Add `debug=True` to see what the defringing is doing and what its two knobs should be set to: the principal components that were kept, the eigenvalue spectrum against the photon-shot-noise plateau, scans of the residual noise against `pca_number` and `n_reference`, and a check of whether the fringes actually went. See [`analysislib/imaging/README.md`](analysislib/imaging/README.md) for the region conventions, the defringe modes, and how to read each figure.
 
 - `analysislib/analysislib-mloop` is our fork of [rpanderson/analysislib-mloop](https://github.com/rpanderson/analysislib-mloop), used to run M-LOOP optimisations against the experiment. It was a git submodule until August 2026, when it was folded into this repo as ordinary files. **Commit changes to it here** — the old `chinlablicsexp/analysislib-mloop` repo is no longer wired up, and anything pushed there will not reach this codebase. Note that this is separate from the `M-LOOP` submodule at the repository root, which is the upstream optimisation package itself and is still a submodule.
 

@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from IPython.display import clear_output, display, HTML
 from scipy.optimize import curve_fit
 from scipy.special import erf
-from labscript_utils.labconfig import LabConfig
 from lyse.dataframe_utilities import get_dataframe_from_shots, get_series_from_shot
 
 
@@ -552,11 +551,66 @@ def calibrate_from_gravity(fit_results, pos_key, magnification, pixel_size=6.5,
     }
 
 
-def _sequence_folder(year, month, day, sequence, number):
-    """Return the path to a sequence folder using experiment_shot_storage from labconfig."""
-    labconfig = LabConfig()
-    storage = labconfig.get('DEFAULT', 'experiment_shot_storage')
-    return os.path.join(storage, sequence, f'{year:04d}', f'{month:02d}', f'{day:02d}', f'{number:04d}')
+def _portal():
+    """The imaging portal module, imported on first use.
+
+    Deferred because it pulls in h5py and the whole processing stack, which
+    the scan-plotting half of this module has no use for.  The absolute import
+    is the fallback for running this file as a script, where the relative one
+    has no parent package.
+    """
+    try:
+        from .imaging import portal
+    except ImportError:                                   # pragma: no cover
+        from analysislib.imaging import portal
+    return portal
+
+
+def _sequence_folder(year, month, day, sequence, number, storage=None):
+    """Return the path to a sequence folder using experiment_shot_storage from labconfig.
+
+    ``storage`` reads a shot tree other than this machine's — an archive, or a
+    copy of another rig's run.  Normally left alone: labconfig is where each
+    machine's paths belong.  Shared with the imaging portal, so both halves of
+    analysislib resolve a sequence folder the same way.
+    """
+    return os.path.join(_portal().shot_storage(storage), sequence,
+                        f'{year:04d}', f'{month:02d}', f'{day:02d}', f'{number:04d}')
+
+
+# ── defringed absorption imaging ──────────────────────────────────────────
+# Thin re-exports of analysislib.imaging.portal, so a daily notebook that has
+# already done `import analysislib.helperfuncs as hf` can reach the imaging
+# pipeline without a second import.  The imaging package is imported lazily:
+# it pulls in h5py and the whole processing stack, which the scan-plotting
+# half of this module has no use for.
+
+def view_shot(year, month, day, sequence, number, shot=0, **kwargs):
+    """Load, defringe, fit and plot one shot.  See imaging.portal.view_shot.
+
+    Addressed like :func:`live_plot_scan`, plus a shot index within the run::
+
+        view = hf.view_shot(2026, 8, 21, 'cs_molasses_healthcheck', 57, shot=12)
+
+    The two defringe knobs, and the diagnostics that set them::
+
+        view = hf.view_shot(2026, 8, 21, 'cs_molasses_healthcheck', 57, shot=12,
+                            n_reference=8,    # how far back to look
+                            pca_number=6,     # components kept
+                            debug=True)       # plot the components and scans
+    """
+    return _portal().view_shot(year, month, day, sequence, number,
+                              shot=shot, **kwargs)
+
+
+def view_scan(year, month, day, sequence, number, shots=None, **kwargs):
+    """Run the defringed analysis over a whole run, as a DataFrame.
+
+    See ``imaging.portal.view_scan``.  The offline equivalent of letting lyse
+    chew through the folder with ``df_image_analysis.py``.
+    """
+    return _portal().view_scan(year, month, day, sequence, number,
+                              shots=shots, **kwargs)
 
 
 def _find_h5_files(folder):

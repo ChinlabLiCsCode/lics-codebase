@@ -9,6 +9,21 @@ Everything configurable lives in PARAMS below; the machinery is in
 ``analysislib/imaging/``.  Compared with ``absorption_image_analysis.py`` this
 routine adds defringing, a view/atom-box crop, and the saturation-corrected OD,
 and it fits over the atom box rather than the whole 2048x2048 frame.
+
+To run the same analysis on shots that are already on disk — and to *choose*
+the settings below rather than guess them — use the notebook portal, which
+addresses a shot the way ``helperfuncs.live_plot_scan`` addresses a scan::
+
+    import analysislib.helperfuncs as hf
+
+    view = hf.view_shot(2026, 8, 21, 'cs_molasses_healthcheck', 57, shot=12)
+    view = hf.view_shot(2026, 8, 21, 'cs_molasses_healthcheck', 57, shot=12,
+                        n_reference=12, pca_number=3, debug=True)
+
+``debug=True`` plots the principal components, the eigenvalue spectrum against
+the photon-shot-noise plateau, a before/after of the defringing, and a scan of
+the residual noise against each of the two knobs below.  See
+``analysislib/imaging/README.md``.
 """
 
 import os
@@ -31,12 +46,26 @@ except ImportError:                                   # pragma: no cover
 PARAMS = presets.CS_H_MOT.replace(
     # 'auto' builds the defringe basis from the last n_reference shots this
     # routine has seen, plus the current one.  Alternatives:
-    #   'self'  - use only this shot's light frame (rescaled, no fringe removal)
+    #   'scale' - A' = c*L, this shot's own light frame times the one number
+    #             that makes the OD read zero outside the atom box.  No PCA, so
+    #             it cannot damage the fringes; use it when the fringe check in
+    #             debug mode says the PCA fit is leaving more fringe than a
+    #             plain A/L would
+    #   'self'  - PCA on this shot's light frame alone: a scale and an offset
     #   'none'  - plain atoms/light, i.e. what absorption_image_analysis does
     #   a path  - a set saved with imaging.build_defringe_set(), e.g.
     #             r'D:\LiCs_Exp_Data\defringe_sets\dfset_20260820.npz'
     defringe='auto',
+    # How far back to look: the basis is built from the last n_reference
+    # shots this routine has seen.  More frames pull the fringe modes further
+    # clear of the photon shot noise, but frames from too long ago describe
+    # fringes that have since drifted.
     n_reference=15,
+    # How many principal components to keep.  Only the components that stand
+    # above the shot-noise plateau are worth keeping; the rest just copy the
+    # reference frames' own noise into the synthetic light frame.  Check it
+    # with hf.view_shot(..., debug=True) rather than guessing — on the
+    # 2026-08-21 molasses shots the plateau starts at 2.
     pca_number=10,
     fit_type='gauss',        # 'gauss' | 'dbl' | 'tf', or a ('x', 'y') pair
     fit_offset=False,        # fit a constant baseline under the profiles

@@ -12,10 +12,20 @@ atoms and light frames before anything else happens.
 from dataclasses import dataclass, field
 import os
 
+# labscript_utils.h5_lock monkeypatches h5py and refuses to load if h5py got
+# there first, so lyse — and anything that imports lyse, such as
+# analysislib.helperfuncs — must not be the first to import it.  Importing it
+# here makes this package safe to import in either order.  The fallback is for
+# using the pipeline outside a labscript install.
+try:
+    import labscript_utils.h5_lock      # noqa: F401
+except ImportError:                     # pragma: no cover
+    pass
+
 import h5py
 import numpy as np
 
-from .defringe import DefringeSet
+from .defringe import DefringeSet, IntensityScale
 
 
 @dataclass
@@ -52,6 +62,7 @@ class ShotResult:
     defringe_set: object = None
     defringe_mode: str = 'none'
     reference_paths: list = field(default_factory=list)
+    coefficients: np.ndarray = None   # x_j of Niu step 2, one per component
 
     @property
     def n_components(self):
@@ -171,8 +182,13 @@ def resolve_defringe_set(L, params, cache=None):
     ``'none'``
         No defringing; the shot's own light frame is the reference.
     ``'self'``
-        Basis from this shot's light frame alone, which amounts to rescaling
-        it to match the atoms frame outside the mask.
+        Basis from this shot's light frame alone: a PCA set of one frame plus
+        the constant, so a scale *and* an offset.
+    ``'scale'``
+        No PCA at all.  ``A' = c * L``, this shot's own light frame times the
+        one number that makes the optical density read zero outside the atom
+        box.  The right choice when the atoms and light exposures are close
+        enough in time that their fringes have not moved.
     ``'auto'``
         Basis from ``cache`` (the last ``params.n_reference`` shots) plus this
         shot.  Falls back to ``'self'`` on the first shot.
@@ -187,10 +203,14 @@ def resolve_defringe_set(L, params, cache=None):
     if mode == 'none':
         return None, 'none', []
 
+    if mode == 'scale':
+        return IntensityScale(L, mask=params.mask, dtype=params.dtype), 'scale', []
+
     if mode == 'self':
         dfset = DefringeSet.from_stack(L[None, ...], mask=params.mask,
                                        pca_number=params.pca_number,
-                                       dtype=params.dtype)
+                                       dtype=params.dtype,
+                                       subtract_mean=params.subtract_mean)
         return dfset, 'self', []
 
     if mode == 'auto':
@@ -202,7 +222,8 @@ def resolve_defringe_set(L, params, cache=None):
             paths = cache.paths
         dfset = DefringeSet.from_stack(stack, mask=params.mask,
                                        pca_number=params.pca_number,
-                                       sources=paths, dtype=params.dtype)
+                                       sources=paths, dtype=params.dtype,
+                                       subtract_mean=params.subtract_mean)
         return dfset, 'auto', paths
 
     # Anything else is treated as a path to a saved set.
@@ -238,11 +259,15 @@ def process_shot(shot_path, params, cache=None, defringe_set=None):
     else:
         mode, refs = 'given', list(defringe_set.sources)
 
-    Aprime = L if defringe_set is None else defringe_set.apply(A)
+    coefficients = None
+    if defringe_set is None:
+        Aprime = L
+    else:
+        Aprime, coefficients = defringe_set.apply(A, return_coefficients=True)
 
     od = od_calc(A, Aprime, params)
     nd = od * params.pixel**2 / params.sigma0
 
     return ShotResult(images=images, A=A, L=L, Aprime=Aprime, od=od, nd=nd,
                       defringe_set=defringe_set, defringe_mode=mode,
-                      reference_paths=refs)
+                      reference_paths=refs, coefficients=coefficients)

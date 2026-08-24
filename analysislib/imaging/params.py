@@ -52,9 +52,13 @@ class ImagingParams:
     alpha: Tuple[float, float, float] = (1.0, 0.0, 0.0)   # OD correction terms
 
     # ── defringing ────────────────────────────────────────────────────────
-    defringe: str = 'auto'                  # 'none' | 'self' | 'auto' | <path>
+    # pca_number and n_reference are the two knobs worth scanning; see
+    # imaging.debug.plot_component_scan / plot_reference_scan, or just call
+    # helperfuncs.view_shot(..., debug=True).
+    defringe: str = 'auto'   # 'none'|'scale'|'self'|'auto'|<path>
     pca_number: int = 10                    # basis vectors kept
-    n_reference: int = 15                   # rolling cache depth for 'auto'
+    n_reference: int = 15                   # reference light frames in the basis
+    subtract_mean: bool = False             # Niu-style mean-frame subtraction
     dtype: str = 'float32'                  # working dtype for the big arrays
 
     # ── fitting ───────────────────────────────────────────────────────────
