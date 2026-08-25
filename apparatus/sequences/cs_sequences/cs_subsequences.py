@@ -20,9 +20,9 @@ def Cs_MOT_Loading(t, ct: ConnectionTable, set_statics=True):
     ct.Cs_3DMOT_AO_AM__b3c21.constant(t, Cs_3DMOT_AO_AM_CsMOT)
     
     # close Li shutters
-    ct.Li_Rep_Shutter__b2c01.disable(t)
-    ct.Li_MOT_Shutter__b1c31.disable(t)
-    ct.Li_Zeeman_Shutter__b2c03.disable(t)
+    # ct.Li_Rep_Shutter__b2c01.disable(t)
+    # ct.Li_MOT_Shutter__b1c31.disable(t)
+    # ct.Li_Zeeman_Shutter__b2c03.disable(t)
 
     # open the Cs shutters
     ct.Cs_Zeeman_Shutter__b1c17.enable(t)
@@ -89,13 +89,13 @@ def Cs_CMOT(t, ct: ConnectionTable):
 
     # MOT AOM amplitude trajectory
     ct.Cs_3DMOT_AO_AM__b3c21.ramp(t-0.030, 0.030, Cs_3DMOT_AO_AM_CsMOT, Cs_3DMOT_AO_AM_CsCMOT1, ct.FINE)
-    ct.Cs_3DMOT_AO_AM__b3c21.ramp(t+0.04, 0.008, Cs_3DMOT_AO_AM_CsCMOT1, Cs_3DMOT_AO_AM_CsCMOT2, ct.FINE)
+    ct.Cs_3DMOT_AO_AM__b3c21.ramp(t+Cs_CMOT1_Time, Cs_CMOT2_Time, Cs_3DMOT_AO_AM_CsCMOT1, Cs_3DMOT_AO_AM_CsCMOT2, ct.FINE)
 
     # MOT frequency
-    ct.Cs_MOT_Freq__b3c24.ramp(t, 0.040, Cs_MOT_Freq_CsMOT, Cs_MOT_Freq_CsCMOT, ct.FINE)
+    ct.Cs_MOT_Freq__b3c24.ramp(t, Cs_CMOT1_Time, Cs_MOT_Freq_CsMOT, Cs_MOT_Freq_CsCMOT, ct.FINE)
 
     # set repump laser frequency
-    ct.Cs_Rep_Freq__b3c26.ramp(t+0.040, 0.009, Cs_Rep_Freq_CsMOT, Cs_Rep_Freq_CsCMOT, ct.FINE)
+    ct.Cs_Rep_Freq__b3c26.ramp(t+Cs_CMOT1_Time, Cs_CMOT2_Time, Cs_Rep_Freq_CsMOT, Cs_Rep_Freq_CsCMOT, ct.FINE)
 
     # turn off Zeeman slower and 2D MOT
     ct.Cs_Zeeman_Shutter__b1c17.disable(t-0.010)
@@ -107,27 +107,27 @@ def Cs_CMOT(t, ct: ConnectionTable):
     ct.Zeeman_C5__b4c14.constant(t-0.010, 0)
 
     # ramp bias fields 
-    ct.Bias_X_HH.ramp(t-0.010, 0.058, Bias_X_HH_CsMOT, Bias_X_HH_CsCMOT, ct.FINE)
-    ct.Bias_X_AH.ramp(t-0.010, 0.058, Bias_X_AH_CsMOT, Bias_X_AH_CsCMOT, ct.FINE)
-    ct.Bias_Y_HH.ramp(t-0.010, 0.058, Bias_Y_HH_CsMOT, Bias_Y_HH_CsCMOT, ct.FINE)
-    ct.Bias_Y_AH.ramp(t-0.010, 0.058, Bias_Y_AH_CsMOT, Bias_Y_AH_CsCMOT, ct.FINE)
-    ct.Bias_Z_HH.ramp(t-0.010, 0.058, Bias_Z_HH_CsMOT, Bias_Z_HH_CsCMOT, ct.FINE)
-    ct.Bias_Z_AH.ramp(t-0.010, 0.058, Bias_Z_AH_CsMOT, Bias_Z_AH_CsCMOT, ct.FINE)
+    ct.Bias_X_HH.ramp(t-0.010, Cs_CMOT1_Time, Bias_X_HH_CsMOT, Bias_X_HH_CsCMOT, ct.FINE)
+    ct.Bias_X_AH.ramp(t-0.010, Cs_CMOT1_Time, Bias_X_AH_CsMOT, Bias_X_AH_CsCMOT, ct.FINE)
+    ct.Bias_Y_HH.ramp(t-0.010, Cs_CMOT1_Time, Bias_Y_HH_CsMOT, Bias_Y_HH_CsCMOT, ct.FINE)
+    ct.Bias_Y_AH.ramp(t-0.010, Cs_CMOT1_Time, Bias_Y_AH_CsMOT, Bias_Y_AH_CsCMOT, ct.FINE)
+    ct.Bias_Z_HH.ramp(t-0.010, Cs_CMOT1_Time, Bias_Z_HH_CsMOT, Bias_Z_HH_CsCMOT, ct.FINE)
+    ct.Bias_Z_AH.ramp(t-0.010, Cs_CMOT1_Time, Bias_Z_AH_CsMOT, Bias_Z_AH_CsCMOT, ct.FINE)
 
     #imaging shutter control
     ct.Cs_VOP_Shutter__b1c16.disable(t)
     ct.Cs_HOP_Shutter__b1c09.disable(t)
 
     #bitter coil control
-    ct.Bitter_V_HH.ramp(t, 0.040, Bitter_V_HH_CsMOT, Bitter_V_HH_CsCMOT1, ct.FINE)
-    ct.Bitter_V_HH.ramp(t+0.040, 0.009, Bitter_V_HH_CsCMOT1, Bitter_V_HH_CsCMOT2, ct.FINE)
-    ct.Bitter_V_AH.ramp(t, 0.040, Bitter_V_AH_CsMOT, Bitter_V_AH_CsCMOT1, ct.FINE)
-    ct.Bitter_V_AH.ramp(t+0.040, 0.009, Bitter_V_AH_CsCMOT1, Bitter_V_AH_CsCMOT2, ct.FINE)
+    ct.Bitter_V_HH.ramp(t, Cs_CMOT1_Time, Bitter_V_HH_CsMOT, Bitter_V_HH_CsCMOT1, ct.FINE)
+    ct.Bitter_V_HH.ramp(t+Cs_CMOT1_Time, Cs_CMOT2_Time, Bitter_V_HH_CsCMOT1, Bitter_V_HH_CsCMOT2, ct.FINE)
+    ct.Bitter_V_AH.ramp(t, Cs_CMOT1_Time, Bitter_V_AH_CsMOT, Bitter_V_AH_CsCMOT1, ct.FINE)
+    ct.Bitter_V_AH.ramp(t+Cs_CMOT1_Time, Cs_CMOT2_Time, Bitter_V_AH_CsCMOT1, Bitter_V_AH_CsCMOT2, ct.FINE)
 
     #turn off dipole trap intensity lock
     #ct.Dual_780_Int_Lock__b3c30.constant(t+0.04, 0)
 
-    return t+0.050
+    return t+Cs_CMOT1_Time+Cs_CMOT2_Time+0.001
 
 def Cs_Molasses(t, ct: ConnectionTable):
     """Function for doing Cs optical molasses cooling. Includes Cs_Molasses_Cooling 
@@ -181,7 +181,7 @@ def TOF(t, ct: ConnectionTable):
     # make sure Cs MOT light is off
     ct.Cs_3DMOT_AO_Sw__b1c02.disable(t)
     ct.Cs_3DMOT_AO_AM__b3c21.constant(t, 0)
-    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.014)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.015)
 
     # make sure RSC light is off
     ct.Cs_RSC_AO_Sw__b1c13.disable(t)
@@ -224,7 +224,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter
-    ct.Pixelfly_Shutter__b2c06.enable(t-0.006)
+    ct.Pixelfly_Shutter__b2c06.enable(t-0.008)
     ct.Pixelfly_Shutter__b2c06.disable(t-0.001)
 
     # imaging beam
@@ -258,7 +258,7 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.pco_panda.expose(t+0.175, name=name, frametype='light', trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter 
-    ct.Pixelfly_Shutter__b2c06.enable(t+0.194)
+    ct.Pixelfly_Shutter__b2c06.enable(t+0.192)
     ct.Pixelfly_Shutter__b2c06.disable(t+0.199)
 
     # imaging beam

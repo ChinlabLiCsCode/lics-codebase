@@ -118,13 +118,13 @@ class ConnectionTable:
         self.Li_HImg_Shutter__b1c28           = DigitalOut(default_value=0,          name='Li_HImg_Shutter__b1c28',           parent_device=NIBox1, connection='port3/line4')
         self.Li_Img_AO_Sw__b1c29              = DigitalOut(default_value=1,          name='Li_Img_AO_Sw__b1c29',              parent_device=NIBox1, connection='port3/line5')
         self.Li_MOT_AO_Sw__b1c30              = DigitalOut(default_value=1,          name='Li_MOT_AO_Sw__b1c30',              parent_device=NIBox1, connection='port3/line6')
-        self.Li_MOT_Shutter__b1c31            = DigitalOut(default_value=0,          name='Li_MOT_Shutter__b1c31',            parent_device=NIBox1, connection='port3/line7')
+        self.Li_MOT_Shutter__b1c31            = DigitalOut(default_value=1,          name='Li_MOT_Shutter__b1c31',            parent_device=NIBox1, connection='port3/line7')
         
         # Box2 digital outputs
         self.Li_Rep_AO_Sw__b2c00              = DigitalOut(default_value=1,          name='Li_Rep_AO_Sw__b2c00',              parent_device=NIBox2, connection='port0/line0')
-        self.Li_Rep_Shutter__b2c01            = DigitalOut(default_value=0,          name='Li_Rep_Shutter__b2c01',            parent_device=NIBox2, connection='port0/line1')
+        self.Li_Rep_Shutter__b2c01            = DigitalOut(default_value=1,          name='Li_Rep_Shutter__b2c01',            parent_device=NIBox2, connection='port0/line1')
         self.Li_VImg_Shutter__b2c02           = DigitalOut(default_value=0,          name='Li_VImg_Shutter__b2c02',           parent_device=NIBox2, connection='port0/line2')
-        self.Li_Zeeman_Shutter__b2c03         = DigitalOut(default_value=0,          name='Li_Zeeman_Shutter__b2c03',         parent_device=NIBox2, connection='port0/line3')
+        self.Li_Zeeman_Shutter__b2c03         = DigitalOut(default_value=1,          name='Li_Zeeman_Shutter__b2c03',         parent_device=NIBox2, connection='port0/line3')
         self.MW_Trig__b2c04                   = DigitalOut(default_value=0,          name='MW_Trig__b2c04',                   parent_device=NIBox2, connection='port0/line4')
         self.oTOP_Pos_Lock_Enable__b2c05      = DigitalOut(default_value=0,          name='oTOP_Pos_Lock_Enable__b2c05',      parent_device=NIBox2, connection='port0/line5')
         self.Pixelfly_Shutter__b2c06          = DigitalOut(default_value=0,          name='Pixelfly_Shutter__b2c06',          parent_device=NIBox2, connection='port0/line6')
