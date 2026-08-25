@@ -248,6 +248,10 @@ y_int = rho.sum(axis=1)
 #fit results
 x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(x_int, y_int)
 
+#calculate the 2d cloud density
+area = np.pi * sigma_x * sigma_y
+rho_2d = N/area
+
 plot_results("")
 
 
@@ -261,3 +265,4 @@ run.save_result("B_x", B_x)
 run.save_result("B_y", B_y)
 run.save_result("N_x", N_x)
 run.save_result("N_y", N_y)
+run.save_results("rho_2d (atoms/um^2)", rho_2d)
