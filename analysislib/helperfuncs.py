@@ -35,6 +35,41 @@ def col_label(key):
     return key
 
 
+def _column_with_errors(df, rkey):
+    """Return (values, per-shot uncertainties or None) for a result column.
+
+    The uncertainty column follows the lyse convention: result 'sigma_x (um)'
+    of routine R is paired with (R, 'u_sigma_x (um)').
+    """
+    y = get_column(df, rkey).astype(float)
+    u_key = (rkey[0], 'u_' + rkey[-1]) if isinstance(rkey, tuple) else 'u_' + rkey
+    try:
+        return y, get_column(df, u_key).astype(float)
+    except (KeyError, TypeError):
+        return y, None
+
+
+def _aggregate_repeats(xv, yv, yev=None):
+    """Average repeated x points, returning (unique_x, y_mean, y_err).
+
+    y_err is the standard error over repeats if any x value was repeated,
+    otherwise the mean of the per-shot uncertainties, otherwise None.
+    """
+    unique_x, inv = np.unique(xv, return_inverse=True)
+    counts = np.bincount(inv)
+    y_mean = np.array([yv[inv == i].mean() for i in range(len(unique_x))])
+    if (counts > 1).any():
+        y_err = np.array([
+            yv[inv == i].std(ddof=1) / np.sqrt(counts[i]) if counts[i] > 1 else np.nan
+            for i in range(len(unique_x))
+        ])
+    elif yev is not None:
+        y_err = np.array([yev[inv == i].mean() for i in range(len(unique_x))])
+    else:
+        y_err = None
+    return unique_x, y_mean, y_err
+
+
 def find_scanned_globals(df):
     """Return column keys for numeric globals that vary across shots."""
     meta = {'filepath', 'sequence_index', 'run number', 'run repeat', 'sequence', 'run'}
@@ -53,7 +88,31 @@ def find_scanned_globals(df):
     return scanned
 
 
-_FIT_TYPES = ('mean', 'linear', 'quadratic', 'cubic', 'poly4', 'poly5', 'gaussian', 'skew_gaussian', 'exponential', 'ballistic')
+_M_CS = 132.905 * 1.66054e-27   # kg
+_K_B  = 1.38065e-23              # J/K
+
+_FIT_TYPES = ('mean', 'linear', 'quadratic', 'cubic', 'poly4', 'poly5', 'gaussian',
+              'skew_gaussian', 'exponential', 'quadrature', 'ballistic')
+
+# Fit types whose subplot is drawn in squared axes rather than raw ones.
+_QUADRATURE_FITS = ('quadrature',)
+
+
+def _square_label(label):
+    """'sigma_x (um)' -> 'sigma_x² (um²)';  'TOF_Time' -> 'TOF_Time²'."""
+    if label.endswith(')') and '(' in label:
+        name, unit = label.rsplit('(', 1)
+        return f'{name.strip()}² ({unit[:-1]}²)'
+    return f'{label}²'
+
+
+def _square_data(x, y, yerr=None):
+    """Map (t, σ, δσ) into quadrature space (t², σ², δσ²)."""
+    x2 = np.asarray(x, dtype=float)**2
+    y2 = np.asarray(y, dtype=float)**2
+    if yerr is None:
+        return x2, y2, None
+    return x2, y2, 2 * np.abs(y) * np.asarray(yerr, dtype=float)
 
 
 def _resolve_fits(fits, pairs):
@@ -215,6 +274,25 @@ def _do_fit(fit_type, x, y, yerr=None):
                 {'type': 'skew_gaussian', 'A': A, 'x0': x0, 'sigma': sig,
                  'alpha': alpha, 'B': B, 'mode': x_mode})
 
+    if fit_type == 'quadrature':
+        # x and y arrive already squared — plot_scan draws this fit type in
+        # quadrature space.  There the ballistic expansion
+        # σ²(t) = σ₀² + v_rms²·t² is a straight line, so the temperature reads
+        # off the slope and the initial cloud size off the intercept, and any
+        # departure from the model shows up as visible curvature.
+        if len(x) < 2:
+            raise ValueError('need ≥2 points for quadrature fit')
+        w = 1 / sigma if sigma is not None else None
+        slope, intercept = np.polyfit(x, y, 1, w=w)
+        intercept = max(intercept, 0.0)          # σ₀² must be non-negative
+        v_rms  = np.sqrt(max(slope, 0.0))        # μm/s
+        sigma0 = np.sqrt(intercept)              # μm
+        T = _M_CS / _K_B * (v_rms * 1e-6)**2     # K
+        label = f'T={T * 1e6:.3g} μK, σ₀={sigma0:.3g} μm'
+        return (x_fine, slope * x_fine + intercept, label, None,
+                {'type': 'quadrature', 'slope': slope, 'intercept': intercept,
+                 'v_rms': v_rms, 'sigma0': sigma0, 'T': T})
+
     if fit_type == 'ballistic':
         # σ²(t) = σ₀² + v_rms²·t²  — linear fit in (t², σ²) space
         if len(x) < 2:
@@ -251,10 +329,14 @@ def plot_scan(df, result_keys, scan_keys=None, fits=None, title=None, show=True)
     scan_keys : list or None
         Column keys to use as the x-axis. None auto-detects varying globals.
     fits : str, list, or dict, optional
-        Fit to overlay on each subplot. Choices per subplot: 'mean', 'linear',
-        'gaussian', 'exponential'. Pass a single string to apply to all subplots,
-        a list (one per subplot pair in order), or a dict keyed by (rkey, skey)
-        tuple or by integer subplot index.
+        Fit to overlay on each subplot: 'mean', 'linear', 'quadratic', 'cubic',
+        'poly4', 'poly5', 'gaussian', 'skew_gaussian', 'exponential',
+        'quadrature' or 'ballistic'. Pass a single string to apply to all
+        subplots, a list (one per subplot pair in order), or a dict keyed by
+        (rkey, skey) tuple or by integer subplot index.
+        A 'quadrature' fit draws its subplot with both axes squared, so the
+        data, the marked max and the fit coefficients are all in quadrature
+        units for that subplot.
     title : str or None
         Figure suptitle. Defaults to the filename of the first shot.
     """
@@ -281,18 +363,12 @@ def plot_scan(df, result_keys, scan_keys=None, fits=None, title=None, show=True)
     for i, (rkey, skey) in enumerate(pairs):
         ax = flat_axes[i]
         try:
-            y = get_column(df, rkey).astype(float)
+            y, yerr = _column_with_errors(df, rkey)
         except (KeyError, TypeError) as e:
             print(f'Skipping result {rkey!r}: {e}')
             ax.set_visible(False)
             continue
         ylabel = col_label(rkey)
-
-        u_key = (rkey[0], 'u_' + rkey[-1]) if isinstance(rkey, tuple) else 'u_' + rkey
-        try:
-            yerr = get_column(df, u_key).astype(float)
-        except (KeyError, TypeError):
-            yerr = None
 
         try:
             x = get_column(df, skey).astype(float)
@@ -303,22 +379,16 @@ def plot_scan(df, result_keys, scan_keys=None, fits=None, title=None, show=True)
         xlabel = col_label(skey)
 
         valid = x.notna() & y.notna()
-        xv, yv = x[valid].values, y[valid].values
-        yev = yerr[valid].values if yerr is not None else None
+        unique_x, yv_mean, yv_err = _aggregate_repeats(
+            x[valid].values, y[valid].values,
+            yerr[valid].values if yerr is not None else None)
 
-        unique_x, inv = np.unique(xv, return_inverse=True)
-        counts = np.bincount(inv)
-        yv_mean = np.array([yv[inv == i].mean() for i in range(len(unique_x))])
-
-        if (counts > 1).any():
-            yv_err = np.array([
-                yv[inv == i].std(ddof=1) / np.sqrt(counts[i]) if counts[i] > 1 else np.nan
-                for i in range(len(unique_x))
-            ])
-        elif yev is not None:
-            yv_err = np.array([yev[inv == i].mean() for i in range(len(unique_x))])
-        else:
-            yv_err = None
+        fit_type = fit_types[i]
+        if fit_type in _QUADRATURE_FITS:
+            unique_x, yv_mean, yv_err = _square_data(unique_x, yv_mean, yv_err)
+            xlabel, ylabel = _square_label(xlabel), _square_label(ylabel)
+            # squaring spreads the values over many orders of magnitude
+            ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 4))
 
         i_max = int(np.argmax(yv_mean))
         x_max, y_max = float(unique_x[i_max]), float(yv_mean[i_max])
@@ -331,7 +401,6 @@ def plot_scan(df, result_keys, scan_keys=None, fits=None, title=None, show=True)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
-        fit_type = fit_types[i]
         result_key = (col_label(rkey), col_label(skey))
         if fit_type is not None and len(unique_x) >= 2:
             try:
@@ -436,18 +505,16 @@ def live_plot_scan(year, month, day, sequence, number, result_keys,
         time.sleep(poll_interval)
 
 
-_M_CS = 132.905 * 1.66054e-27   # kg
-_K_B  = 1.38065e-23              # J/K
-
-
 def tof_temperature(fit_results, sigma_key, tof_key='TOF_Time'):
     """Compute temperature from a TOF sigma fit.
 
-    Supports two fit types:
-      'linear'   : T = m/k_B * slope²  (assumes point source; underestimates T
-                   when initial cloud size is significant)
-      'ballistic': T = m/k_B * v_rms²  where σ²(t) = σ₀² + v_rms²·t²
-                   (physically correct; accounts for finite initial size)
+    Supports three fit types:
+      'linear'    : T = m/k_B * slope²  (assumes point source; underestimates T
+                    when initial cloud size is significant)
+      'quadrature': T = m/k_B * v_rms², from the slope of σ² against t²
+                    (physically correct; accounts for finite initial size)
+      'ballistic' : the same model fitted in σ-vs-t axes; kept working for
+                    older notebooks, 'quadrature' is preferred
 
     Parameters
     ----------
@@ -466,11 +533,11 @@ def tof_temperature(fit_results, sigma_key, tof_key='TOF_Time'):
     coeffs = fit_results[(sigma_key, tof_key)]
     if coeffs['type'] == 'linear':
         v_rms_m = coeffs['slope'] * 1e-6           # slope in um/s → m/s
-    elif coeffs['type'] == 'ballistic':
+    elif coeffs['type'] in ('quadrature', 'ballistic'):
         v_rms_m = coeffs['v_rms'] * 1e-6           # v_rms in um/s → m/s
     else:
-        raise ValueError(
-            f'Expected linear or ballistic fit for {sigma_key!r}, got {coeffs["type"]!r}')
+        raise ValueError(f'Expected a linear, quadrature or ballistic fit for '
+                         f'{sigma_key!r}, got {coeffs["type"]!r}')
     return _M_CS / _K_B * v_rms_m**2
 
 
