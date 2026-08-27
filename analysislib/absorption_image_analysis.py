@@ -239,7 +239,7 @@ def plot_results(title):
 
 ###############################################get all parameters and plot results############################
 #log_image, 2d density and atom number
-log_image, rho, N = abs_calc(dark_image, light_image, atoms_image)
+log_image, rho, N_int = abs_calc(dark_image, light_image, atoms_image)
 
 #integrated density along x and y
 x_int = rho.sum(axis=0)
@@ -247,6 +247,8 @@ y_int = rho.sum(axis=1)
 
 #fit results
 x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(x_int, y_int)
+
+N = np.sqrt(N_x*N_y)
 
 #calculate the 2d cloud density
 area = np.pi * sigma_x * sigma_y
@@ -256,7 +258,7 @@ plot_results("")
 
 
 ########################################################save results#########################################
-run.save_result("N_int", N)
+run.save_result("N_int", N_int)
 run.save_result("sigma_x (um)", sigma_x)
 run.save_result("sigma_y (um)", sigma_y)
 run.save_result("x0_x (um)", x0_x)
