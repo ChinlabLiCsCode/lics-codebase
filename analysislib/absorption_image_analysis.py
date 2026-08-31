@@ -3,18 +3,17 @@ import lyse
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
 
-#constants
-pixel_size = 6.5 #microns
-magnification = 1.2823  # calibrated 2026-08-11 from TOF gravity measurement (g=9.8027 m/s² in Chicago)
-conv = pixel_size/magnification # pixel to image size conversion (um/pix)
-lambda_852 = 852.34727582e-9 # cs d2 transition wavelength in nm
-span = np.linspace(0, 2048*conv, 2048) #array of pixels
-
-#fit options
-FIT_OFFSET = True           # fit a constant background term B in the Gaussian
-INCLUDE_OFFSET_IN_N = False # include the B*span contribution in N_x and N_y
+# Shared physics (calibration constants, fit options, OD/density/fit calculation) lives
+# in the device package so that BLACS's live 'absorption' display_mode and
+# 'live_image_analysis' logging always agree with this post-shot analysis. See
+# lics_labscript_devices/PCOCamera/absorption_analysis.py.
+from lics_labscript_devices.PCOCamera.absorption_analysis import (
+    DEVICE_NAME,
+    CONV_UM_PER_PIX as conv,
+    SPAN_UM as span,
+    full_analysis,
+)
 
 #get run data
 run = lyse.Run(lyse.path)
@@ -23,119 +22,34 @@ shot_path = lyse.path
 run_name = os.path.basename(shot_path)
 
 with h5py.File(shot_path, 'r') as f:
-    acq = 'absorption1' if 'images/pco_panda/absorption1' in f else 'absorption'
-    dark_image  = f[f'images/pco_panda/{acq}/dark'][:].astype(float)
-    light_image = f[f'images/pco_panda/{acq}/light'][:].astype(float)
-    atoms_image = f[f'images/pco_panda/{acq}/atoms'][:].astype(float)
+    acq = 'absorption1' if f'images/{DEVICE_NAME}/absorption1' in f else 'absorption'
+    dark_image  = f[f'images/{DEVICE_NAME}/{acq}/dark'][:].astype(float)
+    light_image = f[f'images/{DEVICE_NAME}/{acq}/light'][:].astype(float)
+    atoms_image = f[f'images/{DEVICE_NAME}/{acq}/atoms'][:].astype(float)
 
 ##############################################################absorption image analysis#################################################
-#calculate log image
+# OD, density, cloud-size fit, and derived atom numbers all come from the shared
+# abs_calc/fit_extract in lics_labscript_devices.PCOCamera.absorption_analysis.
+analysis = full_analysis(dark_image, light_image, atoms_image)
 
-def abs_calc(dark_image, light_image, atoms_image):
-    atoms_minus_dark = atoms_image - dark_image
-    light_minus_dark = light_image - dark_image
-    ratio = np.divide(
-            atoms_minus_dark,
-            light_minus_dark,
-            out = np.full(atoms_image.shape, 1, dtype=float),
-            where = light_minus_dark != 0)
+log_image = analysis['log_image']
+rho       = analysis['rho']
+x_int     = analysis['x_int']
+y_int     = analysis['y_int']
+x_dist    = analysis['x_dist']
+y_dist    = analysis['y_dist']
+N         = analysis['N']  # "true" atom number: geometric mean of N_x, N_y
 
-    ratio[ratio<=0]=1
-    log_image = - np.log(ratio)
-
-    #calculate the resonant cross section in microns
-    sigma0 = 3 * (lambda_852*1e6)**2 / (2 * np.pi)
-
-    #calculate the 2D density and atom number
-    rho = log_image * (conv)**2 / sigma0 # rho has units of atoms/pixel^2
-    N = rho.sum() # N is the total atom number from first principles
-
-    return log_image, rho, N
-
-
-
-###########################################################cloud size calculation################################################
-
-# fitting functions
-def gaussian_dist(x, A, x0:float, sigma:float, B:float=0.0):
-    return A * np.exp(-(x - x0)**2/ (2 * sigma**2)) + B
-
-def gaussian_dist_nooffset(x, A, x0:float, sigma:float):
-    return gaussian_dist(x, A, x0, sigma, 0.0)
-
-def fit_fun(x, line_density, fit_offset=FIT_OFFSET):
-    """Fit a 1D Gaussian to line_density.
-
-    Always returns popt/perr of length 4, ordered (A, x0, sigma, B). When
-    fit_offset is False the constant term is not a free parameter and is
-    reported as B = 0 with zero uncertainty.
-    """
-    A_guess = line_density.max()
-    B_guess = np.median(line_density)
-
-    x0_guess = x[np.argmax(line_density)]
-
-    if fit_offset:
-        model = gaussian_dist
-        p0 = np.array([A_guess - B_guess, x0_guess, 2000, B_guess])
-        bounds = ([0, x.min(), 1, -np.inf],
-                  [np.inf, x.max(), np.ptp(x), np.inf])
-    else:
-        model = gaussian_dist_nooffset
-        p0 = np.array([A_guess, x0_guess, 2000])
-        bounds = ([0, x.min(), 1],
-                  [np.inf, x.max(), np.ptp(x)])
-
-    try:
-        popt, pcov = curve_fit(
-            model,
-            x,
-            line_density,
-            p0=p0,
-            bounds=bounds
-        )
-
-        perr = np.sqrt(np.diag(pcov))
-        popt[2] = abs(popt[2])
-    except Exception as e:
-        print("Failed to fit")
-        print(e)
-
-        perr = np.full(p0.shape, 0.1)
-        popt = np.full(p0.shape, 0.1)
-
-    if not fit_offset:
-        # pad with B = 0 so callers always see the same parameter ordering
-        popt = np.append(popt, 0.0)
-        perr = np.append(perr, 0.0)
-
-    return popt, perr
-
-#extract fit
-def fit_extract(x_int, y_int, fit_offset=FIT_OFFSET,
-                include_offset_in_N=INCLUDE_OFFSET_IN_N):
-
-    popt_x, perr_x = fit_fun(span, x_int/conv, fit_offset=fit_offset)
-    popt_y, perr_y = fit_fun(span, y_int/conv, fit_offset=fit_offset)
-
-    A_x, x0_x, sigma_x, B_x = popt_x
-    Ax_err, x0x_err, sigmax_err, Bx_err = perr_x
-
-    A_y, x0_y, sigma_y, B_y = popt_y
-    Ay_err, x0y_err, sigmay_err, By_err = perr_y
-
-    #the curves to plot: the full fit, offset included if it was fitted
-    x_dist = gaussian_dist(span, A_x, x0_x, sigma_x, B_x)
-    y_dist = gaussian_dist(span, A_y, x0_y, sigma_y, B_y)
-
-    #get the atom number along x and y, with or without the constant term
-    B_x_N = B_x if include_offset_in_N else 0.0
-    B_y_N = B_y if include_offset_in_N else 0.0
-
-    N_x = gaussian_dist(span, A_x, x0_x, sigma_x, B_x_N).sum()*conv
-    N_y = gaussian_dist(span, A_y, x0_y, sigma_y, B_y_N).sum()*conv
-
-    return x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y
+N_int   = analysis['results']['N_int']
+sigma_x = analysis['results']['sigma_x (um)']
+sigma_y = analysis['results']['sigma_y (um)']
+x0_x    = analysis['results']['x0_x (um)']
+x0_y    = analysis['results']['x0_y (um)']
+B_x     = analysis['results']['B_x']
+B_y     = analysis['results']['B_y']
+N_x     = analysis['results']['N_x']
+N_y     = analysis['results']['N_y']
+rho_2d  = analysis['results']['rho_2d (atoms/um^2)']
 
 
 ####################################################################plotting code#############################
@@ -237,23 +151,7 @@ def plot_results(title):
 
     plt.show()
 
-###############################################get all parameters and plot results############################
-#log_image, 2d density and atom number
-log_image, rho, N_int = abs_calc(dark_image, light_image, atoms_image)
-
-#integrated density along x and y
-x_int = rho.sum(axis=0)
-y_int = rho.sum(axis=1)
-
-#fit results
-x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(x_int, y_int)
-
-N = np.sqrt(N_x*N_y)
-
-#calculate the 2d cloud density
-area = np.pi * sigma_x * sigma_y
-rho_2d = N/area
-
+###############################################plot results############################
 plot_results("")
 
 
