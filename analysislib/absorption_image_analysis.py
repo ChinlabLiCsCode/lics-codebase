@@ -156,6 +156,7 @@ plot_results("")
 
 
 ########################################################save results#########################################
+run.save_result("N", N)
 run.save_result("N_int", N_int)
 run.save_result("sigma_x (um)", sigma_x)
 run.save_result("sigma_y (um)", sigma_y)
