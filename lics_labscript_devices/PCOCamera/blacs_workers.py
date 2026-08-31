@@ -4,27 +4,11 @@ import time
 import numpy as np
 import labscript_utils.h5_lock
 import h5py
+import zmq
+from labscript_utils.properties import set_attributes
 
 from labscript_devices.IMAQdxCamera.blacs_workers import IMAQdxCameraWorker
-
-
-def compute_absorption_od(dark, light, atoms):
-    """Compute the optical density (OD) image from dark/light/atoms frames.
-
-    Same core calculation as abs_calc() in
-    analysislib/absorption_image_analysis.py, minus the pixel-to-micron
-    density/atom-number conversion (not meaningful for a quick-look display).
-    """
-    atoms_minus_dark = atoms.astype(float) - dark.astype(float)
-    light_minus_dark = light.astype(float) - dark.astype(float)
-    ratio = np.divide(
-        atoms_minus_dark,
-        light_minus_dark,
-        out=np.full(atoms_minus_dark.shape, 1.0),
-        where=light_minus_dark != 0,
-    )
-    ratio[ratio <= 0] = 1
-    return -np.log(ratio)
+from lics_labscript_devices.PCOCamera.absorption_analysis import full_analysis
 
 
 class PCO_Camera:
@@ -238,17 +222,20 @@ class PCOCameraWorker(IMAQdxCameraWorker):
         result = super().transition_to_manual()
         if getattr(self, 'display_mode', 'live') == 'absorption' and h5_filepath is not None:
             try:
-                self._send_last_absorption_image(h5_filepath)
+                self._compute_and_send_absorption_display(h5_filepath)
             except Exception as e:
                 print(f"PCOCameraWorker: failed to compute absorption image: {e}", file=sys.stderr)
         return result
 
-    def _send_last_absorption_image(self, h5_filepath):
+    def _compute_and_send_absorption_display(self, h5_filepath):
         """Read back the most recently acquired exposure's dark/light/atoms frames
-        from the shot file, compute the OD image, and send it to the BLACS tab in
-        place of the raw camera frames that transition_to_manual() already sent."""
+        from the shot file, run the shared absorption analysis (same calculation as
+        analysislib/absorption_image_analysis.py), log the fit results to the shot
+        file under 'live_image_analysis', and send Dark/Light/Atoms/OD/Density to the
+        BLACS tab in place of the raw camera frames that transition_to_manual() already
+        sent, so the tab's frame selector can switch between them."""
         image_path = 'images/' + (self.orientation or self.device_name)
-        with h5py.File(h5_filepath, 'r') as f:
+        with h5py.File(h5_filepath, 'r+') as f:
             exposures = f['devices'][self.device_name]['EXPOSURES'][:]
             if not len(exposures):
                 return
@@ -267,11 +254,49 @@ class PCOCameraWorker(IMAQdxCameraWorker):
                 data = dset[()]
                 return data[-1] if data.ndim == 3 else data
 
-            dark = last_frame(frame_group['dark'])
-            light = last_frame(frame_group['light'])
-            atoms = last_frame(frame_group['atoms'])
-        od = compute_absorption_od(dark, light, atoms)
-        self._send_image_to_parent(od)
+            dark = last_frame(frame_group['dark']).astype(float)
+            light = last_frame(frame_group['light']).astype(float)
+            atoms = last_frame(frame_group['atoms']).astype(float)
+
+            analysis = full_analysis(dark, light, atoms)
+
+            results_group = f.require_group('live_image_analysis')
+            set_attributes(results_group, analysis['results'])
+
+        frames = {
+            'Dark': dark,
+            'Light': light,
+            'Atoms': atoms,
+            'OD': analysis['log_image'],
+            'Density': analysis['density'],
+        }
+        # x/y integrated-density profiles + Gaussian fit curves, and the geometric-mean
+        # atom number N, so the tab can draw the same live fit-overlay plots as
+        # absorption_image_analysis.py's density panel, without recomputing anything.
+        profile = {
+            'x_int': analysis['x_int'].tolist(),
+            'y_int': analysis['y_int'].tolist(),
+            'x_dist': analysis['x_dist'].tolist(),
+            'y_dist': analysis['y_dist'].tolist(),
+            'N': float(analysis['N']),
+            'results': {k: float(v) for k, v in analysis['results'].items()},
+        }
+        self._send_named_frames_to_parent(frames, extra=profile)
+
+    def _send_named_frames_to_parent(self, frames, extra=None):
+        """Send several same-shaped named 2D frames (e.g. Dark/Light/Atoms/OD/Density)
+        to the BLACS tab in one message, so it can switch between them locally without
+        asking the worker again. `extra` is merged into the JSON metadata (e.g. profile
+        fit data) alongside the binary image stack."""
+        names = list(frames.keys())
+        stacked = np.stack([np.asarray(frames[n], dtype=float) for n in names])
+        metadata = dict(dtype=str(stacked.dtype), shape=stacked.shape, frame_names=names)
+        if extra:
+            metadata.update(extra)
+        self.image_socket.send_json(metadata, zmq.SNDMORE)
+        self.image_socket.send(stacked, copy=False)
+        response = self.image_socket.recv()
+        assert response == b'ok', response
 
     def set_manual_attribute(self, name, value):
         """Set a camera attribute from the BLACS tab during manual mode.
