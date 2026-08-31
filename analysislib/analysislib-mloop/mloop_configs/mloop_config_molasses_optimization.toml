@@ -27,9 +27,9 @@ console_log_level = 0
 # Bias X
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_X_HH_Molasses]
 global_name = 'Bias_X_HH_Molasses'
-min = -1.5
+min = -3
 max = 3
-start = 1.5
+start = 1
 
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_X_AH_Molasses]
 global_name = 'Bias_X_AH_Molasses'
@@ -41,9 +41,9 @@ start = 0
 # Bias Y
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Y_HH_Molasses]
 global_name = 'Bias_Y_HH_Molasses'
-min = -2
+min = -3
 max = 4
-start = -1
+start = -2.35
 
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Y_AH_Molasses]
 global_name = 'Bias_Y_AH_Molasses'
@@ -57,7 +57,7 @@ start = 0
 global_name = 'Bias_Z_HH_Molasses'
 min = -6
 max = 0
-start = -3
+start = -2
 
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Z_AH_Molasses]
 global_name = 'Bias_Z_AH_Molasses'
@@ -68,7 +68,7 @@ start = 0
 # 3D MOT AOM amplitude
 [MLOOP_PARAMS.Cs_Molasses_params.Cs_3DMOT_AO_AM_Molasses]
 global_name = 'Cs_3DMOT_AO_AM_Molasses'
-min = -1.5
+min = 0
 max = 3
 start = 1.5
 

@@ -24,7 +24,7 @@ import mloop_config
 # this script plots the parameters named in whichever config it reads.
 # None uses the default mloop_config.toml in this directory.
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs',
-                           'mloop_config_molasses_optimization.toml')
+                           'mloop_config_mot_optimization.toml')
 
 # Fraction of each parameter's range counted as "near" its best value.  Widened
 # automatically if that leaves too few shots to see, which happens easily once
