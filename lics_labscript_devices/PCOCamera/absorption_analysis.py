@@ -25,8 +25,26 @@ DEVICE_NAME = 'pco_panda'
 PIXEL_SIZE_UM = 6.5  # microns, physical pixel pitch of the PCO Panda 4.2
 MAGNIFICATION = 1.2823  # calibrated 2026-08-11 from TOF gravity measurement (g=9.8027 m/s^2 in Chicago)
 CONV_UM_PER_PIX = PIXEL_SIZE_UM / MAGNIFICATION  # pixel-to-image-size conversion (um/pix)
-LAMBDA_852_M = 852.34727582e-9  # Cs D2 transition wavelength, meters
-SIGMA0_UM2 = 3 * (LAMBDA_852_M * 1e6) ** 2 / (2 * np.pi)  # resonant cross section, um^2
+
+# Resonant D2 transition wavelengths, meters. Species affects only the resonant cross
+# section (and therefore density/atom-number results) -- the OD image itself doesn't
+# depend on species.
+LAMBDA_852_M = 852.34727582e-9   # Cs-133 D2
+LAMBDA_671_M = 670.977338e-9     # Li-7 D2
+SPECIES_WAVELENGTH_M = {
+    'Cs': LAMBDA_852_M,
+    'Li': LAMBDA_671_M,
+}
+DEFAULT_SPECIES = 'Cs'
+
+
+def resonant_cross_section_um2(species=DEFAULT_SPECIES):
+    """Resonant scattering cross section sigma0 = 3*lambda^2/(2*pi), in um^2."""
+    if species not in SPECIES_WAVELENGTH_M:
+        raise ValueError(f"species must be one of {list(SPECIES_WAVELENGTH_M)}, not {species!r}")
+    wavelength_um = SPECIES_WAVELENGTH_M[species] * 1e6
+    return 3 * wavelength_um ** 2 / (2 * np.pi)
+
 
 SENSOR_PIXELS = 2048
 SPAN_UM = np.linspace(0, SENSOR_PIXELS * CONV_UM_PER_PIX, SENSOR_PIXELS)  # array of pixel positions, in microns
@@ -36,10 +54,11 @@ FIT_OFFSET = True           # fit a constant background term B in the Gaussian
 INCLUDE_OFFSET_IN_N = False  # include the B*span contribution in N_x and N_y
 
 
-def abs_calc(dark_image, light_image, atoms_image):
+def abs_calc(dark_image, light_image, atoms_image, species=DEFAULT_SPECIES):
     """Compute the OD (log) image, 2D atomic density rho (atoms/pixel^2), and
     total atom number N_int (from first principles / summed OD) from
-    dark/light/atoms frames."""
+    dark/light/atoms frames. `species` ('Cs' or 'Li') selects the resonant cross
+    section used to convert OD to density -- it does not affect log_image."""
     dark_image = np.asarray(dark_image, dtype=float)
     light_image = np.asarray(light_image, dtype=float)
     atoms_image = np.asarray(atoms_image, dtype=float)
@@ -57,7 +76,8 @@ def abs_calc(dark_image, light_image, atoms_image):
     log_image = -np.log(ratio)
 
     # 2D density and atom number from first principles
-    rho = log_image * (CONV_UM_PER_PIX) ** 2 / SIGMA0_UM2  # atoms/pixel^2
+    sigma0 = resonant_cross_section_um2(species)
+    rho = log_image * (CONV_UM_PER_PIX) ** 2 / sigma0  # atoms/pixel^2
     N_int = rho.sum()  # total atom number, summed OD
 
     return log_image, rho, N_int
@@ -146,13 +166,13 @@ def fit_extract(x_int, y_int, span=SPAN_UM, conv=CONV_UM_PER_PIX,
     return x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y
 
 
-def full_analysis(dark_image, light_image, atoms_image,
+def full_analysis(dark_image, light_image, atoms_image, species=DEFAULT_SPECIES,
                    fit_offset=FIT_OFFSET, include_offset_in_N=INCLUDE_OFFSET_IN_N):
     """Run the full OD/density/fit pipeline and return everything a consumer
     might want. `results` holds exactly the set of named results that
     absorption_image_analysis.py saves via run.save_result()/save_results(),
     also used verbatim for BLACS's 'live_image_analysis' logging."""
-    log_image, rho, N_int = abs_calc(dark_image, light_image, atoms_image)
+    log_image, rho, N_int = abs_calc(dark_image, light_image, atoms_image, species=species)
     density = rho / CONV_UM_PER_PIX ** 2  # atoms/um^2
 
     x_int = rho.sum(axis=0)
@@ -177,6 +197,7 @@ def full_analysis(dark_image, light_image, atoms_image,
         "B_y": B_y,
         "N_x": N_x,
         "N_y": N_y,
+        "N": N,
         "rho_2d (atoms/um^2)": rho_2d,
     }
 

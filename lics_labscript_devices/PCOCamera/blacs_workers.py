@@ -210,21 +210,74 @@ class PCOCameraWorker(IMAQdxCameraWorker):
 
     interface_class = PCO_Camera
 
+    def init(self):
+        # display_mode and species are runtime-only settings (see PCOCameraTab's mode/
+        # species switchers), not connection table properties: they're changed live from
+        # the tab via set_display_mode()/set_species() below, and reset to their defaults
+        # on every worker (re)start.
+        self.display_mode = 'live'
+        self.species = 'Cs'
+        # (dark, light, atoms) from the most recently computed absorption shot, so
+        # set_species() can instantly redisplay with the new species without waiting for
+        # another shot.
+        self._last_absorption_frames = None
+        super().init()
+
     def get_camera(self):
         if self.mock:
             from labscript_devices.IMAQdxCamera.blacs_workers import MockCamera
             return MockCamera()
         return self.interface_class(self.serial_number, shutter_mode=self.shutter_mode)
 
+    def set_display_mode(self, mode):
+        if mode not in ('live', 'absorption'):
+            raise ValueError(f"display_mode must be 'live' or 'absorption', not {mode!r}")
+        self.display_mode = mode
+        if mode == 'absorption' and self.continuous_thread is not None:
+            # Continuous live-view acquisition is pointless while the absorption panel
+            # is shown, and leaving it running would race with our own image_socket use
+            # in transition_to_manual() below (see the comment there). Fully stop it
+            # (not just pause) so it won't auto-resume around future shots either.
+            self.stop_continuous()
+
+    def set_species(self, species):
+        if species not in ('Cs', 'Li'):
+            raise ValueError(f"species must be 'Cs' or 'Li', not {species!r}")
+        self.species = species
+        if self._last_absorption_frames is not None:
+            # Instantly redisplay the last shot's frames with the new species, rather
+            # than waiting for another shot. Species only affects the resonant cross
+            # section (Density/atom-number results), not the OD image, but it's simplest
+            # to just recompute everything. Deliberately does NOT rewrite
+            # 'live_image_analysis' in the shot's h5 file -- that log reflects what the
+            # shot actually used, and shouldn't be retroactively changed by a later
+            # species toggle done purely for redisplay.
+            dark, light, atoms = self._last_absorption_frames
+            analysis = full_analysis(dark, light, atoms, species=self.species)
+            self._send_absorption_analysis(dark, light, atoms, analysis)
+
     def transition_to_manual(self):
         # Base class clears self.h5_filepath before returning, so capture it first.
         h5_filepath = self.h5_filepath
         result = super().transition_to_manual()
-        if getattr(self, 'display_mode', 'live') == 'absorption' and h5_filepath is not None:
+        if self.display_mode == 'absorption' and h5_filepath is not None:
+            # super().transition_to_manual() may have just resumed continuous
+            # acquisition (if it was running before the shot and not stopped by
+            # set_display_mode above), which uses self.image_socket from a background
+            # thread. zmq REQ sockets aren't thread-safe and enforce strict alternating
+            # send/recv, so using it concurrently from here raises ZMQError:
+            # "Operation cannot be accomplished in current state". Pause it around our
+            # own use of the socket to avoid that race.
+            was_continuous = self.continuous_thread is not None
+            if was_continuous:
+                self.stop_continuous(pause=True)
             try:
                 self._compute_and_send_absorption_display(h5_filepath)
             except Exception as e:
                 print(f"PCOCameraWorker: failed to compute absorption image: {e}", file=sys.stderr)
+            finally:
+                if was_continuous:
+                    self.start_continuous(self.continuous_dt)
         return result
 
     def _compute_and_send_absorption_display(self, h5_filepath):
@@ -258,11 +311,37 @@ class PCOCameraWorker(IMAQdxCameraWorker):
             light = last_frame(frame_group['light']).astype(float)
             atoms = last_frame(frame_group['atoms']).astype(float)
 
-            analysis = full_analysis(dark, light, atoms)
+            analysis = full_analysis(dark, light, atoms, species=self.species)
 
             results_group = f.require_group('live_image_analysis')
             set_attributes(results_group, analysis['results'])
 
+            # Persist the density image itself (previously only sent transiently to the
+            # tab for display, never saved) with the cloud-size fit results attached
+            # directly to it as attributes, so a later analysis script can load the image
+            # and its fit numbers together without recomputing anything.
+            if 'density' in results_group:
+                del results_group['density']
+            density_dset = results_group.create_dataset(
+                'density', data=analysis['density'].astype('float32'), compression='gzip'
+            )
+            density_dset.attrs['species'] = self.species
+            fit_result_keys = (
+                'N_x', 'N_y', 'N',
+                'sigma_x (um)', 'sigma_y (um)',
+                'x0_x (um)', 'x0_y (um)',
+            )
+            set_attributes(
+                density_dset,
+                {k: analysis['results'][k] for k in fit_result_keys},
+            )
+
+        self._last_absorption_frames = (dark, light, atoms)
+        self._send_absorption_analysis(dark, light, atoms, analysis)
+
+    def _send_absorption_analysis(self, dark, light, atoms, analysis):
+        """Send Dark/Light/Atoms/OD/Density plus profile/fit data to the BLACS tab, so
+        its frame selector can switch between them without asking the worker again."""
         frames = {
             'Dark': dark,
             'Light': light,

@@ -286,7 +286,6 @@ class ConnectionTable:
             connection='port0/line7',
             serial_number=14404725,
             shutter_mode='rolling shutter',
-            display_mode='absorption',
             camera_attributes={
                 "trigger_mode": 'external exposure control',
                 'exposure_time': 0.050,

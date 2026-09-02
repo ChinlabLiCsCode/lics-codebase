@@ -16,16 +16,11 @@ class PCOCamera(IMAQdxCamera):
 
     Changing shutter_mode triggers a camera reboot (~3 s) on first use.
 
-    display_mode controls what the BLACS tab shows after a shot. Valid values:
-        'live'        (default) — tab behaves as a normal live camera viewer
-        'absorption'  — after each shot, the tab computes the optical density
-                        (OD) image from that shot's 'dark'/'light'/'atoms'
-                        frames (same calculation as
-                        analysislib/absorption_image_analysis.py's abs_calc)
-                        and displays it in place of the raw camera frames.
-                        Requires the shot to have used frametypes 'dark',
-                        'light' and 'atoms' under the same exposure name
-                        (see Cs_LF_H_Imaging in cs_subsequences.py).
+    The BLACS tab's display mode ('Live' camera viewer vs. 'Absorption', which
+    computes and shows the OD/density image from each shot's 'dark'/'light'/
+    'atoms' frames — same calculation as
+    analysislib/absorption_image_analysis.py's abs_calc) is switched live from
+    a dropdown in the tab itself, not configured here — see PCOCameraTab.
 
     Typical connection table usage::
 
@@ -37,7 +32,6 @@ class PCOCamera(IMAQdxCamera):
             orientation='vertical',
             trigger_duration=1e-3,         # 1 ms trigger pulse
             shutter_mode='global shutter', # optional, default 'rolling shutter'
-            display_mode='absorption',     # optional, default 'live'
             camera_attributes={
                 'trigger_mode': 'external exposure start & software trigger',
                 'exposure_time': 0.050,    # seconds
@@ -54,13 +48,8 @@ class PCOCamera(IMAQdxCamera):
     description = 'PCO Camera'
 
     @set_passed_properties(
-        property_names={"connection_table_properties": ["shutter_mode", "display_mode"]}
+        property_names={"connection_table_properties": ["shutter_mode"]}
     )
-    def __init__(self, *args, shutter_mode='rolling shutter', display_mode='live', **kwargs):
+    def __init__(self, *args, shutter_mode='rolling shutter', **kwargs):
         super().__init__(*args, **kwargs)
-        if display_mode not in ('live', 'absorption'):
-            raise ValueError(
-                f"display_mode must be 'live' or 'absorption', not {display_mode!r}"
-            )
         self.shutter_mode = shutter_mode
-        self.display_mode = display_mode

@@ -140,14 +140,14 @@ def plot_results(title):
 
     fig.suptitle(run_name+title)
 
-    # Displaying the N_y value larger
-    fig_2 = plt.figure(constrained_layout=True, figsize=(6, 2.5))
-    ax_big = fig_2.add_subplot(111)
-    ax_big.axis('off')
-    ax_big.text(0.5, 0.6, big_number(N_y), ha='center', va='center',
-                fontsize=128, fontweight='bold', transform=ax_big.transAxes)
-    ax_big.text(0.5, 0.1, 'atoms ($N_y$)', ha='center', va='center',
-                fontsize=26, color='gray', transform=ax_big.transAxes)
+    # # Displaying the N_y value larger
+    # fig_2 = plt.figure(constrained_layout=True, figsize=(6, 2.5))
+    # ax_big = fig_2.add_subplot(111)
+    # ax_big.axis('off')
+    # ax_big.text(0.5, 0.6, big_number(N_y), ha='center', va='center',
+    #             fontsize=128, fontweight='bold', transform=ax_big.transAxes)
+    # ax_big.text(0.5, 0.1, 'atoms ($N_y$)', ha='center', va='center',
+    #             fontsize=26, color='gray', transform=ax_big.transAxes)
 
     plt.show()
 
