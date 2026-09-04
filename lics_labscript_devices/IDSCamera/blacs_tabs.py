@@ -52,6 +52,16 @@ class _FrameReceiver(ZMQServer):
 class IDSCameraTab(DeviceTab):
     worker_class = 'lics_labscript_devices.IDSCamera.blacs_workers.IDSCameraWorker'
 
+    # Fixed chrome sizes (px) for axes shared between two linked plots that pyqtgraph
+    # wouldn't otherwise force to the same pixel geometry -- see the PCO camera's
+    # _AbsorptionDisplay for the full explanation. Without this, e.g. col_plot's own
+    # axis labels (which image_plot's hidden axis doesn't have) would eat a different
+    # amount of space from each plot's cell, so even with a linked range the two
+    # viewports end up different pixel sizes and a given row/column lands at different
+    # screen offsets in each -- i.e. the profiles wouldn't visually line up with the image.
+    _SHARED_BOTTOM_AXIS_HEIGHT = 30
+    _SHARED_LEFT_AXIS_WIDTH = 50
+
     def initialise_GUI(self):
         self._acquiring = False
         self._levels_initialized = False
@@ -62,22 +72,64 @@ class IDSCameraTab(DeviceTab):
         self._fps = 0.0
         self._counts_history = []   # list of (perf_counter, counts)
         self._counts_window_s = 10.0
+        self._show_line_cuts = True
 
         layout = self.get_tab_layout()
 
-        # Root: horizontal split — image view left, dashboard right
-        outer = QtWidgets.QWidget()
-        hbox = QtWidgets.QHBoxLayout(outer)
-        hbox.setContentsMargins(0, 0, 0, 0)
+        # --- image, with column profile alongside it and row profile below it ---
+        # (same pg.GraphicsLayoutWidget + linked-PlotItem + HistogramLUTItem
+        # arrangement as the PCO camera's absorption Density panel.)
+        self._graphics = pg.GraphicsLayoutWidget()
+        self._graphics.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self._graphics.setMinimumHeight(320)
+        self._graphics.ci.layout.setContentsMargins(0, 0, 0, 0)
 
-        # --- Left: image view with ROI and crosshair ---
-        self.image_view = pg.ImageView()
-        self.image_view.ui.roiBtn.hide()
-        self.image_view.ui.menuBtn.hide()
-        self.image_view.setSizePolicy(
-            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-        )
-        hbox.addWidget(self.image_view, stretch=3)
+        self._col_plot = self._graphics.addPlot(row=0, col=0)
+        self._image_plot = self._graphics.addPlot(row=0, col=1)
+        self._hist = pg.HistogramLUTItem()
+        self._graphics.addItem(self._hist, row=0, col=2)
+        self._row_plot = self._graphics.addPlot(row=1, col=1)
+
+        self._image_item = pg.ImageItem()
+        self._image_plot.addItem(self._image_item)
+        self._hist.setImageItem(self._image_item)
+        self._image_plot.setAspectLocked(True)
+        self._image_plot.showGrid(x=False, y=False)
+        self._image_plot.setMenuEnabled(False)
+        # pg.ImageView (what this used to be) inverts Y by default so row 0 appears at
+        # the top, matching normal image-viewer conventions; match that here so the
+        # camera view isn't suddenly upside down, and invert col_plot's Y the same way
+        # so a given row lands at the same screen position in both (see class docstring).
+        self._image_plot.getViewBox().invertY(True)
+        self._col_plot.getViewBox().invertY(True)
+
+        # image_plot shares its bottom axis with row_plot's (column position) and its
+        # left axis with col_plot's (row position); showing its own duplicate tick
+        # labels would be redundant, so hide the text (but keep a fixed height/width
+        # matching its shared-axis neighbour).
+        axis_bottom = self._image_plot.getAxis('bottom')
+        axis_bottom.setStyle(showValues=False)
+        axis_bottom.setHeight(self._SHARED_BOTTOM_AXIS_HEIGHT)
+        axis_left = self._image_plot.getAxis('left')
+        axis_left.setStyle(showValues=False)
+        axis_left.setWidth(self._SHARED_LEFT_AXIS_WIDTH)
+
+        self._row_plot.setXLink(self._image_plot)
+        self._row_plot.setLabel('bottom', 'column')
+        self._row_plot.getAxis('left').setWidth(self._SHARED_LEFT_AXIS_WIDTH)
+        self._row_curve = self._row_plot.plot(pen=pg.mkPen('c', width=1))
+
+        self._col_plot.setYLink(self._image_plot)
+        self._col_plot.setLabel('left', 'row')
+        self._col_plot.getAxis('bottom').setHeight(self._SHARED_BOTTOM_AXIS_HEIGHT)
+        self._col_curve = self._col_plot.plot(pen=pg.mkPen('c', width=1))
+
+        row_layout = self._graphics.ci.layout
+        row_layout.setRowStretchFactor(0, 5)
+        row_layout.setRowStretchFactor(1, 1)
+        row_layout.setColumnStretchFactor(0, 1)
+        row_layout.setColumnStretchFactor(1, 5)
+        row_layout.setColumnStretchFactor(2, 1)
 
         self.roi = pg.RectROI(
             [50, 50], [200, 200],
@@ -89,26 +141,34 @@ class IDSCameraTab(DeviceTab):
         self.roi.sigRegionChanged.connect(self._clamp_roi)
         # Restrict ROI to left-button so right-click reaches sigMouseClicked
         self.roi.setAcceptedMouseButtons(QtCore.Qt.LeftButton)
-        self.image_view.getView().setMenuEnabled(False)
-        self.image_view.getView().addItem(self.roi)
+        self._image_plot.addItem(self.roi)
 
         self._row_line = pg.InfiniteLine(angle=0, pen=pg.mkPen('y', width=1))
         self._col_line = pg.InfiniteLine(angle=90, pen=pg.mkPen('y', width=1))
         self._row_line.hide()
         self._col_line.hide()
-        self.image_view.getView().addItem(self._row_line)
-        self.image_view.getView().addItem(self._col_line)
-        self.image_view.getImageItem().scene().sigMouseClicked.connect(
-            self._on_scene_clicked
-        )
+        self._image_plot.addItem(self._row_line)
+        self._image_plot.addItem(self._col_line)
+        self._image_item.scene().sigMouseClicked.connect(self._on_scene_clicked)
 
-        # --- Right: dashboard ---
-        dash = QtWidgets.QWidget()
-        vbox = QtWidgets.QVBoxLayout(dash)
-        vbox.setContentsMargins(4, 4, 4, 4)
+        layout.addWidget(self._graphics, 3)
 
-        # Control buttons row
+        # --- below the image: controls on the left, counts history alongside them ---
+        bottom_widget = QtWidgets.QWidget()
+        bottom_row = QtWidgets.QHBoxLayout()
+        bottom_row.setContentsMargins(0, 0, 0, 0)
+        bottom_widget.setLayout(bottom_row)
+
+        controls_widget = QtWidgets.QWidget()
+        controls_col = QtWidgets.QVBoxLayout()
+        controls_col.setContentsMargins(0, 0, 0, 0)
+        controls_widget.setLayout(controls_col)
+        bottom_row.addWidget(controls_widget, 1)
+
+        btn_widget = QtWidgets.QWidget()
         btn_row = QtWidgets.QHBoxLayout()
+        btn_row.setContentsMargins(4, 4, 4, 4)
+        btn_widget.setLayout(btn_row)
         self._btn_continuous = QtWidgets.QPushButton("Continuous")
         self._btn_stop = QtWidgets.QPushButton("Stop")
         self._btn_snap = QtWidgets.QPushButton("Snap")
@@ -119,15 +179,23 @@ class IDSCameraTab(DeviceTab):
         btn_row.addWidget(self._btn_stop)
         btn_row.addWidget(self._btn_snap)
         btn_row.addWidget(self._label_fps)
+        btn_row.addSpacing(16)
+        self._chk_line_cuts = QtWidgets.QCheckBox("Show line cuts")
+        self._chk_line_cuts.setChecked(True)
+        self._chk_line_cuts.toggled.connect(self._on_line_cuts_toggled)
+        btn_row.addWidget(self._chk_line_cuts)
         btn_row.addStretch()
-        vbox.addLayout(btn_row)
+        controls_col.addWidget(btn_widget)
 
         self._btn_continuous.clicked.connect(self._on_continuous_clicked)
         self._btn_stop.clicked.connect(self._on_stop_clicked)
         self._btn_snap.clicked.connect(self._on_snap_clicked)
 
         # Max fps spinner (controls how fast frames are sent to the tab)
+        rate_widget = QtWidgets.QWidget()
         rate_row = QtWidgets.QHBoxLayout()
+        rate_row.setContentsMargins(4, 4, 4, 4)
+        rate_widget.setLayout(rate_row)
         rate_row.addWidget(QtWidgets.QLabel("Max fps:"))
         self._spin_maxfps = QtWidgets.QDoubleSpinBox()
         self._spin_maxfps.setRange(0.0, 200.0)
@@ -136,17 +204,14 @@ class IDSCameraTab(DeviceTab):
         self._spin_maxfps.setFixedWidth(70)
         rate_row.addWidget(self._spin_maxfps)
         rate_row.addStretch()
-        vbox.addLayout(rate_row)
+        controls_col.addWidget(rate_widget)
         self._spin_maxfps.valueChanged.connect(self._on_maxfps_changed)
 
-        # Stats readout
-        self._stats_label = QtWidgets.QLabel()
-        self._stats_label.setStyleSheet("font-family: monospace;")
-        self._stats_label.setWordWrap(True)
-        vbox.addWidget(self._stats_label)
-
         # Exposure slider
+        exp_widget = QtWidgets.QWidget()
         exp_row = QtWidgets.QHBoxLayout()
+        exp_row.setContentsMargins(4, 4, 4, 4)
+        exp_widget.setLayout(exp_row)
         exp_row.addWidget(QtWidgets.QLabel("Exposure:"))
         self._exposure_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         # Range in microseconds — updated in restore_save_data if known;
@@ -157,11 +222,14 @@ class IDSCameraTab(DeviceTab):
         exp_row.addWidget(self._exposure_slider)
         self._exposure_label = QtWidgets.QLabel("10.0 ms")
         exp_row.addWidget(self._exposure_label)
-        vbox.addLayout(exp_row)
+        controls_col.addWidget(exp_widget)
         self._exposure_slider.valueChanged.connect(self._on_exposure_changed)
 
         # Counts-history window slider
+        win_widget = QtWidgets.QWidget()
         win_row = QtWidgets.QHBoxLayout()
+        win_row.setContentsMargins(4, 4, 4, 4)
+        win_widget.setLayout(win_row)
         win_row.addWidget(QtWidgets.QLabel("Window (s):"))
         self._window_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self._window_slider.setMinimum(1)
@@ -170,41 +238,39 @@ class IDSCameraTab(DeviceTab):
         win_row.addWidget(self._window_slider)
         self._window_label = QtWidgets.QLabel("10 s")
         win_row.addWidget(self._window_label)
-        vbox.addLayout(win_row)
+        controls_col.addWidget(win_widget)
         self._window_slider.valueChanged.connect(self._on_window_changed)
 
-        # Counts history plot — _LockedPlotWidget blocks zoom/pan
-        self._counts_plot = _LockedPlotWidget(title="Counts history")
-        self._counts_plot.setLabel('bottom', 'seconds ago')
-        self._counts_plot.enableAutoRange()
-        self._counts_plot.setMouseEnabled(x=False, y=False)
-        self._counts_curve = self._counts_plot.plot(pen=pg.mkPen('g', width=1))
-        vbox.addWidget(self._counts_plot, stretch=1)
+        # Stats readout
+        self._stats_label = QtWidgets.QLabel()
+        self._stats_label.setStyleSheet("font-family: monospace;")
+        self._stats_label.setWordWrap(True)
+        controls_col.addWidget(self._stats_label)
 
         # Reset / Save CSV buttons
+        csv_widget = QtWidgets.QWidget()
         csv_row = QtWidgets.QHBoxLayout()
+        csv_row.setContentsMargins(4, 4, 4, 4)
+        csv_widget.setLayout(csv_row)
         btn_reset = QtWidgets.QPushButton("Reset")
         btn_csv = QtWidgets.QPushButton("Save CSV")
         csv_row.addWidget(btn_reset)
         csv_row.addWidget(btn_csv)
         csv_row.addStretch()
-        vbox.addLayout(csv_row)
+        controls_col.addWidget(csv_widget)
         btn_reset.clicked.connect(self._on_reset_counts)
         btn_csv.clicked.connect(self._on_save_csv)
+        controls_col.addStretch()
 
-        # Row / column profile plots
-        self._row_plot = _LockedPlotWidget(title="Row profile")
-        self._row_plot.setMouseEnabled(x=False, y=False)
-        self._row_curve = self._row_plot.plot(pen=pg.mkPen('c', width=1))
-        vbox.addWidget(self._row_plot, stretch=1)
+        # --- counts history plot, alongside the controls above (not below them) ---
+        self._counts_plot = _LockedPlotWidget(title="Counts history")
+        self._counts_plot.setLabel('bottom', 'seconds ago')
+        self._counts_plot.enableAutoRange()
+        self._counts_plot.setMouseEnabled(x=False, y=False)
+        self._counts_curve = self._counts_plot.plot(pen=pg.mkPen('g', width=1))
+        bottom_row.addWidget(self._counts_plot, 1)
 
-        self._col_plot = _LockedPlotWidget(title="Column profile")
-        self._col_plot.setMouseEnabled(x=False, y=False)
-        self._col_curve = self._col_plot.plot(pen=pg.mkPen('c', width=1))
-        vbox.addWidget(self._col_plot, stretch=1)
-
-        hbox.addWidget(dash, stretch=2)
-        layout.addWidget(outer)
+        layout.addWidget(bottom_widget, 1)
 
         # ZMQ server that receives frames from the worker
         self._frame_receiver = _FrameReceiver(self._on_frame)
@@ -237,7 +303,9 @@ class IDSCameraTab(DeviceTab):
             'max_fps': self._spin_maxfps.value(),
             'exposure_us': self._exposure_slider.value(),
             'window_s': self._window_slider.value(),
-            'colormap': repr(self.image_view.ui.histogram.gradient.saveState()),
+            'colormap': repr(self._hist.gradient.saveState()),
+            'roi_geometry': self._roi_geometry(self.roi),
+            'show_line_cuts': self._chk_line_cuts.isChecked(),
         }
 
     def restore_save_data(self, save_data):
@@ -247,13 +315,29 @@ class IDSCameraTab(DeviceTab):
             self._exposure_slider.setValue(int(save_data['exposure_us']))
         if 'colormap' in save_data:
             try:
-                self.image_view.ui.histogram.gradient.restoreState(
+                self._hist.gradient.restoreState(
                     ast.literal_eval(save_data['colormap'])
                 )
             except Exception:
                 pass
+        roi_geom = save_data.get('roi_geometry')
+        if roi_geom:
+            x, y, w, h = roi_geom
+            self.roi.setPos((x, y), update=False)
+            self.roi.setSize((w, h))
+        # Triggers _on_line_cuts_toggled (a no-op if already checked, which is fine
+        # since that's the default too).
+        self._chk_line_cuts.setChecked(save_data.get('show_line_cuts', True))
         if save_data.get('acquiring', False):
             self._on_continuous_clicked(None)
+
+    @staticmethod
+    def _roi_geometry(roi_item):
+        """(x, y, w, h) of a draggable RectROI, for save/restore of its exact position
+        and size."""
+        pos = roi_item.pos()
+        size = roi_item.size()
+        return (pos.x(), pos.y(), size.x(), size.y())
 
     # ------------------------------------------------------------------ #
     # ROI helpers                                                          #
@@ -286,7 +370,7 @@ class IDSCameraTab(DeviceTab):
         roi_rect = self._current_roi_rect()
         if roi_rect is None:
             return
-        vp = self.image_view.getView().mapSceneToView(event.scenePos())
+        vp = self._image_plot.getViewBox().mapSceneToView(event.scenePos())
         col, row = int(vp.x()), int(vp.y())
         col0, row0, w, h = roi_rect
         if col0 <= col < col0 + w and row0 <= row < row0 + h:
@@ -316,16 +400,12 @@ class IDSCameraTab(DeviceTab):
 
         # Image display — pyqtgraph wants (W, H) axis order
         first = not self._levels_initialized
-        self.image_view.setImage(
-            image.T,
-            autoLevels=False,
-            autoRange=first,
-            autoHistogramRange=first,
-        )
+        self._image_item.setImage(image.T, autoLevels=False)
         if first:
+            self._image_plot.autoRange()
             lo = float(np.percentile(image, 0.1))
             hi = float(np.percentile(image, 99.9))
-            self.image_view.setLevels(lo, hi)
+            self._hist.setLevels(lo, hi)
             self._levels_initialized = True
 
         # ROI counts
@@ -348,12 +428,47 @@ class IDSCameraTab(DeviceTab):
         while self._counts_history and self._counts_history[0][0] < cutoff:
             self._counts_history.pop(0)
 
+        # Row / column profiles. Deliberately not shown as plot titles: row_plot/col_plot
+        # are pixel-aligned with image_plot via fixed shared axis chrome (see class
+        # docstring) which depends on neither having a title -- image_plot never gets
+        # one, so giving row_plot/col_plot one here (even conditionally) would eat extra
+        # height/width only from their own cells and throw the alignment off. The picked
+        # point is reported in the stats label below instead.
+        profile_text = ""
+        if self._profile_point is not None:
+            px, py = self._profile_point
+            if (col0 <= px < col0 + w) and (row0 <= py < row0 + h):
+                row_profile = image[py, col0:col0 + w]
+                col_profile = image[row0:row0 + h, px]
+                self._row_curve.setData(np.arange(col0, col0 + w), row_profile)
+                self._col_curve.setData(col_profile, np.arange(row0, row0 + h))
+                # Crosshairs are meaningless without the corresponding plots visible.
+                if self._show_line_cuts:
+                    self._row_line.setPos(py)
+                    self._col_line.setPos(px)
+                    self._row_line.show()
+                    self._col_line.show()
+                else:
+                    self._row_line.hide()
+                    self._col_line.hide()
+                profile_text = f"   profile point: ({px}, {py})"
+            else:
+                self._row_curve.setData([])
+                self._col_curve.setData([])
+                self._row_line.hide()
+                self._col_line.hide()
+        else:
+            self._row_curve.setData([])
+            self._col_curve.setData([])
+            self._row_line.hide()
+            self._col_line.hide()
+
         # Stats label
         exp_us = self._exposure_slider.value()
         self._stats_label.setText(
             f"ROI {w}×{h} @ ({col0},{row0})   "
             f"counts={total:,}   mean={region.mean():.1f}   max={int(region.max())}\n"
-            f"exposure: {exp_us / 1000:.2f} ms   {self._fps:.1f} fps"
+            f"exposure: {exp_us / 1000:.2f} ms   {self._fps:.1f} fps{profile_text}"
         )
 
         # Counts history plot
@@ -361,28 +476,6 @@ class IDSCameraTab(DeviceTab):
             xs = [t - now for t, _ in self._counts_history]
             ys = [v for _, v in self._counts_history]
             self._counts_curve.setData(xs, ys)
-
-        # Row / column profiles
-        if self._profile_point is not None:
-            px, py = self._profile_point
-            if (col0 <= px < col0 + w) and (row0 <= py < row0 + h):
-                row_profile = image[py, col0:col0 + w]
-                col_profile = image[row0:row0 + h, px]
-                self._row_curve.setData(row_profile)
-                self._col_curve.setData(col_profile)
-                self._row_plot.setTitle(f"Row profile (y={py})")
-                self._col_plot.setTitle(f"Column profile (x={px})")
-                self._row_line.setPos(py)
-                self._col_line.setPos(px)
-                self._row_line.show()
-                self._col_line.show()
-                return
-        self._row_curve.setData([])
-        self._col_curve.setData([])
-        self._row_plot.setTitle("Row profile")
-        self._col_plot.setTitle("Column profile")
-        self._row_line.hide()
-        self._col_line.hide()
 
     # ------------------------------------------------------------------ #
     # Button / slider handlers                                             #
@@ -417,6 +510,41 @@ class IDSCameraTab(DeviceTab):
     def _on_window_changed(self, value):
         self._counts_window_s = float(value)
         self._window_label.setText(f"{value} s")
+
+    def _on_line_cuts_toggled(self, checked):
+        self._show_line_cuts = checked
+        row_layout = self._graphics.ci.layout
+        axis_bottom = self._image_plot.getAxis('bottom')
+        axis_left = self._image_plot.getAxis('left')
+        if checked:
+            # Just calling .setVisible(True)/stretch factor 1 back on col_plot/row_plot
+            # is not enough to make image_plot expand to fill their space when they're
+            # hidden -- a hidden-but-still-in-the-layout PlotItem keeps reserving its
+            # column/row's minimum size regardless of stretch factor, so it has to be
+            # fully removed from the layout (see the 'else' branch). Re-adding it here
+            # loses the axis link pyqtgraph set up, so that has to be redone too.
+            self._graphics.addItem(self._col_plot, row=0, col=0)
+            self._graphics.addItem(self._row_plot, row=1, col=1)
+            self._col_plot.setYLink(self._image_plot)
+            self._row_plot.setXLink(self._image_plot)
+            axis_bottom.setHeight(self._SHARED_BOTTOM_AXIS_HEIGHT)
+            axis_left.setWidth(self._SHARED_LEFT_AXIS_WIDTH)
+            row_layout.setRowStretchFactor(1, 1)
+            row_layout.setColumnStretchFactor(0, 1)
+        else:
+            self._graphics.removeItem(self._col_plot)
+            self._graphics.removeItem(self._row_plot)
+            self._row_line.hide()
+            self._col_line.hide()
+            # image_plot's own bottom/left axis are fixed to the same size as row_plot's/
+            # col_plot's (so the three stay pixel-aligned while all shown -- see class
+            # docstring); with those hidden there's nothing left to align with, and that
+            # fixed reservation is exactly what stopped the image from expanding into
+            # their freed space, so shrink it down to (near) nothing too.
+            axis_bottom.setHeight(1)
+            axis_left.setWidth(1)
+            row_layout.setRowStretchFactor(1, 0)
+            row_layout.setColumnStretchFactor(0, 0)
 
     def _on_maxfps_changed(self, fps):
         if self._acquiring:

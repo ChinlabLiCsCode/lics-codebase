@@ -211,12 +211,16 @@ class PCOCameraWorker(IMAQdxCameraWorker):
     interface_class = PCO_Camera
 
     def init(self):
-        # display_mode and species are runtime-only settings (see PCOCameraTab's mode/
-        # species switchers), not connection table properties: they're changed live from
-        # the tab via set_display_mode()/set_species() below, and reset to their defaults
-        # on every worker (re)start.
+        # display_mode, species, save_roi and defringe_roi are runtime-only settings (see
+        # PCOCameraTab's switchers/draggable ROIs), not connection table properties:
+        # they're changed live from the tab, and reset to their defaults on every worker
+        # (re)start.
         self.display_mode = 'live'
         self.species = 'Cs'
+        # (x0, y0, x1, y1) pixel bounds, or None for "not configured yet" (no cropping,
+        # nothing recorded). Set live from the tab's draggable ROI boxes.
+        self.save_roi = None
+        self.defringe_roi = None
         # (dark, light, atoms) from the most recently computed absorption shot, so
         # set_species() can instantly redisplay with the new species without waiting for
         # another shot.
@@ -249,17 +253,33 @@ class PCOCameraWorker(IMAQdxCameraWorker):
             # than waiting for another shot. Species only affects the resonant cross
             # section (Density/atom-number results), not the OD image, but it's simplest
             # to just recompute everything. Deliberately does NOT rewrite
-            # 'live_image_analysis' in the shot's h5 file -- that log reflects what the
-            # shot actually used, and shouldn't be retroactively changed by a later
-            # species toggle done purely for redisplay.
+            # 'results/live_image_analysis' in the shot's h5 file -- that log reflects
+            # what the shot actually used, and shouldn't be retroactively changed by a
+            # later species toggle done purely for redisplay.
             dark, light, atoms = self._last_absorption_frames
             analysis = full_analysis(dark, light, atoms, species=self.species)
             self._send_absorption_analysis(dark, light, atoms, analysis)
+
+    def set_save_roi(self, roi):
+        """roi is (x0, y0, x1, y1) pixel bounds (half-open: x1/y1 exclusive), in the
+        coordinate system of the acquired image, or None to stop cropping/recording."""
+        self.save_roi = tuple(int(v) for v in roi) if roi is not None else None
+
+    def set_defringe_roi(self, roi):
+        """Same coordinate convention as set_save_roi(). Recorded as metadata only --
+        no defringing algorithm is implemented (yet); this just reserves the region for
+        one to use later."""
+        self.defringe_roi = tuple(int(v) for v in roi) if roi is not None else None
 
     def transition_to_manual(self):
         # Base class clears self.h5_filepath before returning, so capture it first.
         h5_filepath = self.h5_filepath
         result = super().transition_to_manual()
+        if h5_filepath is not None:
+            try:
+                self._crop_saved_images_and_record_rois(h5_filepath)
+            except Exception as e:
+                print(f"PCOCameraWorker: failed to crop saved images / record ROIs: {e}", file=sys.stderr)
         if self.display_mode == 'absorption' and h5_filepath is not None:
             # super().transition_to_manual() may have just resumed continuous
             # acquisition (if it was running before the shot and not stopped by
@@ -280,13 +300,66 @@ class PCOCameraWorker(IMAQdxCameraWorker):
                     self.start_continuous(self.continuous_dt)
         return result
 
+    def _crop_saved_images_and_record_rois(self, h5_filepath):
+        """Crop every image transition_to_manual() just saved down to save_roi (if set),
+        and record save_roi/defringe_roi as metadata on the image group -- regardless of
+        display_mode, and regardless of whether a crop was actually needed, so the ROIs
+        configured at shot time are always recoverable from the shot file. Runs before
+        the absorption display/analysis below, so that (if display_mode is 'absorption')
+        it operates on the already-cropped images, same as anyone re-reading the shot
+        file afterwards would see."""
+        if self.save_roi is None and self.defringe_roi is None:
+            return
+        image_path = 'images/' + (self.orientation or self.device_name)
+        with h5py.File(h5_filepath, 'r+') as f:
+            image_group = f.get(image_path)
+            if image_group is None:
+                return
+
+            roi_attrs = {}
+            if self.save_roi is not None:
+                roi_attrs['save_roi'] = self.save_roi
+            if self.defringe_roi is not None:
+                roi_attrs['defringe_roi'] = self.defringe_roi
+            set_attributes(image_group, roi_attrs)
+
+            if self.save_roi is None:
+                return
+            x0, y0, x1, y1 = self.save_roi
+            for key in list(image_group.keys()):
+                exposure_group = image_group[key]
+                if not isinstance(exposure_group, h5py.Group):
+                    continue
+                for frametype in list(exposure_group.keys()):
+                    dset = exposure_group[frametype]
+                    # (H, W) for a single frame, or (N, H, W) if this (name, frametype)
+                    # pair had multiple exposures in the same shot.
+                    h, w = dset.shape[-2:]
+                    cx0, cy0 = max(0, x0), max(0, y0)
+                    cx1, cy1 = min(w, x1), min(h, y1)
+                    if cx1 <= cx0 or cy1 <= cy0:
+                        continue  # ROI doesn't overlap this image; leave it alone
+                    if (cx0, cy0, cx1, cy1) == (0, 0, w, h):
+                        continue  # ROI covers the whole image already; nothing to trim
+                    cropped = dset[..., cy0:cy1, cx0:cx1]
+                    attrs = dict(dset.attrs)
+                    del exposure_group[frametype]
+                    new_dset = exposure_group.create_dataset(
+                        frametype, data=cropped, dtype='uint16', compression='gzip'
+                    )
+                    for attr_key, attr_val in attrs.items():
+                        new_dset.attrs[attr_key] = attr_val
+
     def _compute_and_send_absorption_display(self, h5_filepath):
         """Read back the most recently acquired exposure's dark/light/atoms frames
         from the shot file, run the shared absorption analysis (same calculation as
-        analysislib/absorption_image_analysis.py), log the fit results to the shot
-        file under 'live_image_analysis', and send Dark/Light/Atoms/OD/Density to the
-        BLACS tab in place of the raw camera frames that transition_to_manual() already
-        sent, so the tab's frame selector can switch between them."""
+        analysislib/absorption_image_analysis.py), log the fit results under
+        'results/live_image_analysis' (the same HDF5 location lyse's own
+        run.save_result() writes to, so these show up as ordinary columns in the lyse
+        dataframe without needing a separate analysis script to run), and send
+        Dark/Light/Atoms/OD/Density to the BLACS tab in place of the raw camera frames
+        that transition_to_manual() already sent, so the tab's frame selector can switch
+        between them."""
         image_path = 'images/' + (self.orientation or self.device_name)
         with h5py.File(h5_filepath, 'r+') as f:
             exposures = f['devices'][self.device_name]['EXPOSURES'][:]
@@ -313,18 +386,32 @@ class PCOCameraWorker(IMAQdxCameraWorker):
 
             analysis = full_analysis(dark, light, atoms, species=self.species)
 
-            results_group = f.require_group('live_image_analysis')
+            # 'results/<name>' is exactly the HDF5 location lyse's own Run.save_result()
+            # writes to (results/<analysis script's basename>/<result name>) -- writing
+            # here directly means these appear as ordinary lyse dataframe columns
+            # (('live_image_analysis', 'N_x'), etc.) without lyse needing to run a
+            # separate analysis script against the shot. A plain top-level group (what
+            # this used to be) is invisible to lyse's dataframe builder, which only walks
+            # 'results' and 'images' (see lyse/dataframe_utilities.py).
+            results_group = f.require_group('results/live_image_analysis')
             set_attributes(results_group, analysis['results'])
 
             # Persist the density image itself (previously only sent transiently to the
-            # tab for display, never saved) with the cloud-size fit results attached
-            # directly to it as attributes, so a later analysis script can load the image
-            # and its fit numbers together without recomputing anything.
-            if 'density' in results_group:
-                del results_group['density']
-            density_dset = results_group.create_dataset(
+            # tab for display, never saved), as a sibling of dark/light/atoms under this
+            # exposure so it shows up in the lyse dataframe the same way those do
+            # (('pco_panda', 'absorption1', 'density', 'N_x'), etc.), with the cloud-size
+            # fit results attached directly to it as attributes too, so a later analysis
+            # script can load the image and its fit numbers together without recomputing
+            # anything.
+            if 'density' in frame_group:
+                del frame_group['density']
+            density_dset = frame_group.create_dataset(
                 'density', data=analysis['density'].astype('float32'), compression='gzip'
             )
+            density_dset.attrs['CLASS'] = np.bytes_('IMAGE')
+            density_dset.attrs['IMAGE_VERSION'] = np.bytes_('1.2')
+            density_dset.attrs['IMAGE_SUBCLASS'] = np.bytes_('IMAGE_GRAYSCALE')
+            density_dset.attrs['IMAGE_WHITE_IS_ZERO'] = np.uint8(0)
             density_dset.attrs['species'] = self.species
             fit_result_keys = (
                 'N_x', 'N_y', 'N',
@@ -357,6 +444,10 @@ class PCOCameraWorker(IMAQdxCameraWorker):
             'y_int': analysis['y_int'].tolist(),
             'x_dist': analysis['x_dist'].tolist(),
             'y_dist': analysis['y_dist'].tolist(),
+            # Sized to match the actual (possibly Save-ROI-cropped) image, not
+            # necessarily the full 2048x2048 sensor -- see full_analysis().
+            'span_x': analysis['span_x'].tolist(),
+            'span_y': analysis['span_y'].tolist(),
             'N': float(analysis['N']),
             'results': {k: float(v) for k, v in analysis['results'].items()},
         }

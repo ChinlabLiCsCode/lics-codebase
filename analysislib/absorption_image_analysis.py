@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from lics_labscript_devices.PCOCamera.absorption_analysis import (
     DEVICE_NAME,
     CONV_UM_PER_PIX as conv,
-    SPAN_UM as span,
     full_analysis,
 )
 
@@ -38,6 +37,10 @@ x_int     = analysis['x_int']
 y_int     = analysis['y_int']
 x_dist    = analysis['x_dist']
 y_dist    = analysis['y_dist']
+# Sized to match the actual image (not necessarily the full 2048x2048 sensor -- e.g.
+# after Save ROI cropping), so these are used instead of a fixed-length span.
+span_x    = analysis['span_x']
+span_y    = analysis['span_y']
 N         = analysis['N']  # "true" atom number: geometric mean of N_x, N_y
 
 N_int   = analysis['results']['N_int']
@@ -63,7 +66,10 @@ def big_number(value):
 
 
 def plot_results(title):
-    extent = [0, 2048*conv, 0, 2048*conv]  # rescale extent into microns
+    # rescale extent into microns; uses the actual image size, not necessarily the full
+    # 2048x2048 sensor (e.g. after Save ROI cropping)
+    img_h, img_w = dark_image.shape
+    extent = [0, img_w*conv, 0, img_h*conv]
 
     # size = (6, 12)
     fig = plt.figure(constrained_layout=True) #, figsize=size)
@@ -122,15 +128,15 @@ def plot_results(title):
     plt.setp(ax_density.get_yticklabels(), visible=False)
 
     # x-profile: below the image, x-axis shared with density plot
-    ax_x_prof.scatter(span[::1], x_int[::1]/conv, s=4, alpha=0.5, label='data')
-    ax_x_prof.plot(span, x_dist, color='red', label=rf'fit $\sigma$={sigma_x:.0f} μm')
+    ax_x_prof.scatter(span_x[::1], x_int[::1]/conv, s=4, alpha=0.5, label='data')
+    ax_x_prof.plot(span_x, x_dist, color='red', label=rf'fit $\sigma$={sigma_x:.0f} μm')
     ax_x_prof.set_xlabel(r'x ($\mu$m)')
     # ax_x_prof.set_ylabel(r'Density (atoms/$\mu$m)')
     # ax_x_prof.legend(fontsize=8)
 
     # y-profile: right of the image, y-axis shared with density plot; axes transposed
-    ax_y_prof.scatter(y_int[::1]/conv, span[::1], s=4, alpha=0.5, label='data')
-    ax_y_prof.plot(y_dist, span, color='red', label=rf'fit $\sigma$={sigma_y:.0f} μm')
+    ax_y_prof.scatter(y_int[::1]/conv, span_y[::1], s=4, alpha=0.5, label='data')
+    ax_y_prof.plot(y_dist, span_y, color='red', label=rf'fit $\sigma$={sigma_y:.0f} μm')
     ax_y_prof.set_ylabel(r'y ($\mu$m)')
     ax_y_prof.xaxis.set_label_position('top')
     ax_y_prof.xaxis.tick_top()

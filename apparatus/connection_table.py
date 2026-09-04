@@ -287,13 +287,29 @@ class ConnectionTable:
             serial_number=14404725,
             shutter_mode='rolling shutter',
             camera_attributes={
+                # 'external exposure control' means the trigger PULSE WIDTH is the
+                # exposure duration -- set per shot via pco_panda.expose(...,
+                # trigger_duration=...) (e.g. pco_exposure_duration in
+                # cs_subsequences.py). The exposure_time value below is NOT what
+                # controls shot exposure duration in this mode -- the camera's own
+                # exposure_time/set_delay_exposure_time mechanism only applies when the
+                # camera itself times the exposure (as it does in 'auto sequence' mode
+                # below, for Live view). It's kept here, rather than removed, only
+                # because IMAQdxCamera requires every key present in
+                # manual_mode_camera_attributes to also exist in camera_attributes; its
+                # value is otherwise inert for buffered/shot-mode runs.
                 "trigger_mode": 'external exposure control',
                 'exposure_time': 0.050,
                 'roi': (1, 1, 2048, 2048),
                 'binning': (1, 1),
             },
             manual_mode_camera_attributes={
+                # 'auto sequence': the camera free-runs and times its own exposure --
+                # this is the mode Live view uses, so exposure_time here is the one
+                # that actually matters, seeding the BLACS tab's Exposure (ms) spinbox
+                # (itself adjustable live via the tab's Apply Exposure button).
                 'trigger_mode': 'auto sequence',
+                'exposure_time': 0.050,
             },
         )
 

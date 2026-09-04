@@ -142,26 +142,37 @@ def fit_fun(x, line_density, fit_offset=FIT_OFFSET):
     return popt, perr
 
 
-def fit_extract(x_int, y_int, span=SPAN_UM, conv=CONV_UM_PER_PIX,
+def fit_extract(x_int, y_int, span_x=None, span_y=None, conv=CONV_UM_PER_PIX,
                  fit_offset=FIT_OFFSET, include_offset_in_N=INCLUDE_OFFSET_IN_N):
     """Fit Gaussians to the x/y integrated density profiles and return the
-    fitted distributions, atom numbers, centres, widths and offsets."""
-    popt_x, perr_x = fit_fun(span, x_int / conv, fit_offset=fit_offset)
-    popt_y, perr_y = fit_fun(span, y_int / conv, fit_offset=fit_offset)
+    fitted distributions, atom numbers, centres, widths and offsets.
+
+    span_x/span_y default to a pixel-position array matching len(x_int)/len(y_int) --
+    NOT necessarily SENSOR_PIXELS long. This makes fit_extract (and full_analysis, which
+    calls it) work correctly for a cropped image (e.g. after Save ROI cropping), not just
+    a full 2048x2048 frame; x_int and y_int need not even be the same length as each
+    other, if the crop isn't square."""
+    if span_x is None:
+        span_x = np.linspace(0, len(x_int) * conv, len(x_int))
+    if span_y is None:
+        span_y = np.linspace(0, len(y_int) * conv, len(y_int))
+
+    popt_x, perr_x = fit_fun(span_x, x_int / conv, fit_offset=fit_offset)
+    popt_y, perr_y = fit_fun(span_y, y_int / conv, fit_offset=fit_offset)
 
     A_x, x0_x, sigma_x, B_x = popt_x
     A_y, x0_y, sigma_y, B_y = popt_y
 
     # the curves to plot: the full fit, offset included if it was fitted
-    x_dist = gaussian_dist(span, A_x, x0_x, sigma_x, B_x)
-    y_dist = gaussian_dist(span, A_y, x0_y, sigma_y, B_y)
+    x_dist = gaussian_dist(span_x, A_x, x0_x, sigma_x, B_x)
+    y_dist = gaussian_dist(span_y, A_y, x0_y, sigma_y, B_y)
 
     # get the atom number along x and y, with or without the constant term
     B_x_N = B_x if include_offset_in_N else 0.0
     B_y_N = B_y if include_offset_in_N else 0.0
 
-    N_x = gaussian_dist(span, A_x, x0_x, sigma_x, B_x_N).sum() * conv
-    N_y = gaussian_dist(span, A_y, x0_y, sigma_y, B_y_N).sum() * conv
+    N_x = gaussian_dist(span_x, A_x, x0_x, sigma_x, B_x_N).sum() * conv
+    N_y = gaussian_dist(span_y, A_y, x0_y, sigma_y, B_y_N).sum() * conv
 
     return x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y
 
@@ -171,15 +182,22 @@ def full_analysis(dark_image, light_image, atoms_image, species=DEFAULT_SPECIES,
     """Run the full OD/density/fit pipeline and return everything a consumer
     might want. `results` holds exactly the set of named results that
     absorption_image_analysis.py saves via run.save_result()/save_results(),
-    also used verbatim for BLACS's 'live_image_analysis' logging."""
+    also used verbatim for BLACS's 'live_image_analysis' logging.
+
+    Works for any image size, not just the full 2048x2048 sensor -- e.g. after Save ROI
+    cropping -- since span_x/span_y are computed from the actual image shape."""
     log_image, rho, N_int = abs_calc(dark_image, light_image, atoms_image, species=species)
     density = rho / CONV_UM_PER_PIX ** 2  # atoms/um^2
 
     x_int = rho.sum(axis=0)
     y_int = rho.sum(axis=1)
+    img_h, img_w = rho.shape
+    span_x = np.linspace(0, img_w * CONV_UM_PER_PIX, img_w)
+    span_y = np.linspace(0, img_h * CONV_UM_PER_PIX, img_h)
 
     x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(
-        x_int, y_int, fit_offset=fit_offset, include_offset_in_N=include_offset_in_N
+        x_int, y_int, span_x=span_x, span_y=span_y,
+        fit_offset=fit_offset, include_offset_in_N=include_offset_in_N
     )
 
     # "True" atom number: geometric mean of the two independent 1D-fit atom numbers.
@@ -209,6 +227,8 @@ def full_analysis(dark_image, light_image, atoms_image, species=DEFAULT_SPECIES,
         'y_int': y_int,
         'x_dist': x_dist,
         'y_dist': y_dist,
+        'span_x': span_x,
+        'span_y': span_y,
         'N': N,
         'results': results,
     }
