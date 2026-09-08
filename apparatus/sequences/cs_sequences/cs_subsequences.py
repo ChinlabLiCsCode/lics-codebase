@@ -201,22 +201,23 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     have turned the coil off.
     """
     name = f'absorption{image_num}'
+    pixelfly_shutter_open_offset = -0.012 # scanned by hand 20260904
+    pixelfly_shutter_close_offset = -0.002 # scanned by hand 20260904
+    pco_exposure_duration = 0.028 # 28 ms gives a 3 ms full frame exposure.
+    # The rolling shutter takes 24.something ms to fully open up, so the real exposure
+    # can start 25 ms after the start trigger.  
+
     # collect initial background image with the shutter closed 
     ct.Pixelfly_Shutter__b2c06.disable(t-0.225)
     ct.pco_panda.expose(t-0.225, name=name, frametype="dark", trigger_duration=pco_exposure_duration)
-
 
     # make sure MOT and REP freqs are right
     ct.Cs_MOT_Freq__b3c24.constant(t-0.001, Cs_MOT_Freq_CsLFHImg)
     ct.Cs_Rep_Freq__b3c26.constant(t-0.001, Cs_Rep_Freq_CsLFHImg)
 
-    # make sure REP shutter is closed
-    ct.Cs_Rep_Shutter__b1c12.disable(t-0.015)
-
     # set bias fields appropriately for imaging
     # 
     #
-
 
     # ATOM IMAGE at t=0.000
 
@@ -224,18 +225,18 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter
-    ct.Pixelfly_Shutter__b2c06.enable(t-0.008)
-    ct.Pixelfly_Shutter__b2c06.disable(t-0.001)
+    ct.Pixelfly_Shutter__b2c06.enable(t+pixelfly_shutter_open_offset)
+    ct.Pixelfly_Shutter__b2c06.disable(t+pixelfly_shutter_close_offset)
 
     # imaging beam
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t-0.015)
-    ct.Cs_HImg_Shutter__b1c07.enable(t-0.014)
-    ct.Cs_LFImg_Shutter__b1c11.enable(t-0.014)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+img_shutter_open_offset)
+    ct.Cs_HImg_Shutter__b1c07.enable(t+img_shutter_open_offset)
+    ct.Cs_LFImg_Shutter__b1c11.enable(t+img_shutter_open_offset)
     ct.Cs_LFImg_AO_Sw__b1c10.enable(t)
     ct.Cs_LFImg_AO_Sw__b1c10.disable(t+Img_Pulse_Length_CsLFHImg) 
     ct.Scope_Trig__b2c08.enable(t)
     ct.Scope_Trig__b2c08.disable(t+Img_Pulse_Length_CsLFHImg)
-    ct.Cs_HImg_Shutter__b1c07.disable(t)
+    ct.Cs_HImg_Shutter__b1c07.disable(t+img_shutter_close_offset)
     ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.030)
 
     # V OP beam
@@ -253,36 +254,37 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     # ct.oTOP_AO_AM__b4c06.constant(t+5e-3, 0)
 
     # LIGHT IMAGE at t=0.200
+    t += 0.200
 
-    # aquire image
-    ct.pco_panda.expose(t+0.175, name=name, frametype='light', trigger_duration=pco_exposure_duration)
+    # acquire image
+    ct.pco_panda.expose(t-0.025, name=name, frametype='light', trigger_duration=pco_exposure_duration)
 
-    # pixelfly shutter 
-    ct.Pixelfly_Shutter__b2c06.enable(t+0.192)
-    ct.Pixelfly_Shutter__b2c06.disable(t+0.199)
+    # pixelfly shutter
+    ct.Pixelfly_Shutter__b2c06.enable(t+pixelfly_shutter_open_offset)
+    ct.Pixelfly_Shutter__b2c06.disable(t+pixelfly_shutter_close_offset)
 
     # imaging beam
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.185)
-    ct.Cs_HImg_Shutter__b1c07.enable(t+0.186)
-    ct.Cs_LFImg_Shutter__b1c11.enable(t+0.186)
-    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.200)
-    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+0.200+Img_Pulse_Length_CsLFHImg) 
-    # ct.Scope_Trig__b2c08.enable(t+0.200)
-    # ct.Scope_Trig__b2c08.disable(t+0.200+Img_Pulse_Length_CsLFHImg)
-    ct.Cs_HImg_Shutter__b1c07.disable(t+0.200)
-    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.230)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+img_shutter_open_offset)
+    ct.Cs_HImg_Shutter__b1c07.enable(t+img_shutter_open_offset)
+    ct.Cs_LFImg_Shutter__b1c11.enable(t+img_shutter_open_offset)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t)
+    ct.Cs_LFImg_AO_Sw__b1c10.disable(t+Img_Pulse_Length_CsLFHImg) 
+    ct.Scope_Trig__b2c08.enable(t)
+    ct.Scope_Trig__b2c08.disable(t+Img_Pulse_Length_CsLFHImg)
+    ct.Cs_HImg_Shutter__b1c07.disable(t+img_shutter_close_offset)
+    ct.Cs_LFImg_AO_Sw__b1c10.enable(t+0.030)
 
     # V OP beam
-    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.185)
-    ct.Cs_VOP_Shutter__b1c16.enable(t+0.186)
-    ct.Cs_OP_AO_AM__b3c25.constant(t+0.199, 3)
-    ct.Cs_OP_AO_Sw__b1c08.enable(t+0.199)
-    ct.Cs_OP_AO_Sw__b1c08.disable(t+0.200+Img_Pulse_Length_CsLFHImg)
-    ct.Cs_VOP_Shutter__b1c16.disable(t+0.198)
-    ct.Cs_OP_AO_Sw__b1c08.enable(t+0.210)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t-0.015)
+    ct.Cs_VOP_Shutter__b1c16.enable(t-0.014)
+    ct.Cs_OP_AO_AM__b3c25.constant(t-0.001, 3)
+    ct.Cs_OP_AO_Sw__b1c08.enable(t-0.001)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t+Img_Pulse_Length_CsLFHImg)
+    ct.Cs_VOP_Shutter__b1c16.disable(t-0.001)
+    ct.Cs_OP_AO_Sw__b1c08.enable(t+0.010)
 
 
-    return t+0.300
+    return t+0.100
 
 if __name__ == '__main__':
     ct = ConnectionTable()

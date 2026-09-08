@@ -11,22 +11,44 @@ from lyse.dataframe_utilities import get_dataframe_from_shots, get_series_from_s
 
 # ── DataFrame helpers (shared with multishot_scan_plotter) ────────────────────
 
+# Analysis routines searched, in order, when a bare result name is not a global
+# and is produced by more than one routine. 'live_image_analysis' is the log
+# BLACS writes during the shot; 'absorption_image_analysis' is the lyse routine.
+ROUTINE_PRIORITY = ('live_image_analysis', 'absorption_image_analysis')
+
+
+def resolve_column_key(df, key, routines=ROUTINE_PRIORITY):
+    """Return the actual DataFrame column key that `key` refers to.
+
+    Lookup order for a bare string: an exact column, the global (key, ''), then
+    the result named `key` in any routine. If several routines produced it, the
+    first routine listed in `routines` wins, so 'N_x' resolves without having to
+    spell out ('live_image_analysis', 'N_x').
+    """
+    if key in df.columns:
+        return key
+    if isinstance(key, str):
+        if (key, '') in df.columns:
+            return (key, '')
+        matches = [c for c in df.columns if (isinstance(c, tuple) and c[-1] == key) or c == key]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            for routine in routines:
+                for c in matches:
+                    if isinstance(c, tuple) and c[0] == routine:
+                        return c
+            raise KeyError(f"Ambiguous key {key!r} — matches {matches}. Use a tuple.")
+    raise KeyError(f"Column {key!r} not found in DataFrame.")
+
+
 def get_column(df, key):
     """Return a Series from df by string name or (routine, result) tuple.
 
-    Globals are stored as (name, '') in the lyse DataFrame.
+    Globals are stored as (name, '') in the lyse DataFrame; results are stored
+    as (routine, name). See resolve_column_key for the lookup order.
     """
-    if key in df.columns:
-        return df[key]
-    if isinstance(key, str):
-        if (key, '') in df.columns:
-            return df[(key, '')]
-        matches = [c for c in df.columns if (isinstance(c, tuple) and c[-1] == key) or c == key]
-        if len(matches) == 1:
-            return df[matches[0]]
-        if len(matches) > 1:
-            raise KeyError(f"Ambiguous key {key!r} — matches {matches}. Use a tuple.")
-    raise KeyError(f"Column {key!r} not found in DataFrame.")
+    return df[resolve_column_key(df, key)]
 
 
 def col_label(key):
@@ -41,7 +63,9 @@ def _column_with_errors(df, rkey):
     The uncertainty column follows the lyse convention: result 'sigma_x (um)'
     of routine R is paired with (R, 'u_sigma_x (um)').
     """
-    y = get_column(df, rkey).astype(float)
+    # resolve first so the uncertainty is read from the same routine as the value
+    rkey = resolve_column_key(df, rkey)
+    y = df[rkey].astype(float)
     u_key = (rkey[0], 'u_' + rkey[-1]) if isinstance(rkey, tuple) else 'u_' + rkey
     try:
         return y, get_column(df, u_key).astype(float)
@@ -496,7 +520,7 @@ def live_plot_scan(year, month, day, sequence, number, result_keys,
 
             if n_complete >= n_shots:
                 print(f'Done — all {n_shots} shots processed.')
-                return fit_results
+                return fit_results, fig
 
         except Exception as e:
             clear_output(wait=True)

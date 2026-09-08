@@ -56,13 +56,13 @@ rho_2d  = analysis['results']['rho_2d (atoms/um^2)']
 
 
 ####################################################################plotting code#############################
-def big_number(value):
-    """Format an atom number as mantissa x 10^exponent, for the large readout."""
-    if not np.isfinite(value) or value <= 0:
-        return '--'
-    exponent = int(np.floor(np.log10(value)))
-    mantissa = value / 10**exponent
-    return rf'${mantissa:.2f}\times10^{{{exponent}}}$'
+# def big_number(value):
+#     """Format an atom number as mantissa x 10^exponent, for the large readout."""
+#     if not np.isfinite(value) or value <= 0:
+#         return '--'
+#     exponent = int(np.floor(np.log10(value)))
+#     mantissa = value / 10**exponent
+#     return rf'${mantissa:.2f}\times10^{{{exponent}}}$'
 
 
 def plot_results(title):
@@ -173,3 +173,6 @@ run.save_result("B_y", B_y)
 run.save_result("N_x", N_x)
 run.save_result("N_y", N_y)
 run.save_results("rho_2d (atoms/um^2)", rho_2d)
+run.save_results("light_mean_counts", np.mean(light_image))
+run.save_results("dark_mean_counts", np.mean(dark_image))
+run.save_results("atoms_mean_counts", np.mean(atoms_image))
