@@ -10,7 +10,7 @@ from labscript_utils.setup_logging import LOG_PATH
 # Path to the config file. None uses the default mloop_config.toml in this directory.
 # Change this to point to a named config to switch optimisations without renaming files.
 # Example: CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs', 'mloop_config_bias_z.toml')
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs', 'mloop_config_mot_optimization.toml')
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs', 'mloop_config_cmot_optimization.toml')
 
 try:
     from labscript_utils import check_version
@@ -100,6 +100,22 @@ def verify_globals(config):
     logger.debug('Getting requested globals values from lyse.routine_storage.')
     requested_dict = lyse.routine_storage.params
 
+    # prepare_globals() emits one key per runmanager global, so a missing name
+    # means these params came from an optimisation started under a different
+    # config -- editing a config (or CONFIG_PATH) does not affect the thread
+    # that is already running.
+    missing = [g.name for g in config['runmanager_globals'] if g.name not in requested_dict]
+    if missing:
+        message = (
+            'The running optimisation never requested {missing}, so it was started '
+            'from a different config than the one loaded now ({path}).\n'
+            'Restart the lyse analysis subprocess for this routine (right-click it '
+            'in lyse -> Restart worker process) so the current config takes effect.\n'
+            'Values the running optimisation did request: {requested}'
+        ).format(missing=missing, path=CONFIG_PATH, requested=sorted(requested_dict))
+        logger.error(message)
+        return False
+
     requested_values = [requested_dict[g.name] for g in config['runmanager_globals']]
 
     # Get the parameter values for the shot we just computed the cost for
@@ -187,10 +203,24 @@ if __name__ == '__main__':
             from Queue import Queue
         logger.debug('Creating queue.')
         lyse.routine_storage.queue = Queue()
-    if (
+
+    running_config_path = getattr(lyse.routine_storage, 'mloop_config_path', None)
+    optimisation_running = (
         hasattr(lyse.routine_storage, 'optimisation')
         and lyse.routine_storage.optimisation.is_alive()
-    ):
+    )
+
+    if optimisation_running and running_config_path != CONFIG_PATH:
+        # The live thread keeps the config it was constructed with, so costs
+        # would be verified against parameters it never requested.
+        message = (
+            'CONFIG_PATH is {new}, but the optimisation still running was started '
+            'with {old}.\nRestart the lyse analysis subprocess for this routine '
+            '(right-click it in lyse -> Restart worker process) to start a new '
+            'optimisation from the current config.'
+        ).format(new=CONFIG_PATH, old=running_config_path)
+        logger.error(message)
+    elif optimisation_running:
         cost_dict = cost_analysis(
             cost_key=config['cost_key'] if not config['mock'] else [],
             maximize=config['maximize'],

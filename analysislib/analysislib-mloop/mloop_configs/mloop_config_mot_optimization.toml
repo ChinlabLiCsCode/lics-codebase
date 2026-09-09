@@ -6,7 +6,7 @@
 mock = false
 
 [ANALYSIS]
-cost_key = ["absorption_image_analysis", "N"]
+cost_key = ["live_image_analysis", "rho_2d (atoms/um^2)"]
 maximize = true
 ignore_bad = false # true
 analysislib_console_log_level = 20
@@ -19,7 +19,7 @@ max_num_runs_without_better_params = 100
 max_num_runs = 500
 trust_region = 0.2
 cost_has_noise = true
-no_delay = false
+no_delay = true
 visualisations = false
 controller_type = "gaussian_process"
 console_log_level = 0
@@ -38,7 +38,7 @@ start = 0.18
 # Bias X
 [MLOOP_PARAMS.Cs_CsMOT_params.Bias_X_HH_CsMOT]
 global_name = 'Bias_X_HH_CsMOT'
-min = -5
+min = -8
 max = 8
 start = 1.5
 

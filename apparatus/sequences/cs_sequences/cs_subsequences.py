@@ -203,13 +203,17 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     name = f'absorption{image_num}'
     pixelfly_shutter_open_offset = -0.012 # scanned by hand 20260904
     pixelfly_shutter_close_offset = -0.002 # scanned by hand 20260904
+    img_shutter_close_offset = 0 # not scanned yet
+    img_shutter_open_offset = -0.014 # not scanned yet
     pco_exposure_duration = 0.028 # 28 ms gives a 3 ms full frame exposure.
+    pco_exposure_offset = 0.025 # 25 ms after trigger, the full frame is exposing
     # The rolling shutter takes 24.something ms to fully open up, so the real exposure
     # can start 25 ms after the start trigger.  
 
     # collect initial background image with the shutter closed 
-    ct.Pixelfly_Shutter__b2c06.disable(t-0.225)
-    ct.pco_panda.expose(t-0.225, name=name, frametype="dark", trigger_duration=pco_exposure_duration)
+    ct.Pixelfly_Shutter__b2c06.disable(t-0.200-pco_exposure_offset)
+    ct.pco_panda.expose(t-0.200-pco_exposure_offset, name=name, frametype="dark", 
+                        trigger_duration=pco_exposure_duration)
 
     # make sure MOT and REP freqs are right
     ct.Cs_MOT_Freq__b3c24.constant(t-0.001, Cs_MOT_Freq_CsLFHImg)
@@ -222,7 +226,8 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     # ATOM IMAGE at t=0.000
 
     # acquire image
-    ct.pco_panda.expose(t-0.025, name=name, frametype='atoms', trigger_duration=pco_exposure_duration)
+    ct.pco_panda.expose(t-pco_exposure_offset, name=name, frametype='atoms', 
+                        trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter
     ct.Pixelfly_Shutter__b2c06.enable(t+pixelfly_shutter_open_offset)
@@ -257,7 +262,8 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     t += 0.200
 
     # acquire image
-    ct.pco_panda.expose(t-0.025, name=name, frametype='light', trigger_duration=pco_exposure_duration)
+    ct.pco_panda.expose(t-pco_exposure_offset, name=name, frametype='light', 
+                        trigger_duration=pco_exposure_duration)
 
     # pixelfly shutter
     ct.Pixelfly_Shutter__b2c06.enable(t+pixelfly_shutter_open_offset)

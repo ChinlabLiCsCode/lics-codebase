@@ -6,7 +6,7 @@
 mock = false
 
 [ANALYSIS]
-cost_key = ["absorption_image_analysis", "rho_2d (atoms/um^2)"]
+cost_key = ["live_image_analysis", "rho_2d (atoms/um^2)"]
 maximize = true
 ignore_bad = false # true
 analysislib_console_log_level = 20
@@ -19,65 +19,65 @@ max_num_runs_without_better_params = 100
 max_num_runs = 500
 trust_region = 0.2
 cost_has_noise = true
-no_delay = false
-visualisations = false
+no_delay = true
+visualisations = true
 controller_type = "gaussian_process"
 console_log_level = 0
 
 # Bias X
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_X_HH_Molasses]
 global_name = 'Bias_X_HH_Molasses'
-min = -3
-max = 3
+min = -8
+max = 8
 start = 1
 
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_X_AH_Molasses]
 global_name = 'Bias_X_AH_Molasses'
-min = -3
-max = 3
+min = -8
+max = 8
 start = 0
 
 
 # Bias Y
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Y_HH_Molasses]
 global_name = 'Bias_Y_HH_Molasses'
-min = -3
-max = 4
+min = -8
+max = 8
 start = -2.35
 
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Y_AH_Molasses]
 global_name = 'Bias_Y_AH_Molasses'
-min = -3
-max = 3
+min = -8
+max = 8
 start = 0
 
 
 # Bias Z
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Z_HH_Molasses]
 global_name = 'Bias_Z_HH_Molasses'
-min = -6
-max = 0
+min = -8
+max = 8
 start = -2
 
 [MLOOP_PARAMS.Cs_Molasses_params.Bias_Z_AH_Molasses]
 global_name = 'Bias_Z_AH_Molasses'
-min = -3
-max = 3
+min = -8
+max = 8
 start = 0
 
 # 3D MOT AOM amplitude
 [MLOOP_PARAMS.Cs_Molasses_params.Cs_3DMOT_AO_AM_Molasses]
 global_name = 'Cs_3DMOT_AO_AM_Molasses'
 min = 0
-max = 3
+max = 5
 start = 1.5
 
 
 # 3D MOT Freq
 [MLOOP_PARAMS.Cs_Molasses_params.Cs_MOT_Freq_Molasses]
 global_name = 'Cs_MOT_Freq_Molasses'
-min = -6
-max = -5
+min = -6.5
+max = -4.5
 start = -5.9
 
 
@@ -93,5 +93,5 @@ start = 6.45
 [MLOOP_PARAMS.Cs_Molasses_params.Cs_Molasses_Time]
 global_name = 'Cs_Molasses_Time'
 min = 0
-max = 0.1
+max = 0.2
 start = 0.05
