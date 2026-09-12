@@ -271,7 +271,7 @@ class ConnectionTable:
         #add the cameras
         self.ids_fluoro = IDSCamera(
             name='ids_fluoro',
-            serial_number='4108850743',
+            serial_number= 4108850743, #SN for other camera: 4108878635
             orientation='fluorescence',
             manual_mode_exposure_time_ms=10.0,
             throughput_limit_mbps=200.0,
@@ -284,7 +284,7 @@ class ConnectionTable:
             name = 'pco_panda',
             parent_device = NIBox2,
             connection='port0/line7',
-            serial_number=14404725,
+            serial_number= 14404725,
             shutter_mode='rolling shutter',
             camera_attributes={
                 # 'external exposure control' means the trigger PULSE WIDTH is the

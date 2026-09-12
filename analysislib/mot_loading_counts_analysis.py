@@ -5,10 +5,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+try:
+    from analysislib import helperfuncs
+except ImportError:      # lyse runs routines with their own folder as sys.path[0]
+    import helperfuncs
+
 #analysis code for fitting MOT loading data
 
 def exponential_model(t, a, b, c):
     return a * (1 - np.exp(-t / b)) + c
+
+def loading_window(shot_path, start='Cs_MOT_Loading', stop='Cs_CMOT'):
+    """Return (t0, tf) of the MOT loading stage on the camera's time base.
+
+    The markers are in labscript time while the camera measures real elapsed
+    seconds, so a wait — the line_trigger, which stops the clock for up to
+    0.1 s — shifts everything after it. Shot.real_time does that bookkeeping.
+
+    Returns None for shots whose timestamps predate the sequence time base
+    (no 'time_base' attribute), since a marker time means nothing against a
+    recording that starts at BLACS programming time.
+    """
+    shot = helperfuncs.Shot(shot_path)
+    with h5py.File(shot_path, 'r') as f:
+        grp = f['images/ids_fluoro/fluorescence']
+        if grp.attrs.get('time_base') != 'sequence':
+            return None
+
+    markers = dict(shot.marker_times())
+    if start not in markers or stop not in markers:
+        return None
+    return markers[start], markers[stop]
+
 
 def collect_data(shot_path, t0_mot, tf_mot):
     """Function to extract time, raw counts, and background-subtracted images from the h5 file for a given shot."""
@@ -36,7 +64,16 @@ def fit_to_exp(time, counts):
 ## load data
 run = lyse.Run(lyse.path)
 shot_path = lyse.path
-time, counts = collect_data(shot_path, t0_mot=0.5, tf_mot=5.5)  # Adjust t0 and tf based on your data
+
+# Prefer the sequence's own markers; fall back to the hand-tuned window for
+# shots recorded before the camera timestamps were aligned to sequence time.
+window = loading_window(shot_path)
+if window is None:
+    window = (0.5, 5.5)
+    print(f'No sequence time base in this shot; using the fixed window {window}.')
+else:
+    print(f'MOT loading window from time markers: {window[0]:.3f} to {window[1]:.3f} s')
+time, counts = collect_data(shot_path, t0_mot=window[0], tf_mot=window[1])
 run_name = os.path.basename(shot_path).split('_')
 run_name = run_name[0] + "_" + run_name[1] #get the name of the run from the shot file name
 

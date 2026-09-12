@@ -163,14 +163,88 @@ def Cs_Molasses(t, ct: ConnectionTable):
     ct.Bias_Z_AH.constant(t, Bias_Z_AH_Molasses)
 
     # turn MOT light off after molasses
-    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t+Cs_Molasses_Time)
-    ct.Cs_3DMOT_Shutter__b1c03.disable(t+Cs_Molasses_Time-0.014) 
+    # ct.Cs_3DMOT_AO_Sw__b1c02.disable(t+Cs_Molasses_Time)
+    # ct.Cs_3DMOT_Shutter__b1c03.disable(t+Cs_Molasses_Time-0.014) 
 
     # # reset MOT laser frequency after molasses
     # ct.Cs_MOT_Freq__b3c24.ramp(t+0.008, 0.001, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_CsLFHImg, ct.FINE)
 
     return t+Cs_Molasses_Time
 
+
+def Cs_RSC(t, ct: ConnectionTable):
+
+    # original sequence values for each parameter: 
+    # Cs_Rep_Freq_RSC = 3.829956
+    # Cs_MOT_Freq_RSC = -0.289917
+    # Cs_RSC_AO_AM_RSC = 2.1
+    # Cs_OP_AO_AM_RSC = 1.409912
+    # Cs_3DMOT_AO_AM_RSC = 0.025024
+    # Cs_RSC_Time = 0.038
+
+    # originally takes place at t=15500, 5 ms after Molasses_Cooling
+    # 
+
+    # close the repump shutter so MOT beam is just MOT light
+    ct.Cs_Rep_Shutter__b1c12.disable(t-0.016)
+
+    # turn off AOM and open H optical pumping shutter
+    ct.Cs_HOP_Shutter__b1c09.enable(t-0.010)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t-0.005)
+
+    # turn off RSC AOM and open shutter in advance of pulse
+    ct.Cs_RSC_AO_Sw__b1c13.disable(t-0.010)
+    ct.Cs_RSC_Shutter__b1c14.enable(t-0.009)
+
+    # set RSC AO AM to zero and enable switch in advance of ramp on
+    ct.Cs_RSC_AO_Sw__b1c13.disable(t-0.0045)
+    ct.Cs_RSC_AO_AM__b3c27.constant(t-0.004, 0)
+
+    # ramp Cs REP frequency from old value to new value 
+    ct.Cs_Rep_Freq__b3c26.ramp(t-0.0025, 0.0025, Cs_Rep_Freq_Molasses, Cs_Rep_Freq_RSC, ct.FINE)
+
+    # ramp Cs MOT frequency from old value to new value
+    ct.Cs_MOT_Freq__b3c24.ramp(t-0.001, 0.0025, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_RSC, ct.FINE)
+
+    # ramp RSC AO AM on 
+    ct.Cs_RSC_AO_AM__b3c27.ramp(t-0.001, 0.0005, 0, Cs_RSC_AO_AM_RSC, ct.FINE)
+
+    # turn OP AO AM on
+    ct.Cs_OP_AO_AM__b3c25.constant(t-0.0003, 0) # why do we need this? 
+    ct.Cs_OP_AO_AM__b3c25.constant(t, Cs_OP_AO_AM_RSC)
+
+    # turn MOT on
+    ct.Cs_3DMOT_AO_AM__b3c21.constant(t-20e-6, 0) # why do we need this? 
+    ct.Cs_3DMOT_AO_AM__b3c21.constant(t+0.0015, Cs_3DMOT_AO_AM_RSC)
+
+    # set bias field values
+    ct.Bias_X_AH.constant(t+20e-6, Bias_X_AH_RSC)
+    ct.Bias_X_HH.constant(t+20e-6, Bias_X_HH_RSC)
+    ct.Bias_Y_AH.constant(t+20e-6, Bias_Y_AH_RSC)
+    ct.Bias_Y_HH.constant(t+20e-6, Bias_Y_HH_RSC)
+    ct.Bias_Z_AH.constant(t+20e-6, Bias_Z_AH_RSC)
+    ct.Bias_Z_HH.constant(t+20e-6, Bias_Z_HH_RSC)
+
+    # do RSC for RSC_Time 
+    t += Cs_RSC_Time
+
+    # turn MOT and OP beams off
+    ct.Cs_3DMOT_AO_AM__b3c21.constant(t-0.0064, 0)
+    ct.Cs_OP_AO_AM__b3c25.constant(t-0.0064, 0)
+    ct.Cs_3DMOT_AO_Sw__b1c02.disable(t-0.0063)
+    ct.Cs_OP_AO_Sw__b1c08.disable(t-0.0063)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.006) # added
+    ct.Cs_HOP_Shutter__b1c09.disable(t-0.006) # added
+
+    # ramp RSC lattice down
+    ct.Cs_RSC_AO_AM__b3c27.ramp(t-0.0054, 0.005, Cs_RSC_AO_AM_RSC, 0, ct.FINE)
+    ct.Cs_RSC_AO_Sw__b1c13.disable(t)
+    ct.Cs_RSC_Shutter__b1c14.disable(t) # added
+
+    
+    return t
+
+    
 def TOF(t, ct: ConnectionTable):
     """Function to turn off all shutters and AOMs related to the MOT, dipole traps, etc."""
 

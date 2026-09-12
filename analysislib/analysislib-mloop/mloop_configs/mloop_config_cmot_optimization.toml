@@ -27,13 +27,13 @@ console_log_level = 0
 # Bitter coil
 [MLOOP_PARAMS.Cs_CMOT_params.Bitter_V_AH_CsCMOT1]
 global_name = 'Bitter_V_AH_CsCMOT1'
-min = 0.1
+min = 0.02
 max = 0.8
 start = 0.5
 
 [MLOOP_PARAMS.Cs_CMOT_params.Bitter_V_AH_CsCMOT2]
 global_name = 'Bitter_V_AH_CsCMOT2'
-min = 0.1
+min = 0.02
 max = 0.9
 start = 0.75
 

@@ -1,6 +1,7 @@
 import sys
 import threading
 import time
+from datetime import datetime
 
 import numpy as np
 import zmq
@@ -18,9 +19,12 @@ class IDSCameraWorker(Worker):
 
     The camera runs continuously at all times. In manual mode, frames are
     forwarded to the BLACS tab for display (throttled by start_continuous's dt
-    argument). In buffered mode, every frame is recorded; at the end of the
-    shot, the full stack is written to the HDF5 file under
-    images/{orientation}/.
+    argument). In buffered mode every frame is recorded, and at the end of the
+    shot the recording is written to images/{device_name}/{orientation}/ as
+    either an image stack or a per-frame counts trace, per save_mode.
+
+    Timestamps are measured from the master pseudoclock start, recovered from
+    the shot's own attrs['run time'] — see _sequence_start_offset.
     """
 
     def init(self):
@@ -393,7 +397,12 @@ class IDSCameraWorker(Worker):
 
         with self._record_lock:
             self._record_buffer = []
+        # perf_counter drives the per-frame deltas: monotonic, immune to clock
+        # adjustment.  The wall clock is kept alongside it only to line the
+        # recording up with the sequence start, which BLACS reports as a
+        # wall-clock time -- see _save_images_to_h5.
         self._record_t0 = time.perf_counter()
+        self._record_t0_wall = time.time()
         self._recording = True
         self.h5_filepath = h5_filepath
         return {}
@@ -414,6 +423,12 @@ class IDSCameraWorker(Worker):
                     self._send_image(last_frame)
                 except Exception:
                     pass
+        elif self.h5_filepath:
+            # Silence here used to look exactly like a disabled feature: no
+            # dataset in the shot and no explanation for it.
+            print("IDS camera: no frames captured during the shot, so nothing "
+                  f"was saved to {self.h5_filepath}. The acquisition loop is "
+                  "not delivering frames -- check the camera connection.")
 
         self.h5_filepath = None
 
@@ -439,6 +454,31 @@ class IDSCameraWorker(Worker):
     # HDF5 output                                                          #
     # ------------------------------------------------------------------ #
 
+    def _sequence_start_offset(self, f):
+        """Seconds from the master pseudoclock start to this recording's t0.
+
+        BLACS stamps the shot with attrs['run time'], the wall clock captured
+        immediately before it starts the master pseudoclock, and writes it
+        before transitioning any device back to manual -- so it is already in
+        the file by the time this runs.  Adding the returned offset to a frame's
+        elapsed time puts it on the sequence time base, where frames recorded
+        between programming and the pseudoclock firing are negative.
+
+        Returns None if the shot carries no 'run time' (manual or offline use),
+        leaving the timestamps on the old programming-time base.
+        """
+        run_time = f.attrs.get('run time')
+        t0_wall = getattr(self, '_record_t0_wall', None)
+        if run_time is None or t0_wall is None:
+            return None
+        try:
+            run_t0 = datetime.strptime(run_time, '%Y%m%dT%H%M%S.%f').timestamp()
+        except ValueError:
+            print(f"IDS camera: could not parse run time {run_time!r}; "
+                  "timestamps left on the programming-time base.")
+            return None
+        return t0_wall - run_t0
+
     def _save_images_to_h5(self, buf, h5_filepath):
         orientation = getattr(self, 'orientation', None) or self.device_name
         timestamps = np.array([t for t, _ in buf])
@@ -446,9 +486,19 @@ class IDSCameraWorker(Worker):
         print(f"Saving {len(buf)} IDS frames ({self.save_mode}) to {h5_filepath} "
               f"under images/{self.device_name}/{orientation}/")
         with h5py.File(h5_filepath, 'r+') as f:
+            offset = self._sequence_start_offset(f)
+            if offset is not None:
+                timestamps = timestamps + offset
+
             grp = f.require_group(f'images/{self.device_name}/{orientation}')
             grp.attrs['camera'] = self.device_name
             grp.attrs['failed_shot'] = False
+            # Which zero the timestamps are measured from, so analysis of old
+            # shots (no attribute -> 'programming') stays interpretable.
+            grp.attrs['time_base'] = 'sequence' if offset is not None else 'programming'
+            if offset is not None:
+                grp.attrs['t0_unix'] = self._record_t0_wall
+                grp.attrs['run_time_unix'] = self._record_t0_wall - offset
             grp.create_dataset('timestamps', data=timestamps)
 
             if self.save_mode == 'counts':

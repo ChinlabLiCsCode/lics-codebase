@@ -11,7 +11,7 @@ maximize = true
 ignore_bad = false # true
 analysislib_console_log_level = 20
 analysislib_file_log_level = 10
-groups = ["Cs_CsMOT_params"]
+groups = ["Cs_MOT_params"]
 
 [MLOOP]
 num_training_runs = 50
@@ -27,7 +27,7 @@ console_log_level = 0
 
 
 #Bitter coils
-[MLOOP_PARAMS.Cs_CsMOT_params.Bitter_V_AH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bitter_V_AH_CsMOT]
 global_name = 'Bitter_V_AH_CsMOT'
 min = 0.14
 max = 0.3
@@ -36,13 +36,13 @@ start = 0.18
 
 
 # Bias X
-[MLOOP_PARAMS.Cs_CsMOT_params.Bias_X_HH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bias_X_HH_CsMOT]
 global_name = 'Bias_X_HH_CsMOT'
 min = -8
 max = 8
 start = 1.5
 
-[MLOOP_PARAMS.Cs_CsMOT_params.Bias_X_AH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bias_X_AH_CsMOT]
 global_name = 'Bias_X_AH_CsMOT'
 min = -5
 max = 5
@@ -50,13 +50,13 @@ start = 0
 
 
 # Bias Y
-[MLOOP_PARAMS.Cs_CsMOT_params.Bias_Y_HH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bias_Y_HH_CsMOT]
 global_name = 'Bias_Y_HH_CsMOT'
 min = -8
 max = 8
 start = -3
 
-[MLOOP_PARAMS.Cs_CsMOT_params.Bias_Y_AH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bias_Y_AH_CsMOT]
 global_name = 'Bias_Y_AH_CsMOT'
 min = -5
 max = 5
@@ -64,20 +64,20 @@ start = 0
 
 
 # Bias Z
-[MLOOP_PARAMS.Cs_CsMOT_params.Bias_Z_HH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bias_Z_HH_CsMOT]
 global_name = 'Bias_Z_HH_CsMOT'
 min = -8
 max = 5
 start = -3
 
-[MLOOP_PARAMS.Cs_CsMOT_params.Bias_Z_AH_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Bias_Z_AH_CsMOT]
 global_name = 'Bias_Z_AH_CsMOT'
 min = -5
 max = 5
 start = 0
 
 # 3D MOT AOM amplitude
-[MLOOP_PARAMS.Cs_CsMOT_params.Cs_3DMOT_AO_AM_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Cs_3DMOT_AO_AM_CsMOT]
 global_name = 'Cs_3DMOT_AO_AM_CsMOT'
 min = 0
 max = 4
@@ -85,7 +85,7 @@ start = 2.3
 
 
 # 3D MOT Freq
-[MLOOP_PARAMS.Cs_CsMOT_params.Cs_MOT_Freq_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Cs_MOT_Freq_CsMOT]
 global_name = 'Cs_MOT_Freq_CsMOT'
 min = -8
 max = -7
@@ -93,8 +93,34 @@ start = -7.31
 
 
 # Repump Freq
-[MLOOP_PARAMS.Cs_CsMOT_params.Cs_Rep_Freq_CsMOT]
+[MLOOP_PARAMS.Cs_MOT_params.Cs_Rep_Freq_CsMOT]
 global_name = 'Cs_Rep_Freq_CsMOT'
 min = 6
 max = 7
 start = 6.51
+
+# 2D MOT
+[MLOOP_PARAMS.Cs_MOT_params.Cs_2DMOT_X_minus_CsMOT]
+global_name = 'Cs_2DMOT_X_minus_CsMOT'
+min = 0
+max = 2.9
+start = 1.5
+
+[MLOOP_PARAMS.Cs_MOT_params.Cs_2DMOT_X_plus_CsMOT]
+global_name = 'Cs_2DMOT_X_plus_CsMOT'
+min = 0
+max = 2.9
+start = 1.5
+
+[MLOOP_PARAMS.Cs_MOT_params.Cs_2DMOT_Y_minus_CsMOT]
+global_name = 'Cs_2DMOT_Y_minus_CsMOT'
+min = 0
+max = 2.9
+start = 1.5
+
+[MLOOP_PARAMS.Cs_MOT_params.Cs_2DMOT_Y_plus_CsMOT]
+global_name = 'Cs_2DMOT_Y_plus_CsMOT'
+min = 0
+max = 2.9
+start = 1.5
+

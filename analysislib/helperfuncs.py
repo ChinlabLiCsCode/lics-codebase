@@ -8,6 +8,11 @@ from scipy.optimize import curve_fit
 from scipy.special import erf
 from lyse.dataframe_utilities import get_dataframe_from_shots, get_series_from_shot
 
+# After the lyse import: labscript_utils.h5_lock monkeypatches h5py and refuses
+# to load if h5py got there first, and importing lyse pulls it in.  Same
+# ordering constraint as analysislib.imaging.process.
+import h5py
+
 
 # ── DataFrame helpers (shared with multishot_scan_plotter) ────────────────────
 
@@ -711,14 +716,169 @@ def _find_h5_files(folder):
     return h5_files
 
 
-def load_shot(year, month, day, sequence, number):
-    """Load the first shot from the specified sequence folder.
+def _dtype_label(dtype):
+    """Short name for a dataset dtype: compound dtypes list their fields."""
+    if dtype.names:
+        shown = ', '.join(dtype.names[:5])
+        extra = len(dtype.names) - 5
+        return f'({shown}{f", +{extra} more" if extra > 0 else ""})'
+    return str(dtype)
 
-    Returns a pandas Series containing globals and any saved results.
+
+class Shot:
+    """One shot: the lyse Series plus every array in the HDF5 file.
+
+    ``get_series_from_shot`` only reports globals and saved results, so the raw
+    arrays a device wrote -- camera frames, the IDS counts trace -- never show
+    up in ``keys()`` and look as though they were never saved.  This wraps the
+    Series so both halves are reachable from one object::
+
+        shot = hf.load_shot(2026, 9, 11, 'cs_molasses_healthcheck', 75)
+        shot['TOF_Time']                                 # a global, as before
+        shot['counts']                                   # the IDS counts trace
+        shot['images/ids_fluoro/fluorescence/counts']    # ...the long way
+
+    Datasets are indexed by name/shape/dtype when the shot is opened and read
+    only when asked for, so touching a shot with full-frame camera images costs
+    nothing until you ask for the frames.  Anything not defined here falls
+    through to the Series, so ``.index``, ``.get`` and ``.loc`` still work.
+    """
+
+    def __init__(self, path):
+        self.path = path
+        self._series = None
+        self._cache = {}
+        self._datasets = {}
+        self.attrs = {}
+        with h5py.File(path, 'r') as f:
+            self.attrs = dict(f.attrs)
+
+            def index(name, obj):
+                if isinstance(obj, h5py.Dataset):
+                    self._datasets[name] = (obj.shape, obj.dtype)
+
+            f.visititems(index)
+
+    @property
+    def series(self):
+        """The lyse Series of globals and results, loaded on first use."""
+        if self._series is None:
+            self._series = get_series_from_shot(self.path)
+        return self._series
+
+    @property
+    def datasets(self):
+        """{hdf5 path: (shape, dtype)} for every dataset, without reading any."""
+        return dict(self._datasets)
+
+    def _resolve(self, key):
+        """Return the full HDF5 path `key` refers to, or None.
+
+        Accepts a full path or a bare trailing name, resolved the way
+        resolve_column_key resolves a bare column name: a unique match wins and
+        an ambiguous one raises rather than guessing.
+        """
+        if key in self._datasets:
+            return key
+        matches = [p for p in self._datasets if p.rsplit('/', 1)[-1] == key]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise KeyError(
+                f"Ambiguous dataset {key!r} — matches {matches}. Use a full path.")
+        return None
+
+    def __getitem__(self, key):
+        try:
+            return self.series[key]
+        except (KeyError, TypeError):
+            pass
+        path = self._resolve(key)
+        if path is None:
+            raise KeyError(
+                f"{key!r} is not a global, a result, or a dataset in {self.path}")
+        if path not in self._cache:
+            with h5py.File(self.path, 'r') as f:
+                self._cache[path] = f[path][:]
+        return self._cache[path]
+
+    def __contains__(self, key):
+        try:
+            self[key]
+        except KeyError:
+            return False
+        return True
+
+    def __getattr__(self, name):
+        # Only reached for attributes not found on the instance or class, so
+        # self.path/_series/... never land here and recurse.
+        return getattr(self.series, name)
+
+    def keys(self):
+        """Every key in the shot: Series entries first, then dataset paths."""
+        return list(self.series.keys()) + list(self._datasets)
+
+    # ── sequence timing ──────────────────────────────────────────────────
+    # Device timestamps are real seconds from the master pseudoclock start, but
+    # time_markers are in labscript time.  A wait stops the pseudoclock without
+    # advancing labscript time, so the two bases drift apart by the accumulated
+    # wait duration -- 0.1 s per line_trigger timeout here.
+
+    def time_markers(self):
+        """[(label, labscript_time), ...] as written by labscript, in order."""
+        if 'time_markers' not in self._datasets:
+            return []
+        markers = self['time_markers']
+        return [(m['label'].decode(), float(m['time'])) for m in markers]
+
+    def waits(self):
+        """[(label, labscript_time, duration), ...] for waits that executed.
+
+        Empty unless the wait monitor recorded durations under data/waits.
+        """
+        if 'data/waits' not in self._datasets:
+            return []
+        return [(w['label'].decode(), float(w['time']), float(w['duration']))
+                for w in self['data/waits']]
+
+    def real_time(self, labscript_time):
+        """Convert a labscript time to real seconds since the sequence start.
+
+        Adds the duration of every wait that has already executed by then, so a
+        time_marker can be laid over a device's recorded timestamps.
+        """
+        elapsed = sum(duration for _, t, duration in self.waits()
+                      if t <= labscript_time)
+        return labscript_time + elapsed
+
+    def marker_times(self):
+        """[(label, real_time), ...] -- time_markers on the device time base."""
+        return [(label, self.real_time(t)) for label, t in self.time_markers()]
+
+    def __repr__(self):
+        series = self.series
+        n_globals = sum(1 for k in series.keys()
+                        if not isinstance(k, tuple) or k[-1] == '')
+        lines = [f'<Shot {os.path.basename(self.path)}>',
+                 f'  {n_globals} globals, {len(series) - n_globals} results']
+        if self._datasets:
+            lines.append(f'  {len(self._datasets)} datasets:')
+            width = max(len(p) for p in self._datasets)
+            lines += [f'    {p:<{width}}  {shape}  {_dtype_label(dtype)}'
+                      for p, (shape, dtype) in self._datasets.items()]
+        return '\n'.join(lines)
+
+
+def load_shot(year, month, day, sequence, number, shot=0):
+    """Load one shot from the specified sequence folder.
+
+    Addressed like :func:`view_shot`, with ``shot`` indexing into the run.
+    Returns a :class:`Shot`: the lyse Series of globals and results, plus every
+    array in the HDF5 file.
     """
     folder = _sequence_folder(year, month, day, sequence, number)
     h5_files = _find_h5_files(folder)
-    return get_series_from_shot(h5_files[0])
+    return Shot(h5_files[shot])
 
 
 def load_scan(year, month, day, sequence, number):
