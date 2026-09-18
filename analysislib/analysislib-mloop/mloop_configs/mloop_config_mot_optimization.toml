@@ -124,3 +124,33 @@ min = 0
 max = 2.9
 start = 1.5
 
+# Zeeman 
+[MLOOP_PARAMS.Cs_MOT_params.Zeeman_C1_CsMOT]
+global_name = 'Zeeman_C1_CsMOT'
+min = 0
+max = 2
+start = 0
+
+[MLOOP_PARAMS.Cs_MOT_params.Zeeman_C2_CsMOT]
+global_name = 'Zeeman_C2_CsMOT'
+min = 0
+max = 2
+start = 0.417
+
+[MLOOP_PARAMS.Cs_MOT_params.Zeeman_C3_CsMOT]
+global_name = 'Zeeman_C3_CsMOT'
+min = 0
+max = 2
+start = 0.139
+
+[MLOOP_PARAMS.Cs_MOT_params.Zeeman_C4_CsMOT]
+global_name = 'Zeeman_C4_CsMOT'
+min = 0
+max = 2
+start = 0.043
+
+[MLOOP_PARAMS.Cs_MOT_params.Zeeman_C5_CsMOT]
+global_name = 'Zeeman_C5_CsMOT'
+min = 0
+max = 2
+start = 0.45

@@ -205,6 +205,7 @@ def Cs_RSC(t, ct: ConnectionTable):
 
     # ramp Cs MOT frequency from old value to new value
     ct.Cs_MOT_Freq__b3c24.ramp(t-0.001, 0.0025, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_RSC, ct.FINE)
+    # ct.Cs_MOT_Freq__b3c24.ramp(t-0.0025, 0.004, Cs_MOT_Freq_Molasses, Cs_MOT_Freq_RSC, ct.FINE)
 
     # ramp RSC AO AM on 
     ct.Cs_RSC_AO_AM__b3c27.ramp(t-0.001, 0.0005, 0, Cs_RSC_AO_AM_RSC, ct.FINE)
@@ -241,6 +242,9 @@ def Cs_RSC(t, ct: ConnectionTable):
     ct.Cs_RSC_AO_Sw__b1c13.disable(t)
     ct.Cs_RSC_Shutter__b1c14.disable(t) # added
 
+    # ramp MOT and rep frequencies back ADDED
+    ct.Cs_Rep_Freq__b3c26.ramp(t, 0.0025, Cs_Rep_Freq_RSC, Cs_Rep_Freq_Molasses, ct.FINE)
+    ct.Cs_MOT_Freq__b3c24.ramp(t, 0.0025, Cs_MOT_Freq_RSC, Cs_MOT_Freq_Molasses, ct.FINE)
     
     return t
 
@@ -255,7 +259,7 @@ def TOF(t, ct: ConnectionTable):
     # make sure Cs MOT light is off
     ct.Cs_3DMOT_AO_Sw__b1c02.disable(t)
     ct.Cs_3DMOT_AO_AM__b3c21.constant(t, 0)
-    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.015)
+    ct.Cs_3DMOT_Shutter__b1c03.disable(t-0.018)
 
     # make sure RSC light is off
     ct.Cs_RSC_AO_Sw__b1c13.disable(t)
