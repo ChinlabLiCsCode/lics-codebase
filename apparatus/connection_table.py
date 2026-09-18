@@ -36,6 +36,49 @@ class ConnectionTable:
         self.FINE = 5e4
         self.COARSE = 1e3
 
+        if background_species=="Cs":
+            Bitter_AH_Upper_FF_background = 0
+            Bitter_HH_Upper_FF_background = 0
+            Bitter_IServo_FB_Sw_background = 0
+            Bitter_Lower_CC_background = 5
+            Bitter_Lower_CV_background = 2.3
+            Bitter_Lower_FF_background = 0
+            Bitter_Upper_AH_Sw_background = 5
+            Bitter_Upper_CC_backgound = 5
+            Bitter_Upper_CV_background = 2.4
+            Bitter_Upper_HH_Sw_background = 0
+
+            Bitter_V_AH_background = Bitter_V_AH_CsMOT
+            Bitter_V_HH_background = Bitter_V_HH_CsMOT
+
+            Bias_X_AH_background = Bias_X_AH_CsMOT
+            Bias_X_HH_background = Bias_X_HH_CsMOT
+            Bias_Y_AH_background = Bias_Y_AH_CsMOT
+            Bias_Y_HH_background = Bias_Y_HH_CsMOT
+            Bias_Z_AH_background = Bias_Z_AH_CsMOT
+            Bias_Z_HH_background = Bias_Z_HH_CsMOT
+
+            Cs_3DMOT_AO_AM_background = Cs_3DMOT_AO_AM_CsMOT
+            Cs_MOT_Freq_background = Cs_MOT_Freq_CsMOT
+            Cs_Rep_Freq_background = Cs_Rep_Freq_CsMOT
+
+            Cs_2DMOT_X_minus_background = Cs_2DMOT_X_minus_CsMOT
+            Cs_2DMOT_X_plus_background = Cs_2DMOT_X_plus_CsMOT
+            Cs_2DMOT_Y_minus_background = Cs_2DMOT_Y_minus_CsMOT
+            Cs_2DMOT_Y_plus_background = Cs_2DMOT_Y_plus_CsMOT
+
+            Zeeman_C1_background = Zeeman_C1_CsMOT
+            Zeeman_C2_background = Zeeman_C2_CsMOT
+            Zeeman_C3_background = Zeeman_C3_CsMOT
+            Zeeman_C4_background = Zeeman_C4_CsMOT
+            Zeeman_C5_background = Zeeman_C5_CsMOT
+
+            Cs_2DMOT_Shutter_background = Enable_2DMOT
+
+        else:
+            Li_something = 0
+
+
         #Pseudoclock
         prawnblaster = PrawnBlaster(name='prawnblaster', com_port='COM3', 
                                     num_pseudoclocks=4, pico_board="pico2",
@@ -88,14 +131,14 @@ class ConnectionTable:
 
         # Box1 digital outputs
         self.Bitter_Precision_Disable__b1c00  = DigitalOut(default_value=1,          name='Bitter_Precision_Disable__b1c00',  parent_device=NIBox1, connection='port0/line0')
-        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=1,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
+        self.Cs_2DMOT_Shutter__b1c01          = DigitalOut(default_value=Cs_2DMOT_Shutter_background,          name='Cs_2DMOT_Shutter__b1c01',          parent_device=NIBox1, connection='port0/line1')
         self.Cs_3DMOT_AO_Sw__b1c02            = DigitalOut(default_value=1,          name='Cs_3DMOT_AO_Sw__b1c02',            parent_device=NIBox1, connection='port0/line2')
         self.Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=1,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
         self.Cs_Andor_Trig__b1c04             = DigitalOut(default_value=0,          name='Cs_Andor_Trig__b1c04',             parent_device=NIBox1, connection='port0/line4')
         self.Cs_HFImg_AO_Sw__b1c05            = DigitalOut(default_value=1,          name='Cs_HFImg_AO_Sw__b1c05',            parent_device=NIBox1, connection='port0/line5')
         self.Cs_HFImg_Shutter__b1c06          = DigitalOut(default_value=0,          name='Cs_HFImg_Shutter__b1c06',          parent_device=NIBox1, connection='port0/line6')
         self.Cs_HImg_Shutter__b1c07           = DigitalOut(default_value=0,          name='Cs_HImg_Shutter__b1c07',           parent_device=NIBox1, connection='port0/line7')
-        self.Cs_OP_AO_Sw__b1c08              = DigitalOut(default_value=1,           name='Cs_OP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
+        self.Cs_OP_AO_Sw__b1c08               = DigitalOut(default_value=1,           name='Cs_OP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
         self.Cs_HOP_Shutter__b1c09            = DigitalOut(default_value=0,          name='Cs_HOP_Shutter__b1c09',            parent_device=NIBox1, connection='port1/line1')
         self.Cs_LFImg_AO_Sw__b1c10            = DigitalOut(default_value=1,          name='Cs_LFImg_AO_Sw__b1c10',            parent_device=NIBox1, connection='port1/line2', inverted=True)
         self.Cs_LFImg_Shutter__b1c11          = DigitalOut(default_value=0,          name='Cs_LFImg_Shutter__b1c11',          parent_device=NIBox1, connection='port1/line3')
@@ -103,7 +146,7 @@ class ConnectionTable:
         self.Cs_RSC_AO_Sw__b1c13              = DigitalOut(default_value=1,          name='Cs_RSC_AO_Sw__b1c13',              parent_device=NIBox1, connection='port1/line5')
         self.Cs_RSC_Shutter__b1c14            = DigitalOut(default_value=1,          name='Cs_RSC_Shutter__b1c14',            parent_device=NIBox1, connection='port1/line6')
         self.Cs_VImg_Shutter__b1c15           = DigitalOut(default_value=0,          name='Cs_VImg_Shutter__b1c15',           parent_device=NIBox1, connection='port1/line7')
-        self.Cs_VOP_Shutter__b1c16           = DigitalOut(default_value=0,           name='Cs_VOP_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
+        self.Cs_VOP_Shutter__b1c16            = DigitalOut(default_value=0,           name='Cs_VOP_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
         self.Cs_Zeeman_Shutter__b1c17         = DigitalOut(default_value=1,          name='Cs_Zeeman_Shutter__b1c17',         parent_device=NIBox1, connection='port2/line1')
         self.DMD_AO_FM__b1c18                 = DigitalOut(default_value=0,          name='DMD_AO_FM__b1c18',                 parent_device=NIBox1, connection='port2/line2')
         self.DMD_AO_Sw__b1c19                 = DigitalOut(default_value=1,          name='DMD_AO_Sw__b1c19',                 parent_device=NIBox1, connection='port2/line3')
@@ -156,10 +199,11 @@ class ConnectionTable:
         
         #-------------------------------------------------------------------analog outputs for NI PXIe-6738 cards---------------------------------------------------------------------------
 
+
         # Box3 analog outputs
-        self.Aerotech_Control__b3c00          = AnalogOut(default_value=Aerotech_Control_background,           name='Aerotech_Control__b3c00',          parent_device=NIBox3, connection='ao0')
-        self.BFL_AO_Sw__b3c01                 = AnalogOut(default_value=BFL_AO_Sw_background,           name='BFL_AO_Sw__b3c01',                 parent_device=NIBox3, connection='ao1')
-        self.BFL_Int_Lock__b3c02              = AnalogOut(default_value=BFL_Int_Lock_background,         name='BFL_Int_Lock__b3c02',              parent_device=NIBox3, connection='ao2')
+        self.Aerotech_Control__b3c00          = AnalogOut(default_value=0,           name='Aerotech_Control__b3c00',          parent_device=NIBox3, connection='ao0')
+        self.BFL_AO_Sw__b3c01                 = AnalogOut(default_value=5,           name='BFL_AO_Sw__b3c01',                 parent_device=NIBox3, connection='ao1')
+        self.BFL_Int_Lock__b3c02              = AnalogOut(default_value=0.1,         name='BFL_Int_Lock__b3c02',              parent_device=NIBox3, connection='ao2')
         self.Bias_X_plus__b3c03               = AnalogOut(default_value=0,           name='Bias_X_plus__b3c03',                 parent_device=NIBox3, connection='ao3')
         self.Bias_X_minus__b3c04              = AnalogOut(default_value=0,           name='Bias_X_minus__b3c04',                 parent_device=NIBox3, connection='ao4')
         self.Bias_Y_plus__b3c05               = AnalogOut(default_value=0,           name='Bias_Y_plus__b3c05',                 parent_device=NIBox3, connection='ao5')
@@ -179,35 +223,35 @@ class ConnectionTable:
         self.Bitter_V_Lower__b3c19            = AnalogOut(default_value=0,           name='Bitter_V_Lower__b3c19',               parent_device=NIBox3, connection='ao19')
         self.Bitter_V_Upper__b3c20            = AnalogOut(default_value=0,           name='Bitter_V_Upper__b3c20',               parent_device=NIBox3, connection='ao20')
         self.Cs_3DMOT_AO_AM__b3c21            = AnalogOut(default_value=Cs_3DMOT_AO_AM_background,         name='Cs_3DMOT_AO_AM__b3c21',            parent_device=NIBox3, connection='ao21')
-        self.CS_HFImg_Freq__b3c22             = AnalogOut(default_value=Cs_HFImg_Freq_background,         name='CS_HFImg_Freq__b3c22',             parent_device=NIBox3, connection='ao22')
+        self.CS_HFImg_Freq__b3c22             = AnalogOut(default_value=-10,         name='CS_HFImg_Freq__b3c22',             parent_device=NIBox3, connection='ao22')
         self.b3c23                            = AnalogOut(default_value=0,           name='b3c23',                            parent_device=NIBox3, connection='ao23')
         self.Cs_MOT_Freq__b3c24               = AnalogOut(default_value=Cs_MOT_Freq_background,       name='Cs_MOT_Freq__b3c24',               parent_device=NIBox3, connection='ao24')
-        self.Cs_OP_AO_AM__b3c25              = AnalogOut(default_value=Cs_OP_AO_AM_background,           name='Cs_OP_AO_AM__b3c25',              parent_device=NIBox3, connection='ao25')
+        self.Cs_OP_AO_AM__b3c25               = AnalogOut(default_value=5,           name='Cs_OP_AO_AM__b3c25',              parent_device=NIBox3, connection='ao25')
         self.Cs_Rep_Freq__b3c26               = AnalogOut(default_value=Cs_Rep_Freq_background,        name='Cs_Rep_Freq__b3c26',               parent_device=NIBox3, connection='ao26')
-        self.Cs_RSC_AO_AM__b3c27              = AnalogOut(default_value=Cs_RSC_AO_AM_background,           name='Cs_RSC_AO_AM__b3c27',              parent_device=NIBox3, connection='ao27')
-        self.Cs_VImg_AO_AM__b3c28             = AnalogOut(default_value=Cs_VImg_AO_AM_background,           name='Cs_VImg_AO_AM__b3c28',             parent_device=NIBox3, connection='ao28')
-        self.DMD_AO_AM__b3c29                 = AnalogOut(default_value=DMD_AO_AM_background,         name='DMD_AO_AM__b3c29',                 parent_device=NIBox3, connection='ao29')
-        self.Dual_780_Int_Lock__b3c30         = AnalogOut(default_value=Dual_780_Int_Lock_background,         name='Dual_780_Int_Lock__b3c30',         parent_device=NIBox3, connection='ao30')
-        self.Li_EOM_Freq__b3c31               = AnalogOut(default_value=Li_EOM_Freq_background,        name='Li_EOM_Freq__b3c31',               parent_device=NIBox3, connection='ao31')
+        self.Cs_RSC_AO_AM__b3c27              = AnalogOut(default_value=5,           name='Cs_RSC_AO_AM__b3c27',              parent_device=NIBox3, connection='ao27')
+        self.Cs_VImg_AO_AM__b3c28             = AnalogOut(default_value=5,           name='Cs_VImg_AO_AM__b3c28',             parent_device=NIBox3, connection='ao28')
+        self.DMD_AO_AM__b3c29                 = AnalogOut(default_value=3.8,         name='DMD_AO_AM__b3c29',                 parent_device=NIBox3, connection='ao29')
+        self.Dual_780_Int_Lock__b3c30         = AnalogOut(default_value=2.5,         name='Dual_780_Int_Lock__b3c30',         parent_device=NIBox3, connection='ao30')
+        self.Li_EOM_Freq__b3c31               = AnalogOut(default_value=-4.5,        name='Li_EOM_Freq__b3c31',               parent_device=NIBox3, connection='ao31')
         
         # Box4 analog outputs
-        self.Li_Img_AO_AM__b4c00              = AnalogOut(default_value=Li_Img_AO_AM_background,          name='Li_Img_AO_AM__b4c00',              parent_device=NIBox4, connection='ao0')
-        self.Li_Img_Freq__b4c01               = AnalogOut(default_value=Li_Img_Freq_background,     name='Li_Img_Freq__b4c01',               parent_device=NIBox4, connection='ao1')
-        self.Li_MOT_AO_AM__b4c02              = AnalogOut(default_value=Li_MOT_AO_AM_background,          name='Li_MOT_AO_AM__b4c02',              parent_device=NIBox4, connection='ao2')
-        self.Li_MOT_Freq__b4c03               = AnalogOut(default_value=Li_MOT_Freq_background,      name='Li_MOT_Freq__b4c03',               parent_device=NIBox4, connection='ao3')
-        self.Li_Rep_AO_FM__b4c04             = AnalogOut(default_value=Li_Rep_AO_FM_background,      name='Li_Rep_AO_FM__b4c04',             parent_device=NIBox4, connection='ao4')
-        self.Li_Rep_AO_AM__b4c05              = AnalogOut(default_value=Li_Rep_AO_AM_background,          name='Li_Rep_AO_AM__b4c05',              parent_device=NIBox4, connection='ao5')
-        self.oTOP_AO_AM__b4c06                = AnalogOut(default_value=oTOP_AO_AM_background,          name='oTOP_AO_AM__b4c06',                parent_device=NIBox4, connection='ao6')
-        self.oTOP_FCarrier__b4c07             = AnalogOut(default_value=oTOP_FCarrier_background,      name='oTOP_FCarrier__b4c07',             parent_device=NIBox4, connection='ao7')
-        self.oTOP_Int_Lock__b4c08             = AnalogOut(default_value=oTOP_Int_Lock_background,         name='oTOP_Int_Lock__b4c08',             parent_device=NIBox4, connection='ao8')
-        self.oTOP_Mod_AM__b4c09               = AnalogOut(default_value=oTOP_Mod_AM_background,           name='oTOP_Mod_AM__b4c09',               parent_device=NIBox4, connection='ao9')
+        self.Li_Img_AO_AM__b4c00              = AnalogOut(default_value=10,          name='Li_Img_AO_AM__b4c00',              parent_device=NIBox4, connection='ao0')
+        self.Li_Img_Freq__b4c01               = AnalogOut(default_value=-5.25,     name='Li_Img_Freq__b4c01',               parent_device=NIBox4, connection='ao1')
+        self.Li_MOT_AO_AM__b4c02              = AnalogOut(default_value=10,          name='Li_MOT_AO_AM__b4c02',              parent_device=NIBox4, connection='ao2')
+        self.Li_MOT_Freq__b4c03               = AnalogOut(default_value=5.2844,      name='Li_MOT_Freq__b4c03',               parent_device=NIBox4, connection='ao3')
+        self.Li_Rep_AO_FM__b4c04             = AnalogOut(default_value=0.4086,      name='Li_Rep_AO_FM__b4c04',             parent_device=NIBox4, connection='ao4')
+        self.Li_Rep_AO_AM__b4c05              = AnalogOut(default_value=10,          name='Li_Rep_AO_AM__b4c05',              parent_device=NIBox4, connection='ao5')
+        self.oTOP_AO_AM__b4c06                = AnalogOut(default_value=10,          name='oTOP_AO_AM__b4c06',                parent_device=NIBox4, connection='ao6')
+        self.oTOP_FCarrier__b4c07             = AnalogOut(default_value=1.8,      name='oTOP_FCarrier__b4c07',             parent_device=NIBox4, connection='ao7')
+        self.oTOP_Int_Lock__b4c08             = AnalogOut(default_value=0.3,         name='oTOP_Int_Lock__b4c08',             parent_device=NIBox4, connection='ao8')
+        self.oTOP_Mod_AM__b4c09               = AnalogOut(default_value=0,           name='oTOP_Mod_AM__b4c09',               parent_device=NIBox4, connection='ao9')
         self.Zeeman_C1__b4c10                 = AnalogOut(default_value=Zeeman_C1_background,           name='Zeeman_C1__b4c10',                 parent_device=NIBox4, connection='ao10')
         self.Zeeman_C2__b4c11                 = AnalogOut(default_value=Zeeman_C2_background,        name='Zeeman_C2__b4c11',                 parent_device=NIBox4, connection='ao11')
         self.Zeeman_C3__b4c12                 = AnalogOut(default_value=Zeeman_C3_background,         name='Zeeman_C3__b4c12',                 parent_device=NIBox4, connection='ao12')
         self.Zeeman_C4__b4c13                 = AnalogOut(default_value=Zeeman_C4_background,        name='Zeeman_C4__b4c13',                 parent_device=NIBox4, connection='ao13')
         self.Zeeman_C5__b4c14                 = AnalogOut(default_value=Zeeman_C5_background,        name='Zeeman_C5__b4c14',                 parent_device=NIBox4, connection='ao14')
-        self.Cs_EOM_Freq_b4c15                = AnalogOut(default_value=Cs_EOM_Freq_background,           name='Cs_EOM_Freq__b4c15',               parent_device=NIBox4, connection='ao15')
-        self.Dual_1064_Int_Lock__b4c16        = AnalogOut(default_value=Dual_1064_Int_Lock_background,           name='Dual_1064_Int_Lock__b4c16',        parent_device=NIBox4, connection='ao16')
+        self.Cs_EOM_Freq_b4c15                = AnalogOut(default_value=9,           name='Cs_EOM_Freq__b4c15',               parent_device=NIBox4, connection='ao15')
+        self.Dual_1064_Int_Lock__b4c16        = AnalogOut(default_value=4,           name='Dual_1064_Int_Lock__b4c16',        parent_device=NIBox4, connection='ao16')
         self.b4c17                            = AnalogOut(default_value=0,           name='b4c17',                            parent_device=NIBox4, connection='ao17')
         self.b4c18                            = AnalogOut(default_value=0,           name='b4c18',                            parent_device=NIBox4, connection='ao18')
         self.b4c19                            = AnalogOut(default_value=0,           name='b4c19',                            parent_device=NIBox4, connection='ao19')
