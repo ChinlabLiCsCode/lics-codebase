@@ -217,6 +217,11 @@ class PCOCameraWorker(IMAQdxCameraWorker):
         # (re)start.
         self.display_mode = 'live'
         self.species = 'Cs'
+        # Gaussian curve fitting (scipy.optimize.curve_fit, x2 per shot) is the
+        # slowest part of the absorption pipeline by far -- defaults on, but the tab's
+        # Fits checkbox can disable it for faster live display between shots where
+        # fit results aren't needed every time.
+        self.fit_enabled = True
         # (x0, y0, x1, y1) pixel bounds, or None for "not configured yet" (no cropping,
         # nothing recorded). Set live from the tab's draggable ROI boxes.
         self.save_roi = None
@@ -257,7 +262,15 @@ class PCOCameraWorker(IMAQdxCameraWorker):
             # what the shot actually used, and shouldn't be retroactively changed by a
             # later species toggle done purely for redisplay.
             dark, light, atoms = self._last_absorption_frames
-            analysis = full_analysis(dark, light, atoms, species=self.species)
+            analysis = full_analysis(dark, light, atoms, species=self.species, fit=self.fit_enabled)
+            self._send_absorption_analysis(dark, light, atoms, analysis)
+
+    def set_fit_enabled(self, enabled):
+        self.fit_enabled = bool(enabled)
+        if self._last_absorption_frames is not None:
+            # Instantly redisplay, same rationale as set_species() above.
+            dark, light, atoms = self._last_absorption_frames
+            analysis = full_analysis(dark, light, atoms, species=self.species, fit=self.fit_enabled)
             self._send_absorption_analysis(dark, light, atoms, analysis)
 
     def set_save_roi(self, roi):
@@ -384,7 +397,7 @@ class PCOCameraWorker(IMAQdxCameraWorker):
             light = last_frame(frame_group['light']).astype(float)
             atoms = last_frame(frame_group['atoms']).astype(float)
 
-            analysis = full_analysis(dark, light, atoms, species=self.species)
+            analysis = full_analysis(dark, light, atoms, species=self.species, fit=self.fit_enabled)
 
             # 'results/<name>' is exactly the HDF5 location lyse's own Run.save_result()
             # writes to (results/<analysis script's basename>/<result name>) -- writing

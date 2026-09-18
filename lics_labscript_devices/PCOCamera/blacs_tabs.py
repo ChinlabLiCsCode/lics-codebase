@@ -259,7 +259,11 @@ class _AbsorptionDisplay:
         results = results or {}
         for row, (key, fmt) in enumerate(self._RESULT_COLUMNS):
             value = results.get(key)
-            self.results_table.item(row, 0).setText(fmt.format(value) if value is not None else '—')
+            # NaN (not just None) means "no value" here too -- full_analysis() reports
+            # every fit-derived result as NaN when called with fit=False (Fits
+            # unchecked in the tab), rather than omitting the keys.
+            is_missing = value is None or (isinstance(value, float) and np.isnan(value))
+            self.results_table.item(row, 0).setText('—' if is_missing else fmt.format(value))
 
         x_int = np.asarray(x_int)
         y_int = np.asarray(y_int)
@@ -509,9 +513,19 @@ class PCOCameraTab(IMAQdxCameraTab):
             "redisplays the last shot with the new species."
         )
         self._species_selector.currentTextChanged.connect(self._on_species_selected)
+        self._chk_fits = QtWidgets.QCheckBox("Fits")
+        self._chk_fits.setChecked(True)
+        self._chk_fits.setToolTip(
+            "Gaussian curve fitting (cloud size, position, atom number) -- the slowest "
+            "part of computing the absorption display. Turn off for faster live "
+            "display between shots when fit results aren't needed every time; N_int, "
+            "the OD image, and Density are unaffected and still update either way."
+        )
+        self._chk_fits.toggled.connect(self._on_fit_enabled_toggled)
         self._frame_row = _row(
             QtWidgets.QLabel("Show frame:"), self._frame_selector,
             QtWidgets.QLabel("Species:"), self._species_selector,
+            self._chk_fits,
         )
         self.image_receiver.selected_frame = 'OD'
 
@@ -661,6 +675,7 @@ class PCOCameraTab(IMAQdxCameraTab):
         data = super().get_save_data()
         data['pco_display_mode'] = self._display_mode
         data['pco_species'] = self._species_selector.currentText()
+        data['pco_fit_enabled'] = self._chk_fits.isChecked()
         data['pco_frame_selector'] = self._frame_selector.currentText()
         # A *copy*, not a live reference -- BLACS's front_panel_settings collects this
         # dict via get_save_data() and only actually repr()s/writes it to disk in a
@@ -701,6 +716,10 @@ class PCOCameraTab(IMAQdxCameraTab):
         # Triggers _on_species_selected -> pushes to the worker (a no-op if already 'Cs',
         # which is fine since the worker also starts with species='Cs').
         self._species_selector.setCurrentText(species)
+
+        # Triggers _on_fit_enabled_toggled (a no-op if already checked, which is fine
+        # since the worker also starts with fit_enabled=True).
+        self._chk_fits.setChecked(save_data.get('pco_fit_enabled', True))
 
         # Triggers _on_show_rois_toggled (a no-op if already checked, which is fine since
         # that's the default too).
@@ -816,6 +835,13 @@ class PCOCameraTab(IMAQdxCameraTab):
     @define_state(MODE_MANUAL, queue_state_indefinitely=True, delete_stale_states=True)
     def _push_species(self, species):
         yield self.queue_work(self.primary_worker, 'set_species', species)
+
+    def _on_fit_enabled_toggled(self, enabled):
+        self._push_fit_enabled(enabled)
+
+    @define_state(MODE_MANUAL, queue_state_indefinitely=True, delete_stale_states=True)
+    def _push_fit_enabled(self, enabled):
+        yield self.queue_work(self.primary_worker, 'set_fit_enabled', enabled)
 
     def _apply_display_mode(self, mode):
         """Toggle which widgets are visible for the given mode. Purely a GUI-thread

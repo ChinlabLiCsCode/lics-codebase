@@ -178,14 +178,21 @@ def fit_extract(x_int, y_int, span_x=None, span_y=None, conv=CONV_UM_PER_PIX,
 
 
 def full_analysis(dark_image, light_image, atoms_image, species=DEFAULT_SPECIES,
-                   fit_offset=FIT_OFFSET, include_offset_in_N=INCLUDE_OFFSET_IN_N):
-    """Run the full OD/density/fit pipeline and return everything a consumer
-    might want. `results` holds exactly the set of named results that
-    absorption_image_analysis.py saves via run.save_result()/save_results(),
-    also used verbatim for BLACS's 'live_image_analysis' logging.
+                   fit=True, fit_offset=FIT_OFFSET, include_offset_in_N=INCLUDE_OFFSET_IN_N):
+    """Run the full OD/density/(optionally fit) pipeline and return everything a
+    consumer might want. `results` holds exactly the set of named results that
+    absorption_image_analysis.py saves via run.save_result()/save_results(), also used
+    verbatim for BLACS's 'live_image_analysis' logging.
 
     Works for any image size, not just the full 2048x2048 sensor -- e.g. after Save ROI
-    cropping -- since span_x/span_y are computed from the actual image shape."""
+    cropping -- since span_x/span_y are computed from the actual image shape.
+
+    fit=False skips fit_extract() (the two scipy.optimize.curve_fit calls, by far the
+    slowest part of this pipeline) entirely -- for BLACS's live per-shot display, where
+    fit results are nice to have but not required every shot and the fit time can lag
+    the display behind real time. log_image/rho/density/x_int/y_int/N_int (all direct,
+    non-fit computations) are unaffected; every fit-derived quantity (x_dist, y_dist,
+    N_x, N_y, x0_x, x0_y, sigma_x, sigma_y, B_x, B_y, N, rho_2d) is NaN instead."""
     log_image, rho, N_int = abs_calc(dark_image, light_image, atoms_image, species=species)
     density = rho / CONV_UM_PER_PIX ** 2  # atoms/um^2
 
@@ -195,15 +202,19 @@ def full_analysis(dark_image, light_image, atoms_image, species=DEFAULT_SPECIES,
     span_x = np.linspace(0, img_w * CONV_UM_PER_PIX, img_w)
     span_y = np.linspace(0, img_h * CONV_UM_PER_PIX, img_h)
 
-    x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(
-        x_int, y_int, span_x=span_x, span_y=span_y,
-        fit_offset=fit_offset, include_offset_in_N=include_offset_in_N
-    )
-
-    # "True" atom number: geometric mean of the two independent 1D-fit atom numbers.
-    N = np.sqrt(N_x * N_y)
-    area = np.pi * sigma_x * sigma_y
-    rho_2d = N / area
+    if fit:
+        x_dist, N_x, x0_x, sigma_x, B_x, y_dist, N_y, x0_y, sigma_y, B_y = fit_extract(
+            x_int, y_int, span_x=span_x, span_y=span_y,
+            fit_offset=fit_offset, include_offset_in_N=include_offset_in_N
+        )
+        # "True" atom number: geometric mean of the two independent 1D-fit atom numbers.
+        N = np.sqrt(N_x * N_y)
+        area = np.pi * sigma_x * sigma_y
+        rho_2d = N / area
+    else:
+        x_dist = np.full_like(span_x, np.nan)
+        y_dist = np.full_like(span_y, np.nan)
+        N_x = x0_x = sigma_x = B_x = N_y = x0_y = sigma_y = B_y = N = rho_2d = np.nan
 
     results = {
         "N_int": N_int,
