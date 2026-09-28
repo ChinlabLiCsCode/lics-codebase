@@ -9,7 +9,7 @@ import numpy as np
 import pyqtgraph as pg
 
 from qtutils import inmain_decorator
-from qtutils.qt import QtCore, QtWidgets
+from qtutils.qt import QtCore, QtGui, QtWidgets
 
 from blacs.tab_base_classes import define_state, MODE_MANUAL
 from blacs.device_base_class import DeviceTab
@@ -44,7 +44,7 @@ class _FrameReceiver(ZMQServer):
         image = np.frombuffer(memoryview(data[1]), dtype=md['dtype'])
         image = image.reshape(md['shape'])
         full_scale = md.get('full_scale', 65535)
-        self._on_frame(image, full_scale)
+        self._on_frame(image, full_scale, md.get('exposure_us'))
         QtWidgets.QApplication.instance().sendPostedEvents()
         return self.NO_RESPONSE
 
@@ -73,6 +73,9 @@ class IDSCameraTab(DeviceTab):
         self._counts_history = []   # list of (perf_counter, counts)
         self._counts_window_s = 10.0
         self._show_line_cuts = True
+        self._last_image = None         # (H, W) frame currently displayed
+        self._last_exposure_us = None   # exposure the worker reported for it
+        self._last_save_dir = os.path.expanduser('~')
 
         layout = self.get_tab_layout()
 
@@ -151,19 +154,20 @@ class IDSCameraTab(DeviceTab):
         self._image_plot.addItem(self._col_line)
         self._image_item.scene().sigMouseClicked.connect(self._on_scene_clicked)
 
-        layout.addWidget(self._graphics, 3)
+        # Image area above, controls + counts history below, with a draggable divider.
+        self._vsplitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        self._vsplitter.setChildrenCollapsible(False)
+        self._vsplitter.addWidget(self._graphics)
 
         # --- below the image: controls on the left, counts history alongside them ---
-        bottom_widget = QtWidgets.QWidget()
-        bottom_row = QtWidgets.QHBoxLayout()
-        bottom_row.setContentsMargins(0, 0, 0, 0)
-        bottom_widget.setLayout(bottom_row)
+        self._hsplitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        self._hsplitter.setChildrenCollapsible(False)
 
         controls_widget = QtWidgets.QWidget()
         controls_col = QtWidgets.QVBoxLayout()
         controls_col.setContentsMargins(0, 0, 0, 0)
         controls_widget.setLayout(controls_col)
-        bottom_row.addWidget(controls_widget, 1)
+        self._hsplitter.addWidget(controls_widget)
 
         btn_widget = QtWidgets.QWidget()
         btn_row = QtWidgets.QHBoxLayout()
@@ -184,6 +188,19 @@ class IDSCameraTab(DeviceTab):
         self._chk_line_cuts.setChecked(True)
         self._chk_line_cuts.toggled.connect(self._on_line_cuts_toggled)
         btn_row.addWidget(self._chk_line_cuts)
+        btn_row.addSpacing(16)
+        self._btn_save_image = QtWidgets.QPushButton("Save image")
+        self._btn_copy_image = QtWidgets.QPushButton("Copy image")
+        self._btn_save_image.setToolTip(
+            "Save the current frame (full resolution, current colormap and levels) "
+            "with an exposure / color range label")
+        self._btn_copy_image.setToolTip(
+            "Copy the current frame (full resolution, current colormap and levels) "
+            "to the clipboard with an exposure / color range label")
+        btn_row.addWidget(self._btn_save_image)
+        btn_row.addWidget(self._btn_copy_image)
+        self._btn_save_image.clicked.connect(self._on_save_image)
+        self._btn_copy_image.clicked.connect(self._on_copy_image)
         btn_row.addStretch()
         controls_col.addWidget(btn_widget)
 
@@ -268,9 +285,14 @@ class IDSCameraTab(DeviceTab):
         self._counts_plot.enableAutoRange()
         self._counts_plot.setMouseEnabled(x=False, y=False)
         self._counts_curve = self._counts_plot.plot(pen=pg.mkPen('g', width=1))
-        bottom_row.addWidget(self._counts_plot, 1)
+        self._hsplitter.addWidget(self._counts_plot)
+        self._hsplitter.setStretchFactor(0, 1)
+        self._hsplitter.setStretchFactor(1, 1)
 
-        layout.addWidget(bottom_widget, 1)
+        self._vsplitter.addWidget(self._hsplitter)
+        self._vsplitter.setStretchFactor(0, 3)
+        self._vsplitter.setStretchFactor(1, 1)
+        layout.addWidget(self._vsplitter)
 
         # ZMQ server that receives frames from the worker
         self._frame_receiver = _FrameReceiver(self._on_frame)
@@ -306,11 +328,20 @@ class IDSCameraTab(DeviceTab):
             'colormap': repr(self._hist.gradient.saveState()),
             'roi_geometry': self._roi_geometry(self.roi),
             'show_line_cuts': self._chk_line_cuts.isChecked(),
+            'last_save_dir': self._last_save_dir,
+            'vsplitter_sizes': self._vsplitter.sizes(),
+            'hsplitter_sizes': self._hsplitter.sizes(),
         }
 
     def restore_save_data(self, save_data):
         self._spin_maxfps.setValue(save_data.get('max_fps', 10.0))
         self._window_slider.setValue(int(save_data.get('window_s', 10)))
+        self._last_save_dir = save_data.get('last_save_dir', self._last_save_dir)
+        for splitter, key in ((self._vsplitter, 'vsplitter_sizes'),
+                              (self._hsplitter, 'hsplitter_sizes')):
+            sizes = save_data.get(key)
+            if sizes:
+                splitter.setSizes([int(x) for x in sizes])
         if 'exposure_us' in save_data:
             self._exposure_slider.setValue(int(save_data['exposure_us']))
         if 'colormap' in save_data:
@@ -380,11 +411,14 @@ class IDSCameraTab(DeviceTab):
     # Frame handler — called on the GUI thread via _FrameReceiver          #
     # ------------------------------------------------------------------ #
 
-    def _on_frame(self, image, full_scale):
+    def _on_frame(self, image, full_scale, exposure_us=None):
         """Update all UI elements for one received frame."""
         # A stack (e.g. from transition_to_manual) — show the last frame
         if len(image.shape) == 3:
             image = image[-1]
+
+        self._last_image = image
+        self._last_exposure_us = exposure_us
 
         self._last_shape = image.shape   # (H, W)
         now = time.perf_counter()
@@ -571,6 +605,75 @@ class IDSCameraTab(DeviceTab):
             for t, v in samples:
                 writer.writerow([f'{now - t:.3f}', v])
         print(f"Saved {len(samples)} samples to {path}")
+
+    # ------------------------------------------------------------------ #
+    # Save / copy image                                                    #
+    # ------------------------------------------------------------------ #
+
+    def _render_labelled_image(self):
+        """The displayed frame as a QImage at full sensor resolution, coloured with
+        the histogram's current colormap and levels, with an exposure / color range
+        label drawn in the top-left corner. None before the first frame."""
+        if self._last_image is None:
+            return None
+        image = self._last_image
+        lo, hi = self._hist.getLevels()
+        lut = self._hist.gradient.getLookupTable(256, alpha=False)
+        scale = (len(lut) - 1) / (hi - lo) if hi > lo else 0.0
+        idx = np.clip((image.astype(np.float32) - lo) * scale, 0, len(lut) - 1)
+        rgb = np.ascontiguousarray(lut[idx.astype(np.intp)], dtype=np.uint8)
+        h, w = image.shape
+        qimg = QtGui.QImage(rgb.data, w, h, 3 * w, QtGui.QImage.Format_RGB888)
+        qimg = qimg.convertToFormat(QtGui.QImage.Format_ARGB32)  # copies off rgb's buffer
+
+        exp_us = self._last_exposure_us
+        if exp_us is None:
+            exp_us = self._exposure_slider.value()
+        text = (f"Exposure: {exp_us / 1000:.3g} ms\n"
+                f"Color range: {lo:.0f} – {hi:.0f} counts")
+
+        painter = QtGui.QPainter(qimg)
+        try:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            painter.setRenderHint(QtGui.QPainter.TextAntialiasing)
+            font = QtGui.QFont()
+            # Scale with the image so the label is legible at full res and when shrunk.
+            font.setPixelSize(max(12, h // 40))
+            painter.setFont(font)
+            pad = font.pixelSize() // 2
+            text_rect = painter.boundingRect(QtCore.QRect(0, 0, w, h),
+                                             QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, text)
+            text_rect.translate(2 * pad, 2 * pad)
+            painter.fillRect(text_rect.adjusted(-pad, -pad, pad, pad),
+                             QtGui.QColor(0, 0, 0, 160))
+            painter.setPen(QtGui.QColor('white'))
+            painter.drawText(text_rect, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, text)
+        finally:
+            painter.end()
+        return qimg
+
+    def _on_save_image(self):
+        qimg = self._render_labelled_image()
+        if qimg is None:
+            return
+        default = os.path.join(self._last_save_dir,
+                               datetime.now().strftime("ids_image_%Y%m%d_%H%M%S.png"))
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self._graphics, "Save image", default,
+            "PNG (*.png);;TIFF (*.tif *.tiff);;JPEG (*.jpg *.jpeg)")
+        if not path:
+            return
+        self._last_save_dir = os.path.dirname(path)
+        if qimg.save(path):
+            print(f"Saved image to {path}")
+        else:
+            QtWidgets.QMessageBox.warning(self._graphics, "Save image", f"Failed to save {path}")
+
+    def _on_copy_image(self):
+        qimg = self._render_labelled_image()
+        if qimg is None:
+            return
+        QtWidgets.QApplication.clipboard().setImage(qimg)
 
     # ------------------------------------------------------------------ #
     # BLACS define_state wrappers for worker method calls                  #

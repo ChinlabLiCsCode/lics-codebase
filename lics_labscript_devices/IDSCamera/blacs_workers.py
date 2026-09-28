@@ -72,6 +72,7 @@ class IDSCameraWorker(Worker):
     def _init_mock(self):
         print("IDSCameraWorker: starting as mock device")
         self.full_scale = 4095
+        self._exposure_us = self.manual_mode_exposure_time_ms * 1000.0
         self._init_shared_state()
         self._start_acq_thread(mock=True)
 
@@ -153,6 +154,7 @@ class IDSCameraWorker(Worker):
         us = self.manual_mode_exposure_time_ms * 1000.0
         us = max(self.exposure_node.Minimum(), min(self.exposure_node.Maximum(), us))
         self.exposure_node.SetValue(us)
+        self._exposure_us = float(self.exposure_node.Value())
         self.converter = self.ids_ipl.ImageConverter()
 
     def _set_roi_full(self):
@@ -335,7 +337,8 @@ class IDSCameraWorker(Worker):
         """Send one frame to the tab's ZMQ server. Caller must hold
         _socket_lock. Blocks until the tab acknowledges with b'ok'."""
         metadata = {'dtype': str(image.dtype), 'shape': list(image.shape),
-                    'full_scale': self.full_scale}
+                    'full_scale': self.full_scale,
+                    'exposure_us': self._exposure_us}
         self._image_socket.send_json(metadata, zmq.SNDMORE)
         self._image_socket.send(image, copy=False)
         resp = self._image_socket.recv()
@@ -376,9 +379,14 @@ class IDSCameraWorker(Worker):
         """Set exposure time (microseconds). Clamps to camera limits and
         re-raises the frame-rate ceiling, which depends on exposure time."""
         if self.mock:
+            self._exposure_us = float(value_us)
             return
         lo, hi = self.exposure_node.Minimum(), self.exposure_node.Maximum()
         self.exposure_node.SetValue(max(lo, min(hi, float(value_us))))
+        # Cached (rather than read back per frame) so _send_image, which runs on the
+        # acquisition thread, doesn't need a USB node read; reported to the tab so
+        # saved/copied images are labelled with the clamped value actually in use.
+        self._exposure_us = float(self.exposure_node.Value())
         self._raise_frame_rate()
 
     def get_exposure(self):
