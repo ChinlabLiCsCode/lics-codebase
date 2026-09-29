@@ -23,7 +23,8 @@ DEVICE_NAME = 'pco_panda'
 
 # --- calibration constants ---
 PIXEL_SIZE_UM = 6.5  # microns, physical pixel pitch of the PCO Panda 4.2
-MAGNIFICATION = 1.2823  # calibrated 2026-08-11 from TOF gravity measurement (g=9.8027 m/s^2 in Chicago)
+# MAGNIFICATION = 1.2823  # calibrated 2026-08-11 from TOF gravity measurement (g=9.8027 m/s^2 in Chicago)
+MAGNIFICATION = 1.4972  # calibrated 2026-09-28 from TOF gravity measurement
 CONV_UM_PER_PIX = PIXEL_SIZE_UM / MAGNIFICATION  # pixel-to-image-size conversion (um/pix)
 
 # Resonant D2 transition wavelengths, meters. Species affects only the resonant cross
