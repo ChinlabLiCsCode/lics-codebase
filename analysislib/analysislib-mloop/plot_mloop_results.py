@@ -24,7 +24,7 @@ import mloop_config
 # this script plots the parameters named in whichever config it reads.
 # None uses the default mloop_config.toml in this directory.
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs',
-                           'mloop_config_mot_optimization.toml')
+                           'mloop_config_cs_mot_optimization.toml')
 
 # Fraction of each parameter's range counted as "near" its best value.  Widened
 # automatically if that leaves too few shots to see, which happens easily once
@@ -116,7 +116,6 @@ try:
                    label=f'best={best_vals[name]:.3g}')
         ax.set_xlabel(name)
         ax.set_ylabel(ylabel)
-        ax.set_title(f'{ylabel} vs {name}')
         ax.legend(fontsize=7)
 
     for j in range(n, len(axes_flat)):

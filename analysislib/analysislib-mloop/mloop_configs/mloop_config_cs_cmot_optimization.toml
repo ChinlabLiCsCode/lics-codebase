@@ -95,7 +95,7 @@ start = 1.5
 # 3D MOT Freq
 [MLOOP_PARAMS.Cs_CMOT_params.Cs_MOT_Freq_CsCMOT]
 global_name = 'Cs_MOT_Freq_CsCMOT'
-min = -8
+min = -7.35
 max = -6
 start = -7.2
 
