@@ -86,7 +86,6 @@ try:
 
     best_idx = y.idxmax() if maximize else y.idxmin()
     best_vals = {name: float(params[name][best_idx]) for name in param_names}
-    best_y = float(y[best_idx])
 
     ranges = {name: config['mloop_params'][name].max - config['mloop_params'][name].min
               for name in param_names}
@@ -96,12 +95,6 @@ try:
     fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows),
                              squeeze=False)
     axes_flat = axes.flatten()
-
-    fig.suptitle(
-        f'M-LOOP session: {mloop_session}   best {ylabel} = {best_y:.3g}\n'
-        + '   '.join(f'{name}={best_vals[name]:.3g}' for name in param_names),
-        fontsize=9,
-    )
 
     for i, name in enumerate(param_names):
         ax = axes_flat[i]

@@ -8,7 +8,7 @@ import os
 
 from mloop_run import run
 
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'mloop_configs',
+CONFIG_PATH = os.path.join(os.path.dirname(__file__),'mloop_configs',
                            'mloop_config_cs_cmot_optimization.toml')
 
 if __name__ == '__main__':

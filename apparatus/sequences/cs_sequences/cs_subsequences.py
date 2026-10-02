@@ -60,10 +60,10 @@ def Cs_MOT_Loading(t, ct: ConnectionTable, set_statics=True):
     ct.Bitter_Lower_FF__b3c14.constant(t, 0)
     ct.Bitter_HH_Upper_FF__b3c10.constant(t, 0)
     ct.Bitter_Upper_HH_Sw__b3c18.constant(t, 0)
-    ct.Bitter_Lower_CC__b3c12.constant(t, 5)
-    ct.Bitter_Lower_CV__b3c13.constant(t, 2.3)
-    ct.Bitter_Upper_CC__b3c16.constant(t, 5)
-    ct.Bitter_Upper_CV__b3c17.constant(t, 2.4)
+    ct.Bitter_Lower_CC__b3c12.constant(t, Bitter_Lower_CC_CsMOT)
+    ct.Bitter_Lower_CV__b3c13.constant(t, Bitter_Lower_CV_CsMOT)
+    ct.Bitter_Upper_CC__b3c16.constant(t, Bitter_Upper_CC_CsMOT)
+    ct.Bitter_Upper_CV__b3c17.constant(t, Bitter_Upper_CV_CsMOT)
     ct.Bitter_IServo_FB_Sw__b3c11.constant(t+0.002, 0)
     ct.Bitter_Upper_AH_Sw__b3c15.constant(t+0.002, 5)
     ct.Bitter_V_HH.constant(t+0.005, Bitter_V_HH_CsMOT)
@@ -288,6 +288,9 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     # The rolling shutter takes 24.something ms to fully open up, so the real exposure
     # can start 25 ms after the start trigger.  
 
+    # turn off HF IMG shutter
+    ct.Cs_HFImg_Shutter__b1c06.disable(t-0.200)
+
     # collect initial background image with the shutter closed 
     ct.Pixelfly_Shutter__b2c06.disable(t-0.200-pco_exposure_offset)
     ct.pco_panda.expose(t-0.200-pco_exposure_offset, name=name, frametype="dark", 
@@ -368,6 +371,9 @@ def Cs_LF_H_Imaging(t, ct: ConnectionTable, image_num):
     ct.Cs_OP_AO_Sw__b1c08.enable(t+0.010)
 
 
+    # turn back on the HF IMG shutter for imaging system testing
+    ct.Cs_HFImg_Shutter__b1c06.enable(t+0.100)
+    
     return t+0.100
 
 if __name__ == '__main__':
