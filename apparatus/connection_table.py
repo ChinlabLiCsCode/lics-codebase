@@ -50,6 +50,10 @@ class ConnectionTable:
 
             Bitter_V_AH_background = Bitter_V_AH_CsMOT
             Bitter_V_HH_background = Bitter_V_HH_CsMOT
+            Bitter_Lower_CV_background = Bitter_Lower_CV_CsMOT
+            Bitter_Upper_CV_background = Bitter_Upper_CV_CsMOT
+            Bitter_Lower_CC_background = Bitter_Lower_CC_CsMOT
+            Bitter_Upper_CC_background = Bitter_Upper_CC_CsMOT
 
             Bias_X_AH_background = Bias_X_AH_CsMOT
             Bias_X_HH_background = Bias_X_HH_CsMOT
@@ -62,10 +66,10 @@ class ConnectionTable:
             Cs_MOT_Freq_background = Cs_MOT_Freq_CsMOT
             Cs_Rep_Freq_background = Cs_Rep_Freq_CsMOT
 
-            Cs_2DMOT_X_minus_background = Cs_2DMOT_X_minus_CsMOT
-            Cs_2DMOT_X_plus_background = Cs_2DMOT_X_plus_CsMOT
-            Cs_2DMOT_Y_minus_background = Cs_2DMOT_Y_minus_CsMOT
-            Cs_2DMOT_Y_plus_background = Cs_2DMOT_Y_plus_CsMOT
+            # Cs_2DMOT_X_minus_background = Cs_2DMOT_X_minus_CsMOT
+            # Cs_2DMOT_X_plus_background = Cs_2DMOT_X_plus_CsMOT
+            # Cs_2DMOT_Y_minus_background = Cs_2DMOT_Y_minus_CsMOT
+            # Cs_2DMOT_Y_plus_background = Cs_2DMOT_Y_plus_CsMOT
 
             Zeeman_C1_background = Zeeman_C1_CsMOT
             Zeeman_C2_background = Zeeman_C2_CsMOT
@@ -136,17 +140,17 @@ class ConnectionTable:
         self.Cs_3DMOT_Shutter__b1c03          = DigitalOut(default_value=1,          name='Cs_3DMOT_Shutter__b1c03',          parent_device=NIBox1, connection='port0/line3')
         self.Cs_Andor_Trig__b1c04             = DigitalOut(default_value=0,          name='Cs_Andor_Trig__b1c04',             parent_device=NIBox1, connection='port0/line4')
         self.Cs_HFImg_AO_Sw__b1c05            = DigitalOut(default_value=1,          name='Cs_HFImg_AO_Sw__b1c05',            parent_device=NIBox1, connection='port0/line5')
-        self.Cs_HFImg_Shutter__b1c06          = DigitalOut(default_value=0,          name='Cs_HFImg_Shutter__b1c06',          parent_device=NIBox1, connection='port0/line6')
+        self.Cs_HFImg_Shutter__b1c06          = DigitalOut(default_value=1,          name='Cs_HFImg_Shutter__b1c06',          parent_device=NIBox1, connection='port0/line6')
         self.Cs_HImg_Shutter__b1c07           = DigitalOut(default_value=0,          name='Cs_HImg_Shutter__b1c07',           parent_device=NIBox1, connection='port0/line7')
-        self.Cs_OP_AO_Sw__b1c08               = DigitalOut(default_value=1,           name='Cs_OP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
+        self.Cs_OP_AO_Sw__b1c08               = DigitalOut(default_value=1,          name='Cs_OP_AO_Sw__b1c08',              parent_device=NIBox1, connection='port1/line0')
         self.Cs_HOP_Shutter__b1c09            = DigitalOut(default_value=0,          name='Cs_HOP_Shutter__b1c09',            parent_device=NIBox1, connection='port1/line1')
         self.Cs_LFImg_AO_Sw__b1c10            = DigitalOut(default_value=1,          name='Cs_LFImg_AO_Sw__b1c10',            parent_device=NIBox1, connection='port1/line2', inverted=True)
         self.Cs_LFImg_Shutter__b1c11          = DigitalOut(default_value=0,          name='Cs_LFImg_Shutter__b1c11',          parent_device=NIBox1, connection='port1/line3')
         self.Cs_Rep_Shutter__b1c12            = DigitalOut(default_value=1,          name='Cs_Rep_Shutter__b1c12',            parent_device=NIBox1, connection='port1/line4')
         self.Cs_RSC_AO_Sw__b1c13              = DigitalOut(default_value=1,          name='Cs_RSC_AO_Sw__b1c13',              parent_device=NIBox1, connection='port1/line5')
         self.Cs_RSC_Shutter__b1c14            = DigitalOut(default_value=1,          name='Cs_RSC_Shutter__b1c14',            parent_device=NIBox1, connection='port1/line6')
-        self.Cs_VImg_Shutter__b1c15           = DigitalOut(default_value=0,          name='Cs_VImg_Shutter__b1c15',           parent_device=NIBox1, connection='port1/line7')
-        self.Cs_VOP_Shutter__b1c16            = DigitalOut(default_value=0,           name='Cs_VOP_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
+        self.Cs_VImg_Shutter__b1c15           = DigitalOut(default_value=1,          name='Cs_VImg_Shutter__b1c15',           parent_device=NIBox1, connection='port1/line7')
+        self.Cs_VOP_Shutter__b1c16            = DigitalOut(default_value=0,          name='Cs_VOP_Shutter__b1c16',           parent_device=NIBox1, connection='port2/line0')
         self.Cs_Zeeman_Shutter__b1c17         = DigitalOut(default_value=1,          name='Cs_Zeeman_Shutter__b1c17',         parent_device=NIBox1, connection='port2/line1')
         self.DMD_AO_FM__b1c18                 = DigitalOut(default_value=0,          name='DMD_AO_FM__b1c18',                 parent_device=NIBox1, connection='port2/line2')
         self.DMD_AO_Sw__b1c19                 = DigitalOut(default_value=1,          name='DMD_AO_Sw__b1c19',                 parent_device=NIBox1, connection='port2/line3')
@@ -210,16 +214,16 @@ class ConnectionTable:
         self.Bias_Y_minus__b3c06              = AnalogOut(default_value=0,           name='Bias_Y_minus__b3c06',                 parent_device=NIBox3, connection='ao6')
         self.Bias_Z_plus__b3c07               = AnalogOut(default_value=0,           name='Bias_Z_plus__b3c07',                 parent_device=NIBox3, connection='ao7')
         self.Bias_Z_minus__b3c08              = AnalogOut(default_value=0,           name='Bias_Z_minus__b3c08',                 parent_device=NIBox3, connection='ao8')
-        self.Bitter_AH_Upper_FF__b3c09        = AnalogOut(default_value=Bitter_AH_Upper_FF_background,           name='Bitter_AH_Upper_FF__b3c09',        parent_device=NIBox3, connection='ao9')
-        self.Bitter_HH_Upper_FF__b3c10        = AnalogOut(default_value=Bitter_HH_Upper_FF_background,           name='Bitter_HH_Upper_FF__b3c10',        parent_device=NIBox3, connection='ao10')
-        self.Bitter_IServo_FB_Sw__b3c11       = AnalogOut(default_value=Bitter_IServo_FB_Sw_background,           name='Bitter_IServo_FB_Sw__b3c11',       parent_device=NIBox3, connection='ao11')
+        self.Bitter_AH_Upper_FF__b3c09        = AnalogOut(default_value=0,           name='Bitter_AH_Upper_FF__b3c09',        parent_device=NIBox3, connection='ao9')
+        self.Bitter_HH_Upper_FF__b3c10        = AnalogOut(default_value=0,           name='Bitter_HH_Upper_FF__b3c10',        parent_device=NIBox3, connection='ao10')
+        self.Bitter_IServo_FB_Sw__b3c11       = AnalogOut(default_value=0,           name='Bitter_IServo_FB_Sw__b3c11',       parent_device=NIBox3, connection='ao11')
         self.Bitter_Lower_CC__b3c12           = AnalogOut(default_value=Bitter_Lower_CC_background,           name='Bitter_Lower_CC__b3c12',           parent_device=NIBox3, connection='ao12')
         self.Bitter_Lower_CV__b3c13           = AnalogOut(default_value=Bitter_Lower_CV_background,         name='Bitter_Lower_CV__b3c13',           parent_device=NIBox3, connection='ao13')
-        self.Bitter_Lower_FF__b3c14           = AnalogOut(default_value=Bitter_Lower_FF_background,           name='Bitter_Lower_FF__b3c14',           parent_device=NIBox3, connection='ao14')
-        self.Bitter_Upper_AH_Sw__b3c15        = AnalogOut(default_value=Bitter_Upper_AH_Sw_background,           name='Bitter_Upper_AH_Sw__b3c15',        parent_device=NIBox3, connection='ao15')
-        self.Bitter_Upper_CC__b3c16           = AnalogOut(default_value=Bitter_Upper_CC_backgound,           name='Bitter_Upper_CC__b3c16',           parent_device=NIBox3, connection='ao16')
+        self.Bitter_Lower_FF__b3c14           = AnalogOut(default_value=0,           name='Bitter_Lower_FF__b3c14',           parent_device=NIBox3, connection='ao14')
+        self.Bitter_Upper_AH_Sw__b3c15        = AnalogOut(default_value=5,           name='Bitter_Upper_AH_Sw__b3c15',        parent_device=NIBox3, connection='ao15')
+        self.Bitter_Upper_CC__b3c16           = AnalogOut(default_value=Bitter_Upper_CC_background,           name='Bitter_Upper_CC__b3c16',           parent_device=NIBox3, connection='ao16')
         self.Bitter_Upper_CV__b3c17           = AnalogOut(default_value=Bitter_Upper_CV_background,           name='Bitter_Upper_CV__b3c17',           parent_device=NIBox3, connection='ao17')
-        self.Bitter_Upper_HH_Sw__b3c18        = AnalogOut(default_value=Bitter_Upper_HH_Sw_background,           name='Bitter_Upper_HH_Sw__b3c18',        parent_device=NIBox3, connection='ao18')
+        self.Bitter_Upper_HH_Sw__b3c18        = AnalogOut(default_value=0,           name='Bitter_Upper_HH_Sw__b3c18',        parent_device=NIBox3, connection='ao18')
         self.Bitter_V_Lower__b3c19            = AnalogOut(default_value=0,           name='Bitter_V_Lower__b3c19',               parent_device=NIBox3, connection='ao19')
         self.Bitter_V_Upper__b3c20            = AnalogOut(default_value=0,           name='Bitter_V_Upper__b3c20',               parent_device=NIBox3, connection='ao20')
         self.Cs_3DMOT_AO_AM__b3c21            = AnalogOut(default_value=Cs_3DMOT_AO_AM_background,         name='Cs_3DMOT_AO_AM__b3c21',            parent_device=NIBox3, connection='ao21')
