@@ -40,12 +40,8 @@ class ConnectionTable:
             Bitter_AH_Upper_FF_background = 0
             Bitter_HH_Upper_FF_background = 0
             Bitter_IServo_FB_Sw_background = 0
-            Bitter_Lower_CC_background = 5
-            Bitter_Lower_CV_background = 2.3
             Bitter_Lower_FF_background = 0
             Bitter_Upper_AH_Sw_background = 5
-            Bitter_Upper_CC_backgound = 5
-            Bitter_Upper_CV_background = 2.4
             Bitter_Upper_HH_Sw_background = 0
 
             Bitter_V_AH_background = Bitter_V_AH_CsMOT
@@ -62,25 +58,55 @@ class ConnectionTable:
             Bias_Z_AH_background = Bias_Z_AH_CsMOT
             Bias_Z_HH_background = Bias_Z_HH_CsMOT
 
-            Cs_3DMOT_AO_AM_background = Cs_3DMOT_AO_AM_CsMOT
-            Cs_MOT_Freq_background = Cs_MOT_Freq_CsMOT
-            Cs_Rep_Freq_background = Cs_Rep_Freq_CsMOT
-
-            # Cs_2DMOT_X_minus_background = Cs_2DMOT_X_minus_CsMOT
-            # Cs_2DMOT_X_plus_background = Cs_2DMOT_X_plus_CsMOT
-            # Cs_2DMOT_Y_minus_background = Cs_2DMOT_Y_minus_CsMOT
-            # Cs_2DMOT_Y_plus_background = Cs_2DMOT_Y_plus_CsMOT
-
             Zeeman_C1_background = Zeeman_C1_CsMOT
             Zeeman_C2_background = Zeeman_C2_CsMOT
             Zeeman_C3_background = Zeeman_C3_CsMOT
             Zeeman_C4_background = Zeeman_C4_CsMOT
             Zeeman_C5_background = Zeeman_C5_CsMOT
 
-            Cs_2DMOT_Shutter_background = Enable_2DMOT
-
         else:
-            Li_something = 0
+            Bitter_AH_Upper_FF_background = 0
+            Bitter_HH_Upper_FF_background = 0
+            Bitter_IServo_FB_Sw_background = 0
+            Bitter_Lower_FF_background = 0
+            Bitter_Upper_AH_Sw_background = 5
+            Bitter_Upper_HH_Sw_background = 0
+
+            Bitter_V_AH_background = Bitter_V_AH_LiMOT
+            Bitter_V_HH_background = Bitter_V_HH_LiMOT
+            Bitter_Lower_CV_background = Bitter_Lower_CV_LiMOT
+            Bitter_Upper_CV_background = Bitter_Upper_CV_LiMOT
+            Bitter_Lower_CC_background = Bitter_Lower_CC_LiMOT
+            Bitter_Upper_CC_background = Bitter_Upper_CC_LiMOT
+
+            Bias_X_AH_background = Bias_X_AH_LiMOT
+            Bias_X_HH_background = Bias_X_HH_LiMOT
+            Bias_Y_AH_background = Bias_Y_AH_LiMOT
+            Bias_Y_HH_background = Bias_Y_HH_LiMOT
+            Bias_Z_AH_background = Bias_Z_AH_LiMOT
+            Bias_Z_HH_background = Bias_Z_HH_LiMOT
+
+            Zeeman_C1_background = Zeeman_C1_LiMOT
+            Zeeman_C2_background = Zeeman_C2_LiMOT
+            Zeeman_C3_background = Zeeman_C3_LiMOT
+            Zeeman_C4_background = Zeeman_C4_LiMOT
+            Zeeman_C5_background = Zeeman_C5_LiMOT
+
+
+        # TODO: actually use these, clean up this block
+        Cs_3DMOT_AO_AM_background = Cs_3DMOT_AO_AM_CsMOT
+        Cs_MOT_Freq_background = Cs_MOT_Freq_CsMOT
+        Cs_Rep_Freq_background = Cs_Rep_Freq_CsMOT
+        Cs_2DMOT_Shutter_background = Enable_2DMOT
+        Cs_2DMOT_X_minus_background = Cs_2DMOT_X_minus_CsMOT
+        Cs_2DMOT_X_plus_background = Cs_2DMOT_X_plus_CsMOT
+        Cs_2DMOT_Y_minus_background = Cs_2DMOT_Y_minus_CsMOT
+        Cs_2DMOT_Y_plus_background = Cs_2DMOT_Y_plus_CsMOT
+        Li_MOT_Freq_background = Li_MOT_Freq_LiMOT
+        Li_Rep_AO_FM_background = Li_Rep_AO_FM_LiMOT
+
+
+
 
 
         #Pseudoclock
@@ -242,8 +268,8 @@ class ConnectionTable:
         self.Li_Img_AO_AM__b4c00              = AnalogOut(default_value=10,          name='Li_Img_AO_AM__b4c00',              parent_device=NIBox4, connection='ao0')
         self.Li_Img_Freq__b4c01               = AnalogOut(default_value=-5.25,     name='Li_Img_Freq__b4c01',               parent_device=NIBox4, connection='ao1')
         self.Li_MOT_AO_AM__b4c02              = AnalogOut(default_value=10,          name='Li_MOT_AO_AM__b4c02',              parent_device=NIBox4, connection='ao2')
-        self.Li_MOT_Freq__b4c03               = AnalogOut(default_value=5.2844,      name='Li_MOT_Freq__b4c03',               parent_device=NIBox4, connection='ao3')
-        self.Li_Rep_AO_FM__b4c04             = AnalogOut(default_value=0.4086,      name='Li_Rep_AO_FM__b4c04',             parent_device=NIBox4, connection='ao4')
+        self.Li_MOT_Freq__b4c03               = AnalogOut(default_value=Li_MOT_Freq_background,      name='Li_MOT_Freq__b4c03',               parent_device=NIBox4, connection='ao3')
+        self.Li_Rep_AO_FM__b4c04              = AnalogOut(default_value=Li_Rep_AO_FM_background,      name='Li_Rep_AO_FM__b4c04',             parent_device=NIBox4, connection='ao4')
         self.Li_Rep_AO_AM__b4c05              = AnalogOut(default_value=10,          name='Li_Rep_AO_AM__b4c05',              parent_device=NIBox4, connection='ao5')
         self.oTOP_AO_AM__b4c06                = AnalogOut(default_value=10,          name='oTOP_AO_AM__b4c06',                parent_device=NIBox4, connection='ao6')
         self.oTOP_FCarrier__b4c07             = AnalogOut(default_value=1.8,      name='oTOP_FCarrier__b4c07',             parent_device=NIBox4, connection='ao7')
